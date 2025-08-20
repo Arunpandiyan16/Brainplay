@@ -5,25 +5,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export const npcs: NPC[] = [
   {
-    id: 'police-inspector',
-    name: 'Inspector Vikram',
-    personality: 'A tough, no-nonsense cop who is investigating a series of crimes in the city. He is suspicious of everyone.',
-    avatar: 'https://placehold.co/64x64/4287f5/e0e8f5?text=IV',
-    'data-ai-hint': 'police inspector portrait'
+    id: 'fixer',
+    name: 'Silas "Glitch" Mercer',
+    personality: 'A grizzled, cynical information broker (a "Fixer") who has seen it all. He talks in cryptic, tech-heavy slang and trusts no one, but he always has the best intel for a price.',
+    avatar: 'https://placehold.co/64x64/00f0ff/1a2a3a?text=S',
+    'data-ai-hint': 'cyberpunk man portrait'
   },
   {
-    id: 'tea-stall-owner',
-    name: 'Annan',
-    personality: 'A friendly and talkative tea stall owner who knows all the local gossip. He is a good source of information.',
-    avatar: 'https://placehold.co/64x64/f5bc42/4287f5?text=A',
-    'data-ai-hint': 'man portrait'
+    id: 'ai-construct',
+    name: 'Oracle',
+    personality: 'A rogue AI construct that exists only in the digital realm. It speaks in paradoxes and philosophical questions, offering guidance that is as confusing as it is brilliant.',
+    avatar: 'https://placehold.co/64x64/ff00ff/1a2a3a?text=O',
+    'data-ai-hint': 'ai face'
   },
   {
-    id: 'rowdy-raja',
-    name: 'Rowdy Raja',
-    personality: 'A feared local gangster who is quick to anger. He is fiercely loyal to his gang.',
-    avatar: 'https://placehold.co/64x64/e0e8f5/f54242?text=RR',
-    'data-ai-hint': 'gangster portrait'
+    id: 'corporate-enforcer',
+    name: 'Commander Valerius',
+    personality: 'A ruthless, cybernetically-enhanced corporate security chief. He is fiercely loyal to his corporation, viewing everyone else as a potential threat or a disposable asset. He is formal, intimidating, and direct.',
+    avatar: 'https://placehold.co/64x64/f0ff00/1a2a3a?text=V',
+    'data-ai-hint': 'cyberpunk soldier portrait'
   },
 ];
 
@@ -36,11 +36,11 @@ export default function NpcSelector({ selectedNpcId, onNpcChange }: NpcSelectorP
   return (
     <Select value={selectedNpcId} onValueChange={onNpcChange}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select a character to talk to" />
+        <SelectValue placeholder="Select a contact..." />
       </SelectTrigger>
       <SelectContent>
         {npcs.map((npc) => (
-          <SelectItem key={npc.id} value={npc.id}>
+          <SelectItem key={npc.id} value={npc.id} className="font-headline">
             {npc.name}
           </SelectItem>
         ))}

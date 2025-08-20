@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { User, Sparkles, Loader2 } from 'lucide-react';
+import { User, Sparkles, Loader2, Cpu, ScanEye, Shield } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -17,122 +17,116 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Card,
-  CardContent,
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Separator } from '../ui/separator';
 import { randomizeAvatar } from '@/app/actions/avatar';
 import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
-type AvatarPart = {
+
+type Augmentation = {
   id: string;
+  name: string;
   url: string;
   hint: string;
 };
 
-const avatarOptions = {
-  faces: Array.from({ length: 4 }, (_, i) => ({ id: `face${i+1}`, url: `https://placehold.co/128x128/e0e8f5/4287f5?text=F${i+1}`, hint: 'avatar face' })),
-  clothes: Array.from({ length: 4 }, (_, i) => ({ id: `clothes${i+1}`, url: `https://placehold.co/128x128/e0e8f5/4287f5?text=C${i+1}`, hint: 'avatar clothes' })),
-  accessories: Array.from({ length: 4 }, (_, i) => ({ id: `acc${i+1}`, url: `https://placehold.co/128x128/e0e8f5/4287f5?text=A${i+1}`, hint: 'avatar accessory' })),
+const augmentationOptions = {
+  optics: Array.from({ length: 4 }, (_, i) => ({ id: `optic${i+1}`, name: `Kiroshi Optics Mk.${i+1}`, url: `https://placehold.co/128x128/1a2a3a/00f0ff?text=O${i+1}`, hint: 'cybernetic eye' })),
+  processors: Array.from({ length: 4 }, (_, i) => ({ id: `proc${i+1}`, name: `Zetatech Chip v${i+1}.0`, url: `https://placehold.co/128x128/1a2a3a/00f0ff?text=P${i+1}`, hint: 'computer chip' })),
+  defenses: Array.from({ length: 4 }, (_, i) => ({ id: `def${i+1}`, name: `Subdermal Armor ${i+1}`, url: `https://placehold.co/128x128/1a2a3a/00f0ff?text=D${i+1}`, hint: 'energy shield' })),
 };
 
-export default function AvatarCustomization() {
-  const [face, setFace] = useState<AvatarPart>(avatarOptions.faces[0]);
-  const [clothes, setClothes] = useState<AvatarPart>(avatarOptions.clothes[0]);
-  const [accessory, setAccessory] = useState<AvatarPart>(avatarOptions.accessories[0]);
-  const [isRandomizing, setIsRandomizing] = useState(false);
-  const { toast } = useToast();
 
-  const handleRandomize = async () => {
-    setIsRandomizing(true);
-    const result = await randomizeAvatar();
-    if (result.success && result.data) {
-        setFace(result.data.face);
-        setClothes(result.data.clothes);
-        setAccessory(result.data.accessory);
-    } else {
-        toast({
-          variant: 'destructive',
-          title: 'Avatar Generation Failed',
-          description: result.error,
-        });
-    }
-    setIsRandomizing(false);
-  }
+export default function AvatarCustomization() {
+  const [optic, setOptic] = useState<Augmentation>(augmentationOptions.optics[0]);
+  const [processor, setProcessor] = useState<Augmentation>(augmentationOptions.processors[0]);
+  const [defense, setDefense] = useState<Augmentation>(augmentationOptions.defenses[0]);
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon" className="rounded-full">
+        <Button variant="outline" size="icon" className="rounded-full bg-secondary hover:bg-primary/20 border-primary/50 text-primary">
           <User className="h-5 w-5" />
-          <span className="sr-only">Customize Avatar</span>
+          <span className="sr-only">Cybernetics</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] bg-card/90 backdrop-blur-lg border-primary/20">
         <DialogHeader>
-          <DialogTitle>Customize Your Avatar</DialogTitle>
+          <DialogTitle className='font-headline'>Cybernetic Augmentations</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
           <div className="flex flex-col items-center justify-center space-y-4">
-            <Card className="w-48 h-48 relative overflow-hidden flex items-center justify-center bg-muted">
-                {isRandomizing ? (
-                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                ) : (
-                  <>
-                    <Avatar className="w-full h-full rounded-none">
-                        <AvatarImage src={face.url} alt="Avatar Face" className="object-cover" />
-                        <AvatarFallback>AV</AvatarFallback>
-                    </Avatar>
-                    <div className="absolute inset-0">
-                        <Image src={clothes.url} alt="Avatar Clothes" layout="fill" objectFit="contain" data-ai-hint={clothes.hint} />
-                    </div>
-                    <div className="absolute inset-0">
-                        <Image src={accessory.url} alt="Avatar Accessory" layout="fill" objectFit="contain" data-ai-hint={accessory.hint}/>
-                    </div>
-                  </>
-                )}
+             <Card className="w-48 h-48 flex flex-col items-center justify-center bg-muted/50 border-primary/20 p-4 space-y-2">
+                <ScanEye className="w-10 h-10 text-primary" />
+                <h4 className="font-bold font-headline text-lg text-primary">{optic.name}</h4>
+                <p className="text-xs text-center text-muted-foreground">Advanced optical implant for enhanced threat detection.</p>
             </Card>
-            <Button variant="secondary" onClick={handleRandomize} disabled={isRandomizing}>
-                {isRandomizing ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                    <Sparkles className="mr-2 h-4 w-4" />
-                )}
-                Randomize
-            </Button>
+             <Card className="w-48 h-48 flex flex-col items-center justify-center bg-muted/50 border-primary/20 p-4 space-y-2">
+                <Cpu className="w-10 h-10 text-primary" />
+                <h4 className="font-bold font-headline text-lg text-primary">{processor.name}</h4>
+                <p className="text-xs text-center text-muted-foreground">Co-processor for faster neural processing and hacking.</p>
+            </Card>
           </div>
-          <Tabs defaultValue="face" className="w-full">
+          <Tabs defaultValue="optics" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="face">Face</TabsTrigger>
-              <TabsTrigger value="clothes">Clothes</TabsTrigger>
-              <TabsTrigger value="accessories">Accessories</TabsTrigger>
+              <TabsTrigger value="optics">Optics</TabsTrigger>
+              <TabsTrigger value="processors">Processors</TabsTrigger>
+              <TabsTrigger value="defenses">Defenses</TabsTrigger>
             </TabsList>
-            <Separator className="my-4" />
-            <TabsContent value="face">
+            <Separator className="my-4 border-primary/20" />
+            <TabsContent value="optics">
                 <div className="grid grid-cols-2 gap-4">
-                    {avatarOptions.faces.map((item) => (
-                        <button key={item.id} onClick={() => setFace(item)} className={cn('rounded-lg overflow-hidden border-2', face.id === item.id ? 'border-primary' : 'border-transparent' )}>
-                            <Image src={item.url} alt={item.id} width={128} height={128} className="w-full h-auto" data-ai-hint={item.hint} />
-                        </button>
+                    {augmentationOptions.optics.map((item) => (
+                        <TooltipProvider key={item.id}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button onClick={() => setOptic(item)} className={cn('rounded-lg overflow-hidden border-2 bg-muted/50', optic.id === item.id ? 'border-primary' : 'border-transparent' )}>
+                                        <Image src={item.url} alt={item.id} width={128} height={128} className="w-full h-auto" data-ai-hint={item.hint} />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                    <p>{item.name}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     ))}
                 </div>
             </TabsContent>
-            <TabsContent value="clothes">
+            <TabsContent value="processors">
                 <div className="grid grid-cols-2 gap-4">
-                    {avatarOptions.clothes.map((item) => (
-                        <button key={item.id} onClick={() => setClothes(item)} className={cn('rounded-lg overflow-hidden border-2', clothes.id === item.id ? 'border-primary' : 'border-transparent' )}>
-                            <Image src={item.url} alt={item.id} width={128} height={128} className="w-full h-auto" data-ai-hint={item.hint} />
-                        </button>
+                    {augmentationOptions.processors.map((item) => (
+                        <TooltipProvider key={item.id}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button onClick={() => setProcessor(item)} className={cn('rounded-lg overflow-hidden border-2 bg-muted/50', processor.id === item.id ? 'border-primary' : 'border-transparent' )}>
+                                        <Image src={item.url} alt={item.id} width={128} height={128} className="w-full h-auto" data-ai-hint={item.hint} />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                    <p>{item.name}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     ))}
                 </div>
             </TabsContent>
-            <TabsContent value="accessories">
-                <div className="grid grid-cols-2 gap-4">
-                    {avatarOptions.accessories.map((item) => (
-                        <button key={item.id} onClick={() => setAccessory(item)} className={cn('rounded-lg overflow-hidden border-2', accessory.id === item.id ? 'border-primary' : 'border-transparent' )}>
-                            <Image src={item.url} alt={item.id} width={128} height={128} className="w-full h-auto" data-ai-hint={item.hint} />
-                        </button>
+            <TabsContent value="defenses">
+                 <div className="grid grid-cols-2 gap-4">
+                    {augmentationOptions.defenses.map((item) => (
+                         <TooltipProvider key={item.id}>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <button onClick={() => setDefense(item)} className={cn('rounded-lg overflow-hidden border-2 bg-muted/50', defense.id === item.id ? 'border-primary' : 'border-transparent' )}>
+                                        <Image src={item.url} alt={item.id} width={128} height={128} className="w-full h-auto" data-ai-hint={item.hint} />
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">
+                                    <p>{item.name}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     ))}
                 </div>
             </TabsContent>
@@ -140,7 +134,7 @@ export default function AvatarCustomization() {
         </div>
         <DialogFooter>
             <DialogClose asChild>
-                <Button type="button">Save Changes</Button>
+                <Button type="button">Commit Changes</Button>
             </DialogClose>
         </DialogFooter>
       </DialogContent>

@@ -8,7 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 const GenerateMissionBriefingInputSchema = z.object({
   missionTitle: z.string().describe('The title of the mission.'),
@@ -17,7 +17,7 @@ const GenerateMissionBriefingInputSchema = z.object({
 export type GenerateMissionBriefingInput = z.infer<typeof GenerateMissionBriefingInputSchema>;
 
 const GenerateMissionBriefingOutputSchema = z.object({
-  briefing: z.string().describe("A detailed, narrative-style mission briefing from the perspective of an in-game character like a police inspector. This should be engaging and set the scene."),
+  briefing: z.string().describe("A detailed, narrative-style mission briefing from the perspective of an AI fixer. This should be engaging, cryptic, and fit a cyberpunk theme."),
   objectives: z.array(z.string()).describe('A list of clear, actionable objectives for the player to complete.'),
 });
 export type GenerateMissionBriefingOutput = z.infer<typeof GenerateMissionBriefingOutputSchema>;
@@ -32,13 +32,13 @@ const prompt = ai.definePrompt({
   name: 'generateMissionBriefingPrompt',
   input: { schema: GenerateMissionBriefingInputSchema },
   output: { schema: GenerateMissionBriefingOutputSchema },
-  prompt: `You are Inspector Vikram, a tough, no-nonsense cop in the Tamil cinematic universe game 'Nayagan\'s Saga'.
-Your task is to provide a mission briefing to the player. The briefing should be immersive, detailed, and fit the "Cop vs. Mafia" theme.
-Expand on the provided mission title and description to create a compelling narrative.
+  prompt: `You are "Silas", a grizzled information broker in the cyberpunk game 'Chrono-Cortex'.
+Your task is to provide a mission briefing to the player (an operative). The briefing should be immersive, detailed, and fit the sci-fi corporate espionage theme.
+Expand on the provided mission title and description to create a compelling narrative. Use tech-heavy slang.
 Conclude with a clear, numbered list of objectives for the player.
 
-Mission Title: {{missionTitle}}
-Mission Description: {{missionDescription}}
+Contract Title: {{missionTitle}}
+Contract Description: {{missionDescription}}
 
 Generate the mission briefing now.`,
 });

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Send, Bot } from 'lucide-react';
+import { Send, Rss } from 'lucide-react';
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,8 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import type { Message } from '@/types';
 
 const initialMessages: Message[] = [
-    {id: uuidv4(), author: 'system', text: 'Welcome to Nayagan\'s Saga Global Chat!'},
-    {id: uuidv4(), author: 'npc', text: 'Just saw a high-speed chase near the docks!', npc: { id: 'generic1', name: 'Racer_X', avatar: 'https://placehold.co/40x40/e81cff/ffffff?text=RX', personality: '', 'data-ai-hint': 'player avatar'}},
+    {id: uuidv4(), author: 'system', text: 'Connection to Global Net established.'},
+    {id: uuidv4(), author: 'npc', text: 'Anyone seen the new Zetatech cyberdeck? The specs are insane.', npc: { id: 'generic1', name: 'NetRunner22', avatar: `https://placehold.co/40x40/e81cff/ffffff?text=NR`, personality: '', 'data-ai-hint': 'hacker avatar'}},
 ];
 
 
@@ -23,7 +23,6 @@ export default function PlayerChat() {
     const [input, setInput] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-    const { toast } = useToast();
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -47,7 +46,7 @@ export default function PlayerChat() {
                     id: uuidv4(),
                     author: 'npc',
                     text: result.data.text,
-                    npc: { id: result.data.author, name: result.data.author, avatar: `https://placehold.co/40x40/e81cff/ffffff?text=${result.data.author.substring(0,2)}`, personality: '', 'data-ai-hint': 'player avatar' },
+                    npc: { id: result.data.author, name: result.data.author, avatar: `https://placehold.co/40x40/e81cff/ffffff?text=${result.data.author.substring(0,2)}`, personality: '', 'data-ai-hint': 'hacker avatar' },
                 };
                 setMessages(prev => [...prev, newMessage]);
             }
@@ -65,7 +64,7 @@ export default function PlayerChat() {
             id: uuidv4(),
             author: 'user',
             text: input,
-            npc: { id: 'user', name: 'Vigilante_77', avatar: 'https://placehold.co/40x40/ffffff/000000?text=ME', personality: '', 'data-ai-hint': 'player avatar'}
+            npc: { id: 'user', name: 'Agent_77', avatar: 'https://placehold.co/40x40/ffffff/000000?text=A77', personality: '', 'data-ai-hint': 'player avatar'}
         };
 
         setMessages((prev) => [...prev, userMessage]);
@@ -73,33 +72,33 @@ export default function PlayerChat() {
     };
 
     return (
-        <Card className="w-full h-full flex flex-col">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Bot /> Global Chat
-                </CardTitle>
-            </CardHeader>
+        <Card className="w-full h-full flex flex-col bg-transparent border-none shadow-none">
             <CardContent className="flex-1 overflow-hidden p-0">
-                <ScrollArea className="h-full p-6" ref={scrollAreaRef}>
+                <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
                     <div className="space-y-4">
                         {messages.map((msg) => (
-                             <div key={msg.id} className={`flex items-start gap-2 ${msg.author === 'user' ? 'justify-end' : ''}`}>
-                                {msg.author !== 'user' && msg.author !== 'system' && (
-                                     <span className="font-bold text-primary">{msg.npc?.name}:</span>
+                             <div key={msg.id} className={`flex items-start gap-2 text-sm ${msg.author === 'user' ? 'justify-end' : ''} ${msg.author === 'system' ? 'justify-center' : ''}`}>
+                                {msg.author === 'system' && (
+                                    <p className="text-xs text-muted-foreground italic">-- {msg.text} --</p>
                                 )}
-                                <p className={`${msg.author === 'user' ? 'text-right text-accent' : ''} ${msg.author === 'system' ? 'text-center text-xs text-muted-foreground' : 'text-sm'}`}>
+                                {msg.author !== 'user' && msg.author !== 'system' && (
+                                     <span className="font-bold text-primary font-headline">{msg.npc?.name}:</span>
+                                )}
+                                {msg.author !== 'system' && (
+                                <p className={`${msg.author === 'user' ? 'text-right text-accent' : 'text-foreground/80'}`}>
                                     {msg.text}
                                 </p>
+                                )}
                              </div>
                         ))}
                     </div>
                 </ScrollArea>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="p-0 pt-4">
                  <form onSubmit={handleSubmit} className="flex w-full items-center space-x-2">
                     <Input
                         type="text"
-                        placeholder="Type a message..."
+                        placeholder="Broadcast message..."
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         autoComplete='off'

@@ -21,22 +21,22 @@ export default function Hud() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="lg">
+        <Button variant="outline" size="lg" className="bg-secondary hover:bg-primary/20 border-primary/50 text-primary">
           <MessageSquare className="mr-2" />
-          Chat
+          Comms
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] h-[70vh] flex flex-col">
+      <DialogContent className="sm:max-w-[500px] h-[70vh] flex flex-col bg-card/90 backdrop-blur-lg border-primary/20">
         <DialogHeader>
-          <DialogTitle>Communications</DialogTitle>
+          <DialogTitle className='font-headline'>Communications Hub</DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="global" className="flex-1 flex flex-col overflow-hidden">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="global">
-                <MessageSquare className="mr-2 h-4 w-4" /> Global Chat
+                <MessageSquare className="mr-2 h-4 w-4" /> Global Net
             </TabsTrigger>
             <TabsTrigger value="npc">
-                <Users className="mr-2 h-4 w-4" /> NPC Chat
+                <Users className="mr-2 h-4 w-4" /> Secure Channel
             </TabsTrigger>
           </TabsList>
           <TabsContent value="global" className="flex-1 overflow-hidden mt-4">

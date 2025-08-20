@@ -15,11 +15,11 @@ type ActiveMissionProps = {
 
 export default function ActiveMission({ mission, briefing, onComplete }: ActiveMissionProps) {
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card className="max-w-4xl mx-auto bg-card/90 backdrop-blur-lg border-primary/20">
       <CardHeader>
-        <CardTitle className="text-3xl font-bold">{mission.title}</CardTitle>
+        <CardTitle className="text-3xl font-bold font-headline text-primary">{mission.title}</CardTitle>
         <CardDescription className="text-md text-muted-foreground">{mission.description}</CardDescription>
-        <div className="flex items-center text-lg font-semibold text-primary pt-2">
+        <div className="flex items-center text-lg font-semibold text-primary pt-2 font-headline">
             <Award className="mr-2 h-5 w-5" />
             <span>Reward: {mission.reward}</span>
         </div>
@@ -27,13 +27,13 @@ export default function ActiveMission({ mission, briefing, onComplete }: ActiveM
       <CardContent className="grid md:grid-cols-2 gap-6 xl:gap-8">
         <div className="space-y-6">
             <div className="space-y-2">
-                <h4 className="font-bold text-xl">Briefing from Inspector Vikram:</h4>
+                <h4 className="font-bold text-xl font-headline">Briefing:</h4>
                 <ScrollArea className="h-48 pr-4">
                     <p className="text-muted-foreground whitespace-pre-wrap">{briefing.briefing}</p>
                 </ScrollArea>
             </div>
             <div className="space-y-2">
-                <h4 className="font-bold text-xl flex items-center gap-2"><ListChecks /> Objectives:</h4>
+                <h4 className="font-bold text-xl flex items-center gap-2 font-headline"><ListChecks /> Objectives:</h4>
                 <ul className="space-y-2 list-disc pl-5">
                     {briefing.objectives.map((obj, index) => (
                         <li key={index} className="text-muted-foreground">{obj}</li>
@@ -55,7 +55,7 @@ export default function ActiveMission({ mission, briefing, onComplete }: ActiveM
       <CardFooter>
         <Button onClick={onComplete} size="lg" className="w-full md:w-auto">
           <CheckCircle2 className="mr-2" />
-          Mark as Complete
+          Complete Contract
         </Button>
       </CardFooter>
     </Card>

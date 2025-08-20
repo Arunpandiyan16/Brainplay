@@ -1,11 +1,24 @@
 import type {Metadata} from 'next';
+import { Oxanium, Orbitron } from 'next/font/google'
 import './globals.css';
 
 
 export const metadata: Metadata = {
-  title: 'Tamil Cinematic Universe',
-  description: 'An open-world adventure with AI-powered characters.',
+  title: 'Chrono-Cortex',
+  description: 'A sci-fi adventure game of corporate espionage.',
 };
+
+const oxanium = Oxanium({
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
+})
+
+const orbitron = Orbitron({
+  subsets: ['latin'],
+  variable: '--font-headline',
+  display: 'swap',
+})
 
 export default function RootLayout({
   children,
@@ -14,12 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-body antialiased">
+      <body className={`${oxanium.variable} ${orbitron.variable} font-body antialiased`}>
         {children}
       </body>
     </html>

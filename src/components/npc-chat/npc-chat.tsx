@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Loader2, Send } from 'lucide-react';
-import Image from 'next/image';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,7 +47,7 @@ export default function NpcChat() {
         userInput: input,
         npcName: selectedNpc.name,
         npcPersonality: selectedNpc.personality,
-        gameContext: "The user is a player in the open-world game 'Nayagan's Saga'.",
+        gameContext: "The user is an operative in the futuristic sci-fi game 'Chrono-Cortex'.",
     });
 
     if (result.success && result.data) {
@@ -62,23 +61,21 @@ export default function NpcChat() {
     } else {
         toast({
             variant: 'destructive',
-            title: 'NPC Chat Error',
+            title: 'Comms Error',
             description: result.error,
         });
-        // Remove the user's message if the NPC fails to respond
         setMessages((prev) => prev.slice(0, prev.length -1));
     }
     setIsLoading(false);
   };
 
   return (
-    <Card className="w-full h-full flex flex-col">
-        <CardHeader>
-            <CardTitle>NPC Chat</CardTitle>
+    <Card className="w-full h-full flex flex-col bg-transparent border-none shadow-none">
+        <CardHeader className="p-0 mb-4">
             <NpcSelector selectedNpcId={selectedNpcId} onNpcChange={setSelectedNpcId} />
         </CardHeader>
         <CardContent className="flex-1 overflow-hidden p-0">
-            <ScrollArea className="h-full p-6" ref={scrollAreaRef}>
+            <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
                  <div className="space-y-4">
                     {messages.map((message) => (
                         <div key={message.id} className={`flex items-start gap-3 ${message.author === 'user' ? 'justify-end' : ''}`}>
@@ -107,11 +104,11 @@ export default function NpcChat() {
                 </div>
             </ScrollArea>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="p-0 pt-4">
             <form onSubmit={handleSubmit} className="flex w-full items-center space-x-2">
                 <Input
                     type="text"
-                    placeholder="Type your message..."
+                    placeholder="Transmit message..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading}

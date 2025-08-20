@@ -15,6 +15,7 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
+    document.documentElement.classList.add('dark');
   }, []);
 
   const handleStartMission = (mission: Mission, briefing: BriefingData) => {
@@ -28,8 +29,6 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      {isClient && <DayNightCycle />}
-      {isClient && <Weather />}
       <main className="flex-1">
           <GameInterface 
             activeMission={activeMission}
