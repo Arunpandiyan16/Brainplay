@@ -45,15 +45,15 @@ export default function EntertainmentHub() {
                     Catch live events, concerts, and more.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {videos.map((video) => (
-                <div key={video.title} className="flex items-center gap-4 group">
+                <div key={video.title} className="flex flex-col gap-2 group">
                     <Image
                         src={video.thumbnail}
                         alt={video.title}
-                        width={120}
-                        height={80}
-                        className="rounded-md object-cover w-[120px] h-[80px] transition-transform duration-300 group-hover:scale-105"
+                        width={400}
+                        height={225}
+                        className="rounded-md object-cover w-full h-auto aspect-video transition-transform duration-300 group-hover:scale-105"
                         data-ai-hint={video.hint}
                     />
                     <div className="flex-1">
