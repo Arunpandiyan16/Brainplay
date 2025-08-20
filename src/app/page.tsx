@@ -9,6 +9,7 @@ import ActiveMission from '@/components/dashboard/active-mission';
 import EntertainmentHub from '@/components/dashboard/entertainment-hub';
 import PlayerHub from '@/components/dashboard/player-hub';
 import WorldLocations from '@/components/dashboard/world-locations';
+import DayNightCycle from '@/components/layout/day-night-cycle';
 import { Toaster } from "@/components/ui/toaster"
 import type { Mission, BriefingData } from '@/types';
 
@@ -27,6 +28,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
+      <DayNightCycle />
       <main className="flex-1 p-4 sm:p-6 md:p-8">
         <div className="container mx-auto">
           {activeMission ? (
