@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, MessageSquare } from 'lucide-react';
+import { Send, MessageSquare, Loader2 } from 'lucide-react';
+import { getPlayerChatMessage } from '@/app/actions/chat';
 
 type ChatMessage = {
   id: number;
@@ -15,18 +16,42 @@ type ChatMessage = {
 
 export default function PlayerChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: 1, author: 'System', text: 'Welcome to the global chat! Messages are not sent to other players in this demo.' },
-    { id: 2, author: 'Player123', text: 'Hey everyone, having a great time!' },
+    { id: 1, author: 'System', text: 'Welcome to the global chat!' },
   ]);
   const [input, setInput] = useState('');
+  const [isAiThinking, setIsAiThinking] = useState(false);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
-      setMessages([...messages, { id: Date.now(), author: 'You', text: input.trim() }]);
+      setMessages(prev => [...prev, { id: Date.now(), author: 'You', text: input.trim() }]);
       setInput('');
     }
   };
+  
+  useEffect(() => {
+    const fetchAiMessage = async () => {
+        setIsAiThinking(true);
+        const lastMessages = messages.slice(-5).map(m => `${m.author}: ${m.text}`);
+        const result = await getPlayerChatMessage({ previousMessages: lastMessages });
+        if(result.success && result.data) {
+            setMessages(prev => [...prev, { id: Date.now(), author: result.data.author, text: result.data.text }]);
+        }
+        setIsAiThinking(false);
+    }
+    
+    // Fetch a message when the component mounts
+    if(messages.length === 1) {
+        fetchAiMessage();
+    }
+
+    const intervalId = setInterval(() => {
+        fetchAiMessage();
+    }, 10000 + Math.random() * 5000); // 10-15 seconds
+
+    return () => clearInterval(intervalId);
+  }, []);
+
 
   return (
     <Card className="flex flex-col h-[400px]">
@@ -45,9 +70,15 @@ export default function PlayerChat() {
                 <span className={`font-bold text-sm ${msg.author === 'You' ? 'text-primary' : 'text-muted-foreground'}`}>
                   {msg.author}
                 </span>
-                <p className="text-sm">{msg.text}</p>
+                <p className="text-sm break-words">{msg.text}</p>
               </div>
             ))}
+             {isAiThinking && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>New message...</span>
+              </div>
+            )}
           </div>
         </ScrollArea>
       </CardContent>
