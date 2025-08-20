@@ -3,6 +3,7 @@ import WorldLocations from '@/components/dashboard/world-locations';
 import Missions from '@/components/dashboard/missions';
 import PlayerChat from '@/components/dashboard/player-chat';
 import NpcChat from '@/components/npc-chat/npc-chat';
+import { Toaster } from "@/components/ui/toaster"
 
 export default function Home() {
   return (
@@ -22,6 +23,7 @@ export default function Home() {
           </div>
         </div>
       </main>
+      <Toaster />
     </div>
   );
 }
