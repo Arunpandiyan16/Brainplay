@@ -30,11 +30,12 @@ export default function PlayerChat() {
   };
   
   useEffect(() => {
+    let isMounted = true;
     const fetchAiMessage = async () => {
         setIsAiThinking(true);
         const lastMessages = messages.slice(-5).map(m => `${m.author}: ${m.text}`);
         const result = await getPlayerChatMessage({ previousMessages: lastMessages });
-        if(result.success && result.data) {
+        if(isMounted && result.success && result.data) {
             setMessages(prev => [...prev, { id: Date.now(), author: result.data.author, text: result.data.text }]);
         }
         setIsAiThinking(false);
@@ -49,7 +50,10 @@ export default function PlayerChat() {
         fetchAiMessage();
     }, 10000 + Math.random() * 5000); // 10-15 seconds
 
-    return () => clearInterval(intervalId);
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    }
   }, []);
 
 

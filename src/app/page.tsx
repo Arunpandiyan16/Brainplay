@@ -7,6 +7,7 @@ import Missions from '@/components/dashboard/missions';
 import PlayerChat from '@/components/dashboard/player-chat';
 import NpcChat from '@/components/npc-chat/npc-chat';
 import ActiveMission from '@/components/dashboard/active-mission';
+import EntertainmentHub from '@/components/dashboard/entertainment-hub';
 import { Toaster } from "@/components/ui/toaster"
 import type { Mission, BriefingData } from '@/types';
 
@@ -40,6 +41,7 @@ export default function Home() {
                 <Missions onStartMission={handleStartMission} />
               </div>
               <div className="lg:col-span-1 space-y-6 xl:space-y-8">
+                <EntertainmentHub />
                 <NpcChat />
                 <PlayerChat />
               </div>

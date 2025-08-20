@@ -82,7 +82,7 @@ export default function NpcChat() {
   }
 
   return (
-    <Card className="flex flex-col h-[500px]">
+    <Card className="flex flex-col h-[400px]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bot className="h-6 w-6" />
