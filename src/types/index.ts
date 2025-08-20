@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export type NPC = {
   id: string;
   name: string;
@@ -7,7 +9,7 @@ export type NPC = {
 };
 
 export type Message = {
-  id: number;
+  id: string;
   author: 'user' | 'npc' | 'system';
   text: string;
   npc?: NPC;

@@ -7,6 +7,7 @@ import { Award } from 'lucide-react';
 import ActiveMission from '@/components/dashboard/active-mission';
 import Minimap from './minimap';
 import InteractiveMap from './interactive-map';
+import Hud from './hud';
 
 import type { Mission, BriefingData } from '@/types';
 
@@ -69,11 +70,10 @@ export default function GameInterface({ activeMission, onStartMission, onComplet
                 </div>
 
 
-                {/* Bottom Left: Minimap */}
+                {/* Bottom Left: Minimap & Active Objective */}
                  <div className="flex items-end gap-4">
                     <Minimap />
                     
-                    {/* Active Mission Objective */}
                     {activeMission && (
                         <Card className="bg-card/80 backdrop-blur-sm max-w-md hidden md:block">
                              <CardContent className="p-4">
@@ -89,23 +89,25 @@ export default function GameInterface({ activeMission, onStartMission, onComplet
                 </div>
 
 
-                {/* Map instead of pausible content */}
-                {!activeMission && (
-                     <div className="absolute top-1/2 right-6 -translate-y-1/2 w-full max-w-2xl">
+                {/* Map or Interactive HUD elements */}
+                <div className="absolute top-1/2 right-6 -translate-y-1/2 w-full max-w-2xl">
+                    {!activeMission ? (
                         <InteractiveMap onStartMission={onStartMission} />
-                    </div>
-                )}
-            </div>
-             {/* Full screen active mission */}
-            {activeMission && (
-                <div className="absolute inset-0 z-30 bg-black/70 flex items-center justify-center p-4">
-                   <ActiveMission
-                     mission={activeMission.mission}
-                     briefing={activeMission.briefing}
-                     onComplete={onCompleteMission}
-                    />
+                    ) : (
+                        <div className="absolute inset-0 z-30 bg-black/70 flex items-center justify-center p-4">
+                            <ActiveMission
+                                mission={activeMission.mission}
+                                briefing={activeMission.briefing}
+                                onComplete={onCompleteMission}
+                            />
+                        </div>
+                    )}
                 </div>
-            )}
+
+                <div className="absolute bottom-4 right-20 sm:right-24 md:right-32 z-30">
+                     <Hud />
+                </div>
+            </div>
         </div>
     );
 }
