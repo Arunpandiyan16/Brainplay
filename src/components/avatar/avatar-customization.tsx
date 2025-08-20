@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { User, Sparkles } from 'lucide-react';
+import { User, Sparkles, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +22,14 @@ import {
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Separator } from '../ui/separator';
+import { randomizeAvatar } from '@/app/actions/avatar';
+import { useToast } from '@/hooks/use-toast';
+
+type AvatarPart = {
+  id: string;
+  url: string;
+  hint: string;
+};
 
 const avatarOptions = {
   faces: Array.from({ length: 4 }, (_, i) => ({ id: `face${i+1}`, url: `https://placehold.co/128x128/e0e8f5/4287f5?text=F${i+1}`, hint: 'avatar face' })),
@@ -30,9 +38,28 @@ const avatarOptions = {
 };
 
 export default function AvatarCustomization() {
-  const [face, setFace] = useState(avatarOptions.faces[0]);
-  const [clothes, setClothes] = useState(avatarOptions.clothes[0]);
-  const [accessory, setAccessory] = useState(avatarOptions.accessories[0]);
+  const [face, setFace] = useState<AvatarPart>(avatarOptions.faces[0]);
+  const [clothes, setClothes] = useState<AvatarPart>(avatarOptions.clothes[0]);
+  const [accessory, setAccessory] = useState<AvatarPart>(avatarOptions.accessories[0]);
+  const [isRandomizing, setIsRandomizing] = useState(false);
+  const { toast } = useToast();
+
+  const handleRandomize = async () => {
+    setIsRandomizing(true);
+    const result = await randomizeAvatar();
+    if (result.success && result.data) {
+        setFace(result.data.face);
+        setClothes(result.data.clothes);
+        setAccessory(result.data.accessory);
+    } else {
+        toast({
+          variant: 'destructive',
+          title: 'Avatar Generation Failed',
+          description: result.error,
+        });
+    }
+    setIsRandomizing(false);
+  }
 
   return (
     <Dialog>
@@ -48,20 +75,30 @@ export default function AvatarCustomization() {
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
           <div className="flex flex-col items-center justify-center space-y-4">
-            <Card className="w-48 h-48 relative overflow-hidden">
-                <Avatar className="w-full h-full rounded-none">
-                    <AvatarImage src={face.url} alt="Avatar Face" className="object-cover" />
-                    <AvatarFallback>AV</AvatarFallback>
-                </Avatar>
-                <div className="absolute inset-0">
-                    <Image src={clothes.url} alt="Avatar Clothes" layout="fill" objectFit="contain" data-ai-hint={clothes.hint} />
-                </div>
-                <div className="absolute inset-0">
-                    <Image src={accessory.url} alt="Avatar Accessory" layout="fill" objectFit="contain" data-ai-hint={accessory.hint}/>
-                </div>
+            <Card className="w-48 h-48 relative overflow-hidden flex items-center justify-center bg-muted">
+                {isRandomizing ? (
+                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                ) : (
+                  <>
+                    <Avatar className="w-full h-full rounded-none">
+                        <AvatarImage src={face.url} alt="Avatar Face" className="object-cover" />
+                        <AvatarFallback>AV</AvatarFallback>
+                    </Avatar>
+                    <div className="absolute inset-0">
+                        <Image src={clothes.url} alt="Avatar Clothes" layout="fill" objectFit="contain" data-ai-hint={clothes.hint} />
+                    </div>
+                    <div className="absolute inset-0">
+                        <Image src={accessory.url} alt="Avatar Accessory" layout="fill" objectFit="contain" data-ai-hint={accessory.hint}/>
+                    </div>
+                  </>
+                )}
             </Card>
-            <Button variant="secondary">
-                <Sparkles className="mr-2 h-4 w-4" />
+            <Button variant="secondary" onClick={handleRandomize} disabled={isRandomizing}>
+                {isRandomizing ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <Sparkles className="mr-2 h-4 w-4" />
+                )}
                 Randomize
             </Button>
           </div>
