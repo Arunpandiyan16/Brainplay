@@ -8,10 +8,16 @@ export default {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       fontFamily: {
-        body: ['var(--font-body)', 'sans-serif'],
-        headline: ['var(--font-headline)', 'sans-serif'],
+        sans: ['var(--font-sans)', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -77,22 +83,10 @@ export default {
             height: '0',
           },
         },
-        'rain': {
-            '0%': { transform: 'translateY(-100%)', opacity: '0' },
-            '100%': { transform: 'translateY(100%)', opacity: '1' },
-        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'rain': 'rain 1s linear infinite',
-      },
-      backgroundImage: {
-        'grid-pattern': "linear-gradient(to right, hsl(var(--primary) / 0.1) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--primary) / 0.1) 1px, transparent 1px)",
-      },
-      backgroundSize: {
-        'grid-pattern': "2rem 2rem",
       },
     },
   },

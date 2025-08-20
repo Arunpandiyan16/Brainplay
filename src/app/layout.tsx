@@ -1,25 +1,15 @@
-import type {Metadata} from 'next';
-import { Cinzel, Cormorant_Garamond } from 'next/font/google'
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
+import Header from '@/components/layout/header';
+import { Toaster } from '@/components/ui/toaster';
 
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Aetherium: The Last Signal',
-  description: 'A mystical journey to restore a forgotten world.',
+  title: 'BrainPlay - Play. Learn. Compete.',
+  description: 'A 5-in-1 hub for fun and knowledge games.',
 };
-
-const cinzel = Cinzel({
-  subsets: ['latin'],
-  variable: '--font-headline',
-  display: 'swap',
-})
-
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  variable: '--font-body',
-  display: 'swap',
-  weight: ['400', '600', '700']
-})
 
 export default function RootLayout({
   children,
@@ -27,9 +17,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${cinzel.variable} ${cormorant.variable} font-body antialiased`}>
-        {children}
+    <html lang="en" className="dark">
+      <body className={inter.className}>
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          {children}
+        </main>
+        <Toaster />
       </body>
     </html>
   );

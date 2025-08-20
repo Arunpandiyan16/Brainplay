@@ -1,97 +1,84 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
-import { User, Sparkles, Dices, Loader2 } from 'lucide-react';
-import { randomizeAvatar } from '@/app/actions/avatar';
-
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
-} from '@/components/ui/dialog';
-import { Card, CardContent } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { generateAvatar } from '@/ai/flows/avatar-flow';
+import { Loader2, Dices } from 'lucide-react';
+import Image from 'next/image';
 
-type AvatarPart = {
-  id: string;
-  url: string;
-  hint: string;
-};
+const avatarParts = ['Face', 'Clothes', 'Accessories'];
 
-const initialAvatar = {
-  face: { id: 'face1', url: 'https://placehold.co/200x200/152a3a/ffc700?text=Face', hint: 'default face' },
-  clothes: { id: 'clothes1', url: 'https://placehold.co/200x200/152a3a/90ee90?text=Clothes', hint: 'default clothes' },
-  accessory: { id: 'accessory1', url: 'https://placehold.co/200x200/152a3a/aaccff?text=Accessory', hint: 'default accessory' },
-};
+export function AvatarCustomization() {
+  const [generatedParts, setGeneratedParts] = useState<Record<string, string>>({
+    Face: '/placeholder-face.png',
+    Clothes: '/placeholder-clothes.png',
+    Accessories: '/placeholder-accessories.png',
+  });
+  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({
+    Face: false,
+    Clothes: false,
+    Accessories: false,
+  });
 
-export default function AvatarCustomization() {
-  const [avatar, setAvatar] = useState(initialAvatar);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const { toast } = useToast();
-
-  const handleRandomize = async () => {
-    setIsGenerating(true);
-    const result = await randomizeAvatar();
-    if (result.success) {
-      setAvatar(result.data);
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Generation Failed',
-        description: result.error,
-      });
+  const handleGenerate = async (part: string, prompt: string) => {
+    setIsLoading((prev) => ({ ...prev, [part]: true }));
+    try {
+      const result = await generateAvatar({ part, prompt });
+      if (result.imageDataUri) {
+        setGeneratedParts((prev) => ({ ...prev, [part]: result.imageDataUri }));
+      }
+    } catch (error) {
+      console.error(`Failed to generate ${part}:`, error);
+      // TODO: Add user-facing error toast
+    } finally {
+      setIsLoading((prev) => ({ ...prev, [part]: false }));
     }
-    setIsGenerating(false);
+  };
+
+  const handleRandomizeAll = () => {
+    handleGenerate('Face', 'a stoic, futuristic male face with cybernetic lines');
+    handleGenerate('Clothes', 'a sleek, high-collar jacket with neon trim');
+    handleGenerate('Accessories', 'glowing holographic glasses');
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon" className="rounded-full bg-secondary hover:bg-primary/20 border-primary/50 text-primary">
-          <User className="h-5 w-5" />
-          <span className="sr-only">Customize Avatar</span>
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[400px] bg-card/90 backdrop-blur-lg border-primary/20">
-        <DialogHeader>
-          <DialogTitle className='font-headline'>Signal Tender's Form</DialogTitle>
-        </DialogHeader>
-        <div className="py-4 space-y-6">
-            <Card className="relative w-48 h-48 mx-auto bg-muted/50 border-primary/20 flex items-center justify-center">
-                 {isGenerating ? (
-                    <Loader2 className="w-12 h-12 animate-spin text-primary" />
-                ) : (
-                    <>
-                        <Image src={avatar.face.url} alt="Avatar Face" layout="fill" objectFit="cover" className="z-10" data-ai-hint={avatar.face.hint} />
-                        <Image src={avatar.clothes.url} alt="Avatar Clothes" layout="fill" objectFit="cover" className="z-20" data-ai-hint={avatar.clothes.hint} />
-                        <Image src={avatar.accessory.url} alt="Avatar Accessory" layout="fill" objectFit="cover" className="z-30" data-ai-hint={avatar.accessory.hint} />
-                    </>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          Tender's Attunement
+          <Button variant="ghost" size="icon" onClick={handleRandomizeAll}>
+            <Dices className="h-5 w-5" />
+            <span className="sr-only">Randomize All</span>
+          </Button>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {avatarParts.map((part) => (
+          <div key={part} className="space-y-2">
+            <h3 className="font-semibold">{part}</h3>
+            <div className="flex items-center gap-2">
+              <div className="relative h-16 w-16 rounded-md bg-muted/50 overflow-hidden">
+                <Image src={generatedParts[part]} alt={`Generated ${part}`} layout="fill" objectFit="cover" />
+                {isLoading[part] && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
                 )}
-            </Card>
-            
-            <div className="flex justify-center">
-                <Button onClick={handleRandomize} disabled={isGenerating}>
-                    <Dices className="mr-2" />
-                    {isGenerating ? 'Generating...' : 'Randomize Form'}
-                </Button>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => handleGenerate(part, `a random futuristic ${part.toLowerCase()}`)}
+                disabled={isLoading[part]}
+              >
+                {isLoading[part] ? 'Generating...' : `New ${part}`}
+              </Button>
             </div>
-
-            <div className="text-center text-sm text-muted-foreground">
-                <p>Don't like the look? Let the Aether reshape your form.</p>
-            </div>
-        </div>
-        <DialogFooter>
-            <DialogClose asChild>
-                <Button type="button">Confirm Form</Button>
-            </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 }
