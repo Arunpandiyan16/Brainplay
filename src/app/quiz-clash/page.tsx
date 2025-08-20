@@ -1,15 +1,17 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, ShieldAlert, Sparkles } from 'lucide-react';
+import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, ShieldAlert, Sparkles, SkipForward } from 'lucide-react';
 import { generateQuizQuestion, QuizQuestion } from '@/ai/flows/quiz-flow';
 import { useToast } from '@/hooks/use-toast';
 
 const TOTAL_TIME = 30;
 const TOTAL_QUESTIONS = 5;
+const SKIP_LIMIT = 1;
 
 type GameState = 'start' | 'playing' | 'ended';
 
@@ -22,6 +24,9 @@ export default function QuizClashPage() {
     const [score, setScore] = useState(0);
     const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
     const [isLoading, setIsLoading] = useState(false);
+    const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
+    const [skipsUsed, setSkipsUsed] = useState(0);
+    const [correctAnswers, setCorrectAnswers] = useState(0);
     const { toast } = useToast();
 
     const currentQuestion = questions[currentQuestionIndex];
@@ -64,6 +69,20 @@ export default function QuizClashPage() {
 
         return () => clearInterval(timer);
     }, [gameState, timeLeft, isLoading]);
+
+    const proceedToNextQuestion = useCallback(() => {
+        setSelectedAnswer(null);
+        setIsCorrect(null);
+        
+        if (currentQuestionIndex < TOTAL_QUESTIONS - 1) {
+            setCurrentQuestionIndex(prev => prev + 1);
+             if (currentQuestionIndex + 1 >= questions.length) {
+                fetchQuestion();
+            }
+        } else {
+            setGameState('ended');
+        }
+    }, [currentQuestionIndex, questions.length, fetchQuestion]);
     
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null) return;
@@ -73,24 +92,30 @@ export default function QuizClashPage() {
         setIsCorrect(correct);
 
         if (correct) {
-            setScore(prev => prev + 10);
+            let points = 10;
+            const newConsecutiveCorrect = consecutiveCorrect + 1;
+            setConsecutiveCorrect(newConsecutiveCorrect);
+            setCorrectAnswers(prev => prev + 1);
+
+            if (newConsecutiveCorrect > 0 && newConsecutiveCorrect % 3 === 0) {
+                points += 5; // Streak bonus
+            }
+            setScore(prev => prev + points);
         } else {
             setScore(prev => prev - 5);
+            setConsecutiveCorrect(0);
         }
 
         setTimeout(() => {
-            setSelectedAnswer(null);
-            setIsCorrect(null);
-            
-            if (currentQuestionIndex < TOTAL_QUESTIONS - 1) {
-                setCurrentQuestionIndex(prev => prev + 1);
-                 if (currentQuestionIndex + 1 === questions.length) {
-                    fetchQuestion();
-                }
-            } else {
-                setGameState('ended');
-            }
+            proceedToNextQuestion();
         }, 1500);
+    };
+
+    const handleSkip = () => {
+        if (skipsUsed >= SKIP_LIMIT || selectedAnswer !== null) return;
+        setSkipsUsed(prev => prev + 1);
+        setConsecutiveCorrect(0);
+        proceedToNextQuestion();
     };
 
     const startGame = () => {
@@ -99,6 +124,11 @@ export default function QuizClashPage() {
         setScore(0);
         setTimeLeft(TOTAL_TIME);
         setGameState('playing');
+        setConsecutiveCorrect(0);
+        setSkipsUsed(0);
+        setCorrectAnswers(0);
+        setSelectedAnswer(null);
+        setIsCorrect(null);
     };
     
     const getButtonClass = (index: number) => {
@@ -137,6 +167,7 @@ export default function QuizClashPage() {
     }
 
     if (gameState === 'ended') {
+        const accuracy = TOTAL_QUESTIONS > 0 ? (correctAnswers / TOTAL_QUESTIONS) * 100 : 0;
         return (
             <div className="flex justify-center items-center py-8">
                 <Card className="w-full max-w-2xl text-center p-8 border-primary glow-shadow">
@@ -147,8 +178,18 @@ export default function QuizClashPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <p className="text-2xl">Your Final Score:</p>
-                        <p className="text-7xl font-bold text-primary">{score}</p>
+                        <div className="text-2xl">Your Final Score:</div>
+                        <div className="text-7xl font-bold text-primary">{score}</div>
+                        <div className="flex justify-around text-lg">
+                            <div>
+                                <p className="text-muted-foreground">Accuracy</p>
+                                <p className="font-bold">{accuracy.toFixed(0)}%</p>
+                            </div>
+                             <div>
+                                <p className="text-muted-foreground">Correct</p>
+                                <p className="font-bold">{correctAnswers}/{TOTAL_QUESTIONS}</p>
+                            </div>
+                        </div>
                         <Button size="lg" className="text-xl w-full" onClick={startGame}>
                            <Sparkles className="mr-2"/> Play Again
                         </Button>
@@ -158,7 +199,7 @@ export default function QuizClashPage() {
         )
     }
 
-    if (isLoading && questions.length === currentQuestionIndex) {
+    if (isLoading && questions.length <= currentQuestionIndex) {
         return (
             <div className="flex justify-center items-center py-8">
                 <Card className="w-full max-w-2xl border-primary glow-shadow">
@@ -217,17 +258,33 @@ export default function QuizClashPage() {
                         ))}
                     </div>
 
+                     {isCorrect === null && (
+                       <Button
+                            variant="outline"
+                            onClick={handleSkip}
+                            disabled={skipsUsed >= SKIP_LIMIT || selectedAnswer !== null}
+                        >
+                            <SkipForward className="mr-2" />
+                            Skip ({SKIP_LIMIT - skipsUsed} left)
+                        </Button>
+                    )}
+
+
                     {isCorrect !== null && (
                          <Card className="bg-secondary/50">
                             <CardContent className="p-4">
+                               <div className="flex items-center gap-2">
+                                {isCorrect ? <Check className="text-green-500" /> : <X className="text-red-500" />}
                                <p className="font-semibold text-lg">{isCorrect ? 'Correct!' : 'Incorrect!'}</p>
-                               <p className="text-muted-foreground">{currentQuestion.explanation}</p>
+                               </div>
+                               <p className="text-muted-foreground mt-2">{currentQuestion.explanation}</p>
                             </CardContent>
                         </Card>
                     )}
 
-                    <div className="text-center font-bold text-2xl">
-                        Score: <span className="text-primary">{score}</span>
+                    <div className="flex justify-between items-center font-bold text-2xl">
+                        <span>Score: <span className="text-primary">{score}</span></span>
+                        {consecutiveCorrect > 0 && <span className="text-sm text-yellow-400 animate-pulse">Streak: {consecutiveCorrect}x</span>}
                     </div>
 
                 </CardContent>
@@ -235,3 +292,5 @@ export default function QuizClashPage() {
         </div>
     );
 }
+
+    
