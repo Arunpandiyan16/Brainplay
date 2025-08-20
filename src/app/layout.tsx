@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'CityVerse',
+  title: 'Tamil Cinematic Universe',
   description: 'An open-world adventure with AI-powered characters.',
 };
 

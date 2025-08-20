@@ -5,25 +5,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export const npcs: NPC[] = [
   {
-    id: 'barista-bob',
-    name: 'Barista Bob',
-    personality: 'Friendly, cheerful, and always eager to talk about coffee.',
-    avatar: 'https://placehold.co/64x64/f5bc42/4287f5?text=BB',
-    'data-ai-hint': 'barista portrait'
+    id: 'police-inspector',
+    name: 'Inspector Vikram',
+    personality: 'A tough, no-nonsense cop who is investigating a series of crimes in the city. He is suspicious of everyone.',
+    avatar: 'https://placehold.co/64x64/4287f5/e0e8f5?text=IV',
+    'data-ai-hint': 'police inspector portrait'
   },
   {
-    id: 'officer-ria',
-    name: 'Officer Ria',
-    personality: 'Stoic, serious, and dedicated to keeping the city safe. A bit formal.',
-    avatar: 'https://placehold.co/64x64/4287f5/e0e8f5?text=OR',
-    'data-ai-hint': 'police portrait'
+    id: 'tea-stall-owner',
+    name: 'Annan',
+    personality: 'A friendly and talkative tea stall owner who knows all the local gossip. He is a good source of information.',
+    avatar: 'https://placehold.co/64x64/f5bc42/4287f5?text=A',
+    'data-ai-hint': 'man portrait'
   },
   {
-    id: 'tourist-tina',
-    name: 'Tourist Tina',
-    personality: 'Excitable, curious, and always asking for directions or recommendations.',
-    avatar: 'https://placehold.co/64x64/e0e8f5/f5bc42?text=TT',
-    'data-ai-hint': 'tourist portrait'
+    id: 'rowdy-raja',
+    name: 'Rowdy Raja',
+    personality: 'A feared local gangster who is quick to anger. He is fiercely loyal to his gang.',
+    avatar: 'https://placehold.co/64x64/e0e8f5/f54242?text=RR',
+    'data-ai-hint': 'gangster portrait'
   },
 ];
 

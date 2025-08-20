@@ -1,6 +1,6 @@
 import Header from '@/components/layout/header';
 import WorldLocations from '@/components/dashboard/world-locations';
-import EntertainmentHub from '@/components/dashboard/entertainment-hub';
+import Missions from '@/components/dashboard/missions';
 import PlayerChat from '@/components/dashboard/player-chat';
 import NpcChat from '@/components/npc-chat/npc-chat';
 
@@ -13,7 +13,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 xl:gap-8">
             <div className="lg:col-span-2 space-y-6 xl:space-y-8">
               <WorldLocations />
-              <EntertainmentHub />
+              <Missions />
             </div>
             <div className="lg:col-span-1 space-y-6 xl:space-y-8">
               <NpcChat />

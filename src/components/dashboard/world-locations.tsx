@@ -3,10 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Map } from 'lucide-react';
 
 const locations = [
-  { name: 'Downtown City', image: 'https://placehold.co/600x400', hint: 'futuristic city' },
-  { name: 'Serenity Park', image: 'https://placehold.co/600x400', hint: 'city park' },
-  { name: 'Sunset Beach', image: 'https://placehold.co/600x400', hint: 'beach sunset' },
-  { name: 'Mega Mall', image: 'https://placehold.co/600x400', hint: 'shopping mall' },
+  { name: 'Chennai Marina', image: 'https://placehold.co/600x400', hint: 'city beach' },
+  { name: 'Madurai Temple Town', image: 'https://placehold.co/600x400', hint: 'temple city' },
+  { name: 'Village Outskirts', image: 'https://placehold.co/600x400', hint: 'rural village' },
+  { name: 'Western Ghats', image: 'https://placehold.co/600x400', hint: 'mountain forest' },
 ];
 
 export default function WorldLocations() {
