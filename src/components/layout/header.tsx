@@ -1,5 +1,4 @@
 import { SunMoon } from 'lucide-react';
-import AvatarCustomization from '@/components/avatar/avatar-customization';
 
 export default function Header() {
   return (
@@ -9,7 +8,6 @@ export default function Header() {
           <SunMoon className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-headline font-bold text-foreground tracking-widest">AETHERIUM</h1>
         </div>
-        <AvatarCustomization />
       </div>
     </header>
   );

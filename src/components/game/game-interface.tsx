@@ -8,6 +8,7 @@ import ActiveMission from '@/components/dashboard/active-mission';
 import Minimap from './minimap';
 import InteractiveMap from './interactive-map';
 import Hud from './hud';
+import AvatarCustomization from '@/components/avatar/avatar-customization';
 
 import type { Mission, BriefingData } from '@/types';
 
@@ -45,6 +46,9 @@ export default function GameInterface({ activeMission, onStartMission, onComplet
                                         objectFit="cover"
                                         data-ai-hint="fantasy character portrait"
                                     />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                       <AvatarCustomization />
+                                    </div>
                                 </div>
                                 <div className="flex-1 space-y-2">
                                     <h3 className="text-xl font-bold font-headline text-primary">Signal Tender</h3>
@@ -78,7 +82,7 @@ export default function GameInterface({ activeMission, onStartMission, onComplet
                                 <div className="flex items-center text-sm font-semibold text-primary pt-2">
                                     <Award className="mr-2 h-4 w-4" />
                                     <span>Reward: {activeMission.mission.reward}</span>
-                                </div>
+                                 </div>
                              </CardContent>
                         </Card>
                     )}
