@@ -1,8 +1,9 @@
 import MissionCard from './mission-card';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Swords } from 'lucide-react';
+import type { Mission, BriefingData } from '@/types';
 
-const missions = [
+const missions: Mission[] = [
   {
     title: 'The Informant',
     description: 'A trusted informant has gone missing. Find him before the mafia gets to him. He was last seen near the harbor.',
@@ -26,7 +27,11 @@ const missions = [
   },
 ];
 
-export default function Missions() {
+type MissionsProps = {
+  onStartMission: (mission: Mission, briefing: BriefingData) => void;
+}
+
+export default function Missions({ onStartMission }: MissionsProps) {
   return (
     <Card>
       <CardHeader>
@@ -40,7 +45,7 @@ export default function Missions() {
       </CardHeader>
       <CardContent className="space-y-4">
         {missions.map((mission) => (
-          <MissionCard key={mission.title} mission={mission} />
+          <MissionCard key={mission.title} mission={mission} onStartMission={onStartMission} />
         ))}
       </CardContent>
     </Card>

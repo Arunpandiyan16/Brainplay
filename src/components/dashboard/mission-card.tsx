@@ -17,31 +17,20 @@ import { Loader2, ListChecks } from 'lucide-react';
 import { getMissionBriefing } from '@/app/actions/mission';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
-
-type Mission = {
-  title: string;
-  description: string;
-  image: string;
-  hint: string;
-  reward: string;
-};
+import type { Mission, BriefingData } from '@/types';
 
 type MissionCardProps = {
   mission: Mission;
+  onStartMission: (mission: Mission, briefing: BriefingData) => void;
 };
 
-type BriefingData = {
-    briefing: string;
-    objectives: string[];
-}
-
-export default function MissionCard({ mission }: MissionCardProps) {
+export default function MissionCard({ mission, onStartMission }: MissionCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [briefingData, setBriefingData] = useState<BriefingData | null>(null);
   const { toast } = useToast();
 
-  const handleStartMission = async () => {
+  const handleOpenDialog = async () => {
     if (briefingData) return; // Don't re-fetch if we already have it
 
     setIsLoading(true);
@@ -63,6 +52,12 @@ export default function MissionCard({ mission }: MissionCardProps) {
     setIsLoading(false);
   };
 
+  const handleAcceptMission = () => {
+    if (briefingData) {
+      onStartMission(mission, briefingData);
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <Card className="flex flex-col sm:flex-row items-center gap-4 p-4 group">
@@ -82,7 +77,7 @@ export default function MissionCard({ mission }: MissionCardProps) {
           </p>
         </div>
         <DialogTrigger asChild>
-          <Button onClick={handleStartMission}>Start Mission</Button>
+          <Button onClick={handleOpenDialog}>Start Mission</Button>
         </DialogTrigger>
       </Card>
       <DialogContent className="sm:max-w-[500px]">
@@ -121,7 +116,7 @@ export default function MissionCard({ mission }: MissionCardProps) {
             </Button>
           </DialogClose>
            <DialogClose asChild>
-                <Button type="button" disabled={isLoading}>
+                <Button type="button" disabled={isLoading || !briefingData} onClick={handleAcceptMission}>
                     Accept Mission
                 </Button>
           </DialogClose>

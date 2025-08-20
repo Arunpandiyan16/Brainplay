@@ -12,3 +12,16 @@ export type Message = {
   text: string;
   npc?: NPC;
 };
+
+export type Mission = {
+  title: string;
+  description: string;
+  image: string;
+  hint: string;
+  reward: string;
+};
+
+export type BriefingData = {
+    briefing: string;
+    objectives: string[];
+}
