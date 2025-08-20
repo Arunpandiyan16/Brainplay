@@ -1,17 +1,12 @@
-
 'use client';
 
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
-import { Zap, Shield, User, Award } from 'lucide-react';
+import { Award } from 'lucide-react';
 
-import Missions from '@/components/dashboard/missions';
-import PlayerChat from '@/components/dashboard/player-chat';
-import NpcChat from '@/components/npc-chat/npc-chat';
 import ActiveMission from '@/components/dashboard/active-mission';
-import EntertainmentHub from '@/components/dashboard/entertainment-hub';
-import WorldLocations from '@/components/dashboard/world-locations';
 import Minimap from './minimap';
+import InteractiveMap from './interactive-map';
 
 import type { Mission, BriefingData } from '@/types';
 
@@ -94,20 +89,16 @@ export default function GameInterface({ activeMission, onStartMission, onComplet
                 </div>
 
 
-                {/* Right Side: Pausible Content */}
-                 <div className="absolute top-1/2 right-6 -translate-y-1/2 w-full max-w-md">
-                     {!activeMission ? (
-                         <Missions onStartMission={onStartMission} />
-                     ) : (
-                         <div className="hidden"> {/* Placeholder for other in-game menus */} </div>
-                     )}
-                </div>
-
-
+                {/* Map instead of pausible content */}
+                {!activeMission && (
+                     <div className="absolute top-1/2 right-6 -translate-y-1/2 w-full max-w-2xl">
+                        <InteractiveMap onStartMission={onStartMission} />
+                    </div>
+                )}
             </div>
              {/* Full screen active mission */}
             {activeMission && (
-                <div className="absolute inset-0 z-30 bg-black/70 flex items-center justify-center">
+                <div className="absolute inset-0 z-30 bg-black/70 flex items-center justify-center p-4">
                    <ActiveMission
                      mission={activeMission.mission}
                      briefing={activeMission.briefing}

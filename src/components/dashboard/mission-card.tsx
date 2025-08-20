@@ -13,11 +13,12 @@ import {
 } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ListChecks } from 'lucide-react';
+import { Loader2, ListChecks, Swords } from 'lucide-react';
 import { getMissionBriefing } from '@/app/actions/mission';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
 import type { Mission, BriefingData } from '@/types';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 type MissionCardProps = {
   mission: Mission;
@@ -31,6 +32,7 @@ export default function MissionCard({ mission, onStartMission }: MissionCardProp
   const { toast } = useToast();
 
   const handleOpenDialog = async () => {
+    setIsOpen(true);
     if (briefingData) return; // Don't re-fetch if we already have it
 
     setIsLoading(true);
@@ -60,26 +62,21 @@ export default function MissionCard({ mission, onStartMission }: MissionCardProp
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="flex flex-col sm:flex-row items-center gap-4 p-4 group">
-        <Image
-          src={mission.image}
-          alt={mission.title}
-          width={150}
-          height={100}
-          className="rounded-md object-cover w-full sm:w-[150px] h-auto sm:h-[100px] transition-transform duration-300 group-hover:scale-105"
-          data-ai-hint={mission.hint}
-        />
-        <div className="flex-1">
-          <h3 className="text-lg font-bold">{mission.title}</h3>
-          <p className="text-sm text-muted-foreground">{mission.description}</p>
-          <p className="text-sm font-semibold text-primary mt-2">
-            Reward: {mission.reward}
-          </p>
-        </div>
-        <DialogTrigger asChild>
-          <Button onClick={handleOpenDialog}>Start Mission</Button>
-        </DialogTrigger>
-      </Card>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DialogTrigger asChild>
+                <button onClick={handleOpenDialog} className="p-2 bg-primary/80 rounded-full hover:bg-primary transition-all duration-200 hover:scale-110 focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-accent outline-none">
+                    <Swords className="h-6 w-6 text-primary-foreground" />
+                </button>
+            </DialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="bg-card text-card-foreground border-border">
+            <p className="font-bold">{mission.title}</p>
+            <p className="text-sm text-muted-foreground">{mission.description}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{mission.title}</DialogTitle>
