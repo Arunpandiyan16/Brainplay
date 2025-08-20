@@ -8,6 +8,7 @@ import NpcChat from '@/components/npc-chat/npc-chat';
 import ActiveMission from '@/components/dashboard/active-mission';
 import EntertainmentHub from '@/components/dashboard/entertainment-hub';
 import PlayerHub from '@/components/dashboard/player-hub';
+import WorldLocations from '@/components/dashboard/world-locations';
 import { Toaster } from "@/components/ui/toaster"
 import type { Mission, BriefingData } from '@/types';
 
@@ -36,8 +37,9 @@ export default function Home() {
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6 xl:gap-8">
-                <div className="md:col-span-3">
+                <div className="md:col-span-3 space-y-6">
                     <PlayerHub />
+                    <WorldLocations />
                 </div>
                 <div className="md:col-span-2 space-y-6">
                     <NpcChat />
