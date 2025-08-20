@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
-import { Award, Zap, HeartPulse } from 'lucide-react';
+import { Award, Zap, HeartPulse, Shield, Wind, Sun, Moon } from 'lucide-react';
 
 import ActiveMission from '@/components/dashboard/active-mission';
 import Minimap from './minimap';
@@ -23,11 +23,11 @@ export default function GameInterface({ activeMission, onStartMission, onComplet
             <div className="absolute inset-0 bg-grid-pattern z-0 opacity-20"/>
             <Image
                 src="https://placehold.co/1920x1080/0a1014/0a1014"
-                alt="Command Center background"
+                alt="Mystical Forest background"
                 layout="fill"
                 objectFit="cover"
                 className="z-0 opacity-20"
-                data-ai-hint="futuristic command center"
+                data-ai-hint="mystical forest night"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background z-10" />
 
@@ -37,27 +37,27 @@ export default function GameInterface({ activeMission, onStartMission, onComplet
                      <Card className="bg-card/80 backdrop-blur-sm border-primary/20">
                         <CardContent className="p-4 space-y-4">
                              <div className="flex items-center gap-4">
-                                <div className="relative w-20 h-20 rounded-lg overflow-hidden group border-2 border-primary/50 bg-primary/10 flex items-center justify-center">
+                                <div className="relative w-20 h-20 rounded-full overflow-hidden group border-2 border-primary/50 bg-primary/10 flex items-center justify-center">
                                      <Image
-                                        src="https://placehold.co/200x200/1a2a3a/00f0ff?text=A"
-                                        alt="Agent Avatar"
+                                        src="https://placehold.co/200x200/152a3a/ffc700?text=S"
+                                        alt="Signal Tender Avatar"
                                         layout="fill"
                                         objectFit="cover"
-                                        data-ai-hint="cyberpunk agent portrait"
+                                        data-ai-hint="fantasy character portrait"
                                     />
                                 </div>
                                 <div className="flex-1 space-y-2">
-                                    <h3 className="text-xl font-bold font-headline text-primary">Agent_77</h3>
+                                    <h3 className="text-xl font-bold font-headline text-primary">Signal Tender</h3>
                                     <div className="flex items-center gap-3">
                                         <HeartPulse className="w-5 h-5 text-red-500" />
                                         <div className="w-full bg-muted/50 rounded-full h-2.5 border border-black/20">
-                                            <div className="bg-red-500 h-full rounded-full" style={{width: "90%"}}></div>
+                                            <div className="bg-red-500 h-full rounded-full" style={{width: "100%"}}></div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <Zap className="w-5 h-5 text-yellow-400" />
+                                        <Shield className="w-5 h-5 text-blue-400" />
                                         <div className="w-full bg-muted/50 rounded-full h-2.5 border border-black/20">
-                                            <div className="bg-yellow-500 h-full rounded-full" style={{width: "75%"}}></div>
+                                            <div className="bg-blue-500 h-full rounded-full" style={{width: "80%"}}></div>
                                         </div>
                                     </div>
                                 </div>
@@ -106,4 +106,3 @@ export default function GameInterface({ activeMission, onStartMission, onComplet
         </div>
     );
 }
-

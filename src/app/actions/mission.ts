@@ -16,7 +16,7 @@ export async function getMissionBriefing(input: GenerateMissionBriefingInput) {
     console.error('Error in mission briefing flow:', error);
     return {
       success: false,
-      error: 'Sorry, I am unable to generate a briefing right now.',
+      error: 'The echoes are silent. Please try again later.',
     };
   }
 }

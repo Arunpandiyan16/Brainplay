@@ -11,14 +11,14 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 const GenerateMissionBriefingInputSchema = z.object({
-  missionTitle: z.string().describe('The title of the mission.'),
-  missionDescription: z.string().describe('The short description of the mission.'),
+  missionTitle: z.string().describe('The title of the location or echo.'),
+  missionDescription: z.string().describe('The short description of the location or echo.'),
 });
 export type GenerateMissionBriefingInput = z.infer<typeof GenerateMissionBriefingInputSchema>;
 
 const GenerateMissionBriefingOutputSchema = z.object({
-  briefing: z.string().describe("A detailed, narrative-style mission briefing from the perspective of an AI fixer. This should be engaging, cryptic, and fit a cyberpunk theme."),
-  objectives: z.array(z.string()).describe('A list of clear, actionable objectives for the player to complete.'),
+  briefing: z.string().describe("A detailed, narrative-style memory or vision from the perspective of an ancient spirit. This should be engaging, cryptic, and fit a mystical, fantasy theme. It should evoke a sense of loss and hope."),
+  objectives: z.array(z.string()).describe('A list of clear, actionable trials or tasks for the player to complete to restore the location.'),
 });
 export type GenerateMissionBriefingOutput = z.infer<typeof GenerateMissionBriefingOutputSchema>;
 
@@ -32,15 +32,15 @@ const prompt = ai.definePrompt({
   name: 'generateMissionBriefingPrompt',
   input: { schema: GenerateMissionBriefingInputSchema },
   output: { schema: GenerateMissionBriefingOutputSchema },
-  prompt: `You are "Silas", a grizzled information broker in the cyberpunk game 'Chrono-Cortex'.
-Your task is to provide a mission briefing to the player (an operative). The briefing should be immersive, detailed, and fit the sci-fi corporate espionage theme.
-Expand on the provided mission title and description to create a compelling narrative. Use tech-heavy slang.
-Conclude with a clear, numbered list of objectives for the player.
+  prompt: `You are the "Voice of Aetherium", an ancient, ethereal entity in the world of "Aetherium: The Last Signal".
+Your task is to provide a memory fragment (an "Echo") to the player, the Signal Tender. The echo should be immersive, detailed, and fit the mystical fantasy theme of a world slowly being lost to a corrupting "Static".
+Expand on the provided location title and description to create a compelling narrative. Use poetic, evocative language.
+Conclude with a clear, numbered list of trials the player must undertake to restore the signal at this location.
 
-Contract Title: {{missionTitle}}
-Contract Description: {{missionDescription}}
+Location: {{missionTitle}}
+Description: {{missionDescription}}
 
-Generate the mission briefing now.`,
+Generate the echo now.`,
 });
 
 const generateMissionBriefingFlow = ai.defineFlow(

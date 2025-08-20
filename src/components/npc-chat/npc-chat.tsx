@@ -47,7 +47,7 @@ export default function NpcChat() {
         userInput: input,
         npcName: selectedNpc.name,
         npcPersonality: selectedNpc.personality,
-        gameContext: "The user is an operative in the futuristic sci-fi game 'Chrono-Cortex'.",
+        gameContext: "The user is the Signal Tender, a mystical being trying to restore a lost world. You are a spirit of this world.",
     });
 
     if (result.success && result.data) {
@@ -61,7 +61,7 @@ export default function NpcChat() {
     } else {
         toast({
             variant: 'destructive',
-            title: 'Comms Error',
+            title: 'The signal fades...',
             description: result.error,
         });
         setMessages((prev) => prev.slice(0, prev.length -1));
@@ -86,7 +86,7 @@ export default function NpcChat() {
                                 </Avatar>
                             )}
                             <div className={`rounded-lg px-3 py-2 max-w-sm ${message.author === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                <p className="text-sm">{message.text}</p>
+                                <p className="text-sm font-body">{message.text}</p>
                             </div>
                          </div>
                     ))}
@@ -108,7 +108,7 @@ export default function NpcChat() {
             <form onSubmit={handleSubmit} className="flex w-full items-center space-x-2">
                 <Input
                     type="text"
-                    placeholder="Transmit message..."
+                    placeholder="Whisper to the spirits..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading}

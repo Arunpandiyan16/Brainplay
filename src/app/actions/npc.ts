@@ -12,6 +12,6 @@ export async function handleNpcChat(input: NPCChatInput) {
     return { success: true, data: result };
   } catch (error) {
     console.error('Error in NPC chat flow:', error);
-    return { success: false, error: 'Sorry, I am unable to respond right now.' };
+    return { success: false, error: 'The spirits are silent right now.' };
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { ListChecks, CheckCircle2, Award } from 'lucide-react';
+import { ListChecks, CheckCircle2, Award, BookText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -27,13 +27,13 @@ export default function ActiveMission({ mission, briefing, onComplete }: ActiveM
       <CardContent className="grid md:grid-cols-2 gap-6 xl:gap-8">
         <div className="space-y-6">
             <div className="space-y-2">
-                <h4 className="font-bold text-xl font-headline">Briefing:</h4>
+                <h4 className="font-bold text-xl flex items-center gap-2 font-headline"><BookText/> Echoes of the Past:</h4>
                 <ScrollArea className="h-48 pr-4">
                     <p className="text-muted-foreground whitespace-pre-wrap">{briefing.briefing}</p>
                 </ScrollArea>
             </div>
             <div className="space-y-2">
-                <h4 className="font-bold text-xl flex items-center gap-2 font-headline"><ListChecks /> Objectives:</h4>
+                <h4 className="font-bold text-xl flex items-center gap-2 font-headline"><ListChecks /> Trials:</h4>
                 <ul className="space-y-2 list-disc pl-5">
                     {briefing.objectives.map((obj, index) => (
                         <li key={index} className="text-muted-foreground">{obj}</li>
@@ -55,7 +55,7 @@ export default function ActiveMission({ mission, briefing, onComplete }: ActiveM
       <CardFooter>
         <Button onClick={onComplete} size="lg" className="w-full md:w-auto">
           <CheckCircle2 className="mr-2" />
-          Complete Contract
+          Restore the Signal
         </Button>
       </CardFooter>
     </Card>

@@ -1,23 +1,24 @@
 import type {Metadata} from 'next';
-import { Oxanium, Orbitron } from 'next/font/google'
+import { Cinzel, Cormorant_Garamond } from 'next/font/google'
 import './globals.css';
 
 
 export const metadata: Metadata = {
-  title: 'Chrono-Cortex',
-  description: 'A sci-fi adventure game of corporate espionage.',
+  title: 'Aetherium: The Last Signal',
+  description: 'A mystical journey to restore a forgotten world.',
 };
 
-const oxanium = Oxanium({
-  subsets: ['latin'],
-  variable: '--font-body',
-  display: 'swap',
-})
-
-const orbitron = Orbitron({
+const cinzel = Cinzel({
   subsets: ['latin'],
   variable: '--font-headline',
   display: 'swap',
+})
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
+  weight: ['400', '600', '700']
 })
 
 export default function RootLayout({
@@ -27,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${oxanium.variable} ${orbitron.variable} font-body antialiased`}>
+      <body className={`${cinzel.variable} ${cormorant.variable} font-body antialiased`}>
         {children}
       </body>
     </html>

@@ -11,15 +11,15 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const NPCChatInputSchema = z.object({
-  userInput: z.string().describe('The user input message to the NPC.'),
-  npcName: z.string().describe('The name of the NPC.'),
-  npcPersonality: z.string().describe('The personality of the NPC.'),
+  userInput: z.string().describe('The user input message to the spirit.'),
+  npcName: z.string().describe('The name of the spirit.'),
+  npcPersonality: z.string().describe('The personality of the spirit.'),
   gameContext: z.string().describe('The current context of the game.'),
 });
 export type NPCChatInput = z.infer<typeof NPCChatInputSchema>;
 
 const NPCChatOutputSchema = z.object({
-  npcResponse: z.string().describe('The NPC response to the user input.'),
+  npcResponse: z.string().describe('The spirit\'s response to the user input.'),
 });
 export type NPCChatOutput = z.infer<typeof NPCChatOutputSchema>;
 
@@ -31,11 +31,11 @@ const prompt = ai.definePrompt({
   name: 'npcChatPrompt',
   input: {schema: NPCChatInputSchema},
   output: {schema: NPCChatOutputSchema},
-  prompt: `You are roleplaying as {{npcName}}, an NPC in a virtual game world. Your personality is {{npcPersonality}}. The current game context is {{gameContext}}.
+  prompt: `You are roleplaying as {{npcName}}, a spirit in the mystical world of Aetherium. Your personality is {{npcPersonality}}. The current game context is {{gameContext}}.
 
-User input: {{userInput}}
+User's whisper: {{userInput}}
 
-Respond as {{npcName}} would, given your personality and the game context. Keep your response concise and relevant to the conversation.`,
+Respond as {{npcName}} would, given your personality and the game context. Keep your response concise, poetic, and relevant to the conversation.`,
 });
 
 const npcChatFlow = ai.defineFlow(

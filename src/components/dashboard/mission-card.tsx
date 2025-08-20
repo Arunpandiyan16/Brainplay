@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ListChecks, LucideIcon, ShieldQuestion, Swords } from 'lucide-react';
+import { Loader2, ListChecks, LucideIcon, ShieldQuestion, Swords, BookOpen } from 'lucide-react';
 import { getMissionBriefing } from '@/app/actions/mission';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
@@ -46,7 +46,7 @@ export default function MissionCard({ mission, onStartMission }: MissionCardProp
     } else {
         toast({
             variant: 'destructive',
-            title: 'Briefing Failed',
+            title: 'Echoes Fade',
             description: result.error,
         });
         setIsOpen(false);
@@ -66,8 +66,8 @@ export default function MissionCard({ mission, onStartMission }: MissionCardProp
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
-                <button onClick={handleOpenDialog} className="p-2 bg-primary/80 rounded-full hover:bg-primary transition-all duration-200 hover:scale-110 focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-accent outline-none">
-                    <ShieldQuestion className="h-6 w-6 text-primary-foreground" />
+                <button onClick={handleOpenDialog} className="p-2 bg-primary/80 rounded-full hover:bg-primary transition-all duration-200 hover:scale-110 focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-accent outline-none animate-pulse">
+                    <BookOpen className="h-6 w-6 text-primary-foreground" />
                 </button>
             </DialogTrigger>
           </TooltipTrigger>
@@ -91,11 +91,11 @@ export default function MissionCard({ mission, onStartMission }: MissionCardProp
                 <ScrollArea className="h-64 pr-4">
                     <div className="space-y-6">
                         <div>
-                            <h4 className="font-bold text-lg mb-2 font-headline">Briefing:</h4>
+                            <h4 className="font-bold text-lg mb-2 font-headline">Echoes of the Past:</h4>
                             <p className="text-sm text-muted-foreground whitespace-pre-wrap">{briefingData.briefing}</p>
                         </div>
                         <div>
-                            <h4 className="font-bold text-lg mb-2 flex items-center gap-2 font-headline"><ListChecks /> Objectives:</h4>
+                            <h4 className="font-bold text-lg mb-2 flex items-center gap-2 font-headline"><ListChecks /> Trials:</h4>
                             <ul className="space-y-2 list-disc pl-5 text-sm">
                                 {briefingData.objectives.map((obj, index) => (
                                     <li key={index}>{obj}</li>
@@ -109,12 +109,12 @@ export default function MissionCard({ mission, onStartMission }: MissionCardProp
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button" variant="secondary">
-              Decline
+              Let it Fade
             </Button>
           </DialogClose>
            <DialogClose asChild>
                 <Button type="button" disabled={isLoading || !briefingData} onClick={handleAcceptMission}>
-                    Accept Contract
+                    Heed the Call
                 </Button>
           </DialogClose>
         </DialogFooter>

@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Header from '@/components/layout/header';
-import DayNightCycle from '@/components/layout/day-night-cycle';
 import GameInterface from '@/components/game/game-interface';
 import { Toaster } from "@/components/ui/toaster"
 import type { Mission, BriefingData } from '@/types';
 import Weather from '@/components/game/weather';
+import DayNightCycle from '@/components/layout/day-night-cycle';
 
 
 export default function Home() {
@@ -36,6 +36,8 @@ export default function Home() {
             onCompleteMission={handleCompleteMission}
           />
       </main>
+      <DayNightCycle />
+      <Weather />
       <Toaster />
     </div>
   );
