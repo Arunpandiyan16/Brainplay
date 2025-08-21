@@ -10,21 +10,15 @@ import { generateQuizQuestion, QuizQuestion } from '@/ai/flows/quiz-flow';
 import { useToast } from '@/hooks/use-toast';
 
 const TOTAL_TIME = 30;
-const TOTAL_QUESTIONS = 5;
 const SKIP_LIMIT = 1;
 
 const CATEGORIES = ['General Knowledge', 'Movies', 'Cricket', 'Tech', 'Tamil Nadu GK'];
 
 type GameState = 'start' | 'playing' | 'ended';
 
-interface QuestionWithCategory extends QuizQuestion {
-    category: string;
-}
-
 export default function QuizClashPage() {
     const [gameState, setGameState] = useState<GameState>('start');
-    const [questions, setQuestions] = useState<QuestionWithCategory[]>([]);
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [question, setQuestion] = useState<QuizQuestion | null>(null);
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [score, setScore] = useState(0);
@@ -32,18 +26,15 @@ export default function QuizClashPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
     const [skipsUsed, setSkipsUsed] = useState(0);
-    const [correctAnswers, setCorrectAnswers] = useState(0);
     const [answeredQuestions, setAnsweredQuestions] = useState<any[]>([]);
     const { toast } = useToast();
-
-    const currentQuestion = questions[currentQuestionIndex];
 
     const fetchQuestion = useCallback(async () => {
         setIsLoading(true);
         try {
             const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
-            const question = await generateQuizQuestion({ category });
-            setQuestions(prev => [...prev, { ...question, category }]);
+            const nextQuestion = await generateQuizQuestion({ category });
+            setQuestion(nextQuestion);
         } catch (error) {
             console.error(error);
             toast({
@@ -51,28 +42,31 @@ export default function QuizClashPage() {
                 title: 'Error',
                 description: 'Failed to generate a new question. Please try again.',
             });
+            // End game if question generation fails
+            setGameState('ended');
         } finally {
             setIsLoading(false);
         }
     }, [toast]);
     
+    // Initial question fetch
     useEffect(() => {
-        if (gameState === 'playing' && questions.length === 0) {
+        if (gameState === 'playing' && !question) {
             fetchQuestion();
         }
-    }, [gameState, questions.length, fetchQuestion]);
+    }, [gameState, question, fetchQuestion]);
 
 
     useEffect(() => {
         if (gameState !== 'playing' || isLoading) return;
 
-        if (timeLeft === 0) {
+        if (timeLeft <= 0) {
             setGameState('ended');
             return;
         }
 
         const timer = setInterval(() => {
-            setTimeLeft(prev => prev - 1);
+            setTimeLeft(prev => Math.max(0, prev - 1));
         }, 1000);
 
         return () => clearInterval(timer);
@@ -81,30 +75,21 @@ export default function QuizClashPage() {
     const proceedToNextQuestion = useCallback(() => {
         setSelectedAnswer(null);
         setIsCorrect(null);
-        
-        if (currentQuestionIndex < TOTAL_QUESTIONS - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
-             if (currentQuestionIndex + 1 >= questions.length) {
-                fetchQuestion();
-            }
-        } else {
-            setGameState('ended');
-        }
-    }, [currentQuestionIndex, questions.length, fetchQuestion]);
+        fetchQuestion();
+    }, [fetchQuestion]);
     
     const handleAnswer = (index: number) => {
-        if (selectedAnswer !== null) return;
+        if (selectedAnswer !== null || !question) return;
         
         setSelectedAnswer(index);
-        const correct = index === currentQuestion.answerIndex;
+        const correct = index === question.answerIndex;
         setIsCorrect(correct);
-        setAnsweredQuestions(prev => [...prev, { ...currentQuestion, answeredCorrectly: correct, skipped: false }]);
+        setAnsweredQuestions(prev => [...prev, { ...question, answeredCorrectly: correct, skipped: false }]);
 
         if (correct) {
             let points = 10;
             const newConsecutiveCorrect = consecutiveCorrect + 1;
             setConsecutiveCorrect(newConsecutiveCorrect);
-            setCorrectAnswers(prev => prev + 1);
 
             if (newConsecutiveCorrect > 0 && newConsecutiveCorrect % 3 === 0) {
                 points += 5; // Streak bonus
@@ -122,30 +107,28 @@ export default function QuizClashPage() {
     };
 
     const handleSkip = () => {
-        if (skipsUsed >= SKIP_LIMIT || selectedAnswer !== null) return;
+        if (skipsUsed >= SKIP_LIMIT || selectedAnswer !== null || !question) return;
         setSkipsUsed(prev => prev + 1);
         setConsecutiveCorrect(0);
-        setAnsweredQuestions(prev => [...prev, { ...currentQuestion, answeredCorrectly: false, skipped: true }]);
+        setAnsweredQuestions(prev => [...prev, { ...question, answeredCorrectly: false, skipped: true }]);
         proceedToNextQuestion();
     };
 
     const startGame = () => {
-        setQuestions([]);
-        setCurrentQuestionIndex(0);
+        setQuestion(null);
         setScore(0);
         setTimeLeft(TOTAL_TIME);
         setGameState('playing');
         setConsecutiveCorrect(0);
         setSkipsUsed(0);
-        setCorrectAnswers(0);
         setSelectedAnswer(null);
         setIsCorrect(null);
         setAnsweredQuestions([]);
     };
     
     const getButtonClass = (index: number) => {
-        if (selectedAnswer !== null) {
-            if (index === currentQuestion.answerIndex) {
+        if (selectedAnswer !== null && question) {
+            if (index === question.answerIndex) {
                 return 'bg-green-500 hover:bg-green-600'; // Correct answer
             }
             if (index === selectedAnswer) {
@@ -157,8 +140,9 @@ export default function QuizClashPage() {
 
     const renderCategoryBreakdown = () => {
         const breakdown: { [key: string]: { correct: number; total: number } } = {};
-
+        
         answeredQuestions.forEach(q => {
+             if (q.skipped) return;
             if (!breakdown[q.category]) {
                 breakdown[q.category] = { correct: 0, total: 0 };
             }
@@ -167,6 +151,8 @@ export default function QuizClashPage() {
                 breakdown[q.category].correct++;
             }
         });
+
+        if (Object.keys(breakdown).length === 0) return null;
 
         return (
             <div className="w-full space-y-2 text-left">
@@ -191,7 +177,7 @@ export default function QuizClashPage() {
                            Quiz Clash
                         </CardTitle>
                         <CardDescription className="text-lg">
-                           Answer {TOTAL_QUESTIONS} questions within {TOTAL_TIME} seconds. Good luck!
+                           Answer as many questions as you can in {TOTAL_TIME} seconds. Good luck!
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -206,6 +192,7 @@ export default function QuizClashPage() {
 
     if (gameState === 'ended') {
         const attemptedQuestions = answeredQuestions.filter(q => !q.skipped).length;
+        const correctAnswers = answeredQuestions.filter(q => q.answeredCorrectly).length;
         const accuracy = attemptedQuestions > 0 ? (correctAnswers / attemptedQuestions) * 100 : 0;
         return (
             <div className="flex justify-center items-center py-8">
@@ -213,20 +200,20 @@ export default function QuizClashPage() {
                     <CardHeader>
                         <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
                            <Trophy className="w-10 h-10 text-yellow-400"/>
-                           Game Over!
+                           Time's Up!
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="text-2xl">Your Final Score:</div>
                         <div className="text-7xl font-bold text-primary">{score}</div>
                         <div className="flex justify-around text-lg w-full">
+                             <div>
+                                <p className="text-muted-foreground">Correct</p>
+                                <p className="font-bold">{correctAnswers}/{attemptedQuestions}</p>
+                            </div>
                             <div>
                                 <p className="text-muted-foreground">Accuracy</p>
                                 <p className="font-bold">{accuracy.toFixed(0)}%</p>
-                            </div>
-                             <div>
-                                <p className="text-muted-foreground">Correct</p>
-                                <p className="font-bold">{correctAnswers}/{TOTAL_QUESTIONS}</p>
                             </div>
                         </div>
                         {renderCategoryBreakdown()}
@@ -238,21 +225,21 @@ export default function QuizClashPage() {
             </div>
         )
     }
+    
+    const questionNumber = answeredQuestions.length + 1;
 
-    if (isLoading && questions.length <= currentQuestionIndex) {
+    if (isLoading || !question) {
         return (
             <div className="flex justify-center items-center py-8">
                 <Card className="w-full max-w-2xl border-primary glow-shadow">
                     <CardContent className="p-8 text-center space-y-4">
                         <Loader2 className="h-16 w-16 animate-spin mx-auto text-primary"/>
-                        <p className="text-xl text-muted-foreground">Generating challenging questions...</p>
+                        <p className="text-xl text-muted-foreground">Generating question {questionNumber}...</p>
                     </CardContent>
                 </Card>
             </div>
         );
     }
-
-    if (!currentQuestion) return null;
 
     return (
         <div className="flex justify-center items-center py-8">
@@ -268,17 +255,17 @@ export default function QuizClashPage() {
                             <span className={timeLeft <= 10 ? 'text-red-500' : ''}>{timeLeft}</span>
                         </div>
                     </CardTitle>
-                    <CardDescription>Question {currentQuestionIndex + 1} of {TOTAL_QUESTIONS} ({currentQuestion.category})</CardDescription>
+                    <CardDescription>Question {questionNumber} ({question.category})</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <Progress value={(timeLeft / TOTAL_TIME) * 100} className="w-full h-2" />
                     
                     <div className="p-4 rounded-lg bg-secondary text-center min-h-[80px] flex items-center justify-center">
-                        <p className="text-lg font-semibold">{currentQuestion.question}</p>
+                        <p className="text-lg font-semibold">{question.question}</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {currentQuestion.choices.map((choice, index) => (
+                        {question.choices.map((choice, index) => (
                             <Button 
                                 key={index} 
                                 size="lg" 
@@ -289,7 +276,7 @@ export default function QuizClashPage() {
                                 <div className="flex items-center">
                                     <div className="w-6 mr-3">
                                         {selectedAnswer !== null && (
-                                            index === currentQuestion.answerIndex ? <Check/> : (index === selectedAnswer ? <X/> : <span/>)
+                                            index === question.answerIndex ? <Check/> : (index === selectedAnswer ? <X/> : <span/>)
                                         )}
                                     </div>
                                     <span>{choice}</span>
@@ -317,7 +304,7 @@ export default function QuizClashPage() {
                                 {isCorrect ? <Check className="text-green-500" /> : <X className="text-red-500" />}
                                <p className="font-semibold text-lg">{isCorrect ? 'Correct!' : 'Incorrect!'}</p>
                                </div>
-                               <p className="text-muted-foreground mt-2">{currentQuestion.explanation}</p>
+                               <p className="text-muted-foreground mt-2">{question.explanation}</p>
                             </CardContent>
                         </Card>
                     )}
@@ -332,5 +319,3 @@ export default function QuizClashPage() {
         </div>
     );
 }
-
-    

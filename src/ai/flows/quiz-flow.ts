@@ -18,7 +18,7 @@ const QuizQuestionSchema = z.object({
   choices: z.array(z.string()).length(4).describe('An array of 4 possible answers.'),
   answerIndex: z.number().min(0).max(3).describe('The index of the correct answer in the choices array.'),
   explanation: z.string().describe('A brief explanation of the correct answer.'),
-  category: z.string().describe('The category of the question.'),
+  category: z.string().describe('The category of the question, which should match the input category.'),
 });
 export type QuizQuestion = z.infer<typeof QuizQuestionSchema>;
 
@@ -30,7 +30,7 @@ const quizPrompt = ai.definePrompt({
     You are a quiz master. Generate a challenging and interesting quiz question for the given category.
     The question should have 4 choices, with one clear correct answer.
     Provide a brief explanation for the correct answer.
-    Ensure the generated question matches the specified category.
+    Ensure the generated question and the category field in the output matches the specified input category.
 
     Category: {{{category}}}
   `,
