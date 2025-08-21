@@ -35,6 +35,7 @@ const quizPrompt = ai.definePrompt({
     Category: {{{category}}}
   `,
   config: {
+    model: 'gemini-pro',
     temperature: 1, // Increase creativity for more varied questions
   }
 });
