@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, ShieldAlert, Sparkles, SkipForward } from 'lucide-react';
+import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward } from 'lucide-react';
 import { generateQuizQuestion, QuizQuestion } from '@/ai/flows/quiz-flow';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,11 +13,17 @@ const TOTAL_TIME = 30;
 const TOTAL_QUESTIONS = 5;
 const SKIP_LIMIT = 1;
 
+const CATEGORIES = ['General Knowledge', 'Movies', 'Cricket', 'Tech', 'Tamil Nadu GK'];
+
 type GameState = 'start' | 'playing' | 'ended';
+
+interface QuestionWithCategory extends QuizQuestion {
+    category: string;
+}
 
 export default function QuizClashPage() {
     const [gameState, setGameState] = useState<GameState>('start');
-    const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+    const [questions, setQuestions] = useState<QuestionWithCategory[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -27,6 +33,7 @@ export default function QuizClashPage() {
     const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
     const [skipsUsed, setSkipsUsed] = useState(0);
     const [correctAnswers, setCorrectAnswers] = useState(0);
+    const [answeredQuestions, setAnsweredQuestions] = useState<any[]>([]);
     const { toast } = useToast();
 
     const currentQuestion = questions[currentQuestionIndex];
@@ -34,8 +41,9 @@ export default function QuizClashPage() {
     const fetchQuestion = useCallback(async () => {
         setIsLoading(true);
         try {
-            const question = await generateQuizQuestion({ category: 'General Knowledge' });
-            setQuestions(prev => [...prev, question]);
+            const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+            const question = await generateQuizQuestion({ category });
+            setQuestions(prev => [...prev, { ...question, category }]);
         } catch (error) {
             console.error(error);
             toast({
@@ -90,6 +98,7 @@ export default function QuizClashPage() {
         setSelectedAnswer(index);
         const correct = index === currentQuestion.answerIndex;
         setIsCorrect(correct);
+        setAnsweredQuestions(prev => [...prev, { ...currentQuestion, answeredCorrectly: correct, skipped: false }]);
 
         if (correct) {
             let points = 10;
@@ -99,6 +108,7 @@ export default function QuizClashPage() {
 
             if (newConsecutiveCorrect > 0 && newConsecutiveCorrect % 3 === 0) {
                 points += 5; // Streak bonus
+                toast({ title: "Streak Bonus!", description: "+5 extra points!" });
             }
             setScore(prev => prev + points);
         } else {
@@ -115,6 +125,7 @@ export default function QuizClashPage() {
         if (skipsUsed >= SKIP_LIMIT || selectedAnswer !== null) return;
         setSkipsUsed(prev => prev + 1);
         setConsecutiveCorrect(0);
+        setAnsweredQuestions(prev => [...prev, { ...currentQuestion, answeredCorrectly: false, skipped: true }]);
         proceedToNextQuestion();
     };
 
@@ -129,6 +140,7 @@ export default function QuizClashPage() {
         setCorrectAnswers(0);
         setSelectedAnswer(null);
         setIsCorrect(null);
+        setAnsweredQuestions([]);
     };
     
     const getButtonClass = (index: number) => {
@@ -141,6 +153,32 @@ export default function QuizClashPage() {
             }
         }
         return 'bg-secondary hover:bg-accent';
+    };
+
+    const renderCategoryBreakdown = () => {
+        const breakdown: { [key: string]: { correct: number; total: number } } = {};
+
+        answeredQuestions.forEach(q => {
+            if (!breakdown[q.category]) {
+                breakdown[q.category] = { correct: 0, total: 0 };
+            }
+            breakdown[q.category].total++;
+            if (q.answeredCorrectly) {
+                breakdown[q.category].correct++;
+            }
+        });
+
+        return (
+            <div className="w-full space-y-2 text-left">
+                <h4 className="font-semibold">Category Breakdown:</h4>
+                {Object.entries(breakdown).map(([category, stats]) => (
+                    <div key={category} className="flex justify-between items-center text-sm">
+                        <p>{category}</p>
+                        <p className="font-mono">{stats.correct} / {stats.total}</p>
+                    </div>
+                ))}
+            </div>
+        );
     };
 
     if (gameState === 'start') {
@@ -167,7 +205,8 @@ export default function QuizClashPage() {
     }
 
     if (gameState === 'ended') {
-        const accuracy = TOTAL_QUESTIONS > 0 ? (correctAnswers / TOTAL_QUESTIONS) * 100 : 0;
+        const attemptedQuestions = answeredQuestions.filter(q => !q.skipped).length;
+        const accuracy = attemptedQuestions > 0 ? (correctAnswers / attemptedQuestions) * 100 : 0;
         return (
             <div className="flex justify-center items-center py-8">
                 <Card className="w-full max-w-2xl text-center p-8 border-primary glow-shadow">
@@ -180,7 +219,7 @@ export default function QuizClashPage() {
                     <CardContent className="space-y-6">
                         <div className="text-2xl">Your Final Score:</div>
                         <div className="text-7xl font-bold text-primary">{score}</div>
-                        <div className="flex justify-around text-lg">
+                        <div className="flex justify-around text-lg w-full">
                             <div>
                                 <p className="text-muted-foreground">Accuracy</p>
                                 <p className="font-bold">{accuracy.toFixed(0)}%</p>
@@ -190,6 +229,7 @@ export default function QuizClashPage() {
                                 <p className="font-bold">{correctAnswers}/{TOTAL_QUESTIONS}</p>
                             </div>
                         </div>
+                        {renderCategoryBreakdown()}
                         <Button size="lg" className="text-xl w-full" onClick={startGame}>
                            <Sparkles className="mr-2"/> Play Again
                         </Button>
@@ -228,7 +268,7 @@ export default function QuizClashPage() {
                             <span className={timeLeft <= 10 ? 'text-red-500' : ''}>{timeLeft}</span>
                         </div>
                     </CardTitle>
-                    <CardDescription>Question {currentQuestionIndex + 1} of {TOTAL_QUESTIONS}</CardDescription>
+                    <CardDescription>Question {currentQuestionIndex + 1} of {TOTAL_QUESTIONS} ({currentQuestion.category})</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <Progress value={(timeLeft / TOTAL_TIME) * 100} className="w-full h-2" />
