@@ -10,13 +10,13 @@
 import { ai } from '../genkit';
 import { z } from 'zod';
 
-export const WordHunterInputSchema = z.object({
+const WordHunterInputSchema = z.object({
   language: z.enum(['English', 'Tamil']).describe('The language of the word.'),
   difficulty: z.enum(['Easy', 'Medium', 'Hard']).describe('The difficulty level, which influences word length and complexity.'),
 });
 export type WordHunterInput = z.infer<typeof WordHunterInputSchema>;
 
-export const WordHunterOutputSchema = z.object({
+const WordHunterOutputSchema = z.object({
   word: z.string().describe('The original, unscrambled word.'),
   scrambled: z.string().describe('The word with its letters scrambled.'),
   hint: z.string().describe('A hint or clue for the word.'),
