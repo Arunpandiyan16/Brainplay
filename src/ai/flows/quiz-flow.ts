@@ -6,7 +6,7 @@
  * - QuizQuestion - The type for a quiz question.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai } from '../genkit';
 import { z } from 'zod';
 
 const QuizQuestionInputSchema = z.object({
