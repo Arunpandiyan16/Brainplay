@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Brain, User, Languages, Sun, Moon, Globe, LogOut } from 'lucide-react';
+import { Brain, User, Sun, Moon, Globe, LogOut, ChevronDown, Gamepad2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import {
@@ -22,6 +22,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
+
+const games = [
+  { href: '/quiz-clash', label: 'Quiz Clash' },
+  { href: '/word-hunter', label: 'Word Hunter' },
+  { href: '/math-rush', label: 'Math Rush' },
+  { href: '/memory-flip', label: 'Memory Flip' },
+  { href: '/spot-fake-news', label: 'Spot the Fake News' },
+  { href: '/daily-challenge', label: 'Daily Challenge' },
+]
 
 export default function Header() {
   const { setTheme } = useTheme();
@@ -47,7 +56,22 @@ export default function Header() {
           <Brain className="h-6 w-6 text-primary" />
           <span className="font-bold">BrainPlay</span>
         </Link>
-        <nav className="flex items-center gap-4 text-sm">
+        <nav className="flex items-center gap-6 text-sm">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="link" className="text-muted-foreground transition-colors hover:text-foreground p-0">
+                Games <ChevronDown className="ml-1 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              {games.map(game => (
+                <DropdownMenuItem key={game.href} asChild>
+                  <Link href={game.href}>{game.label}</Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Link
             href="/leaderboard"
             className="text-muted-foreground transition-colors hover:text-foreground"
