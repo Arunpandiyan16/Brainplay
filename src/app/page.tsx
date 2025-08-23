@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, BrainCircuit, PencilRuler, Puzzle, Newspaper, Sparkles } from 'lucide-react';
+import { Trophy, BrainCircuit, PencilRuler, Puzzle, Newspaper, Sparkles, Calculator } from 'lucide-react';
 import GameCard from '@/components/dashboard/game-card';
 
 const games = [
@@ -24,7 +24,7 @@ const games = [
   {
     title: 'Math Rush',
     description: 'Quick mental math challenges.',
-    icon: <Puzzle className="w-8 h-8" />,
+    icon: <Calculator className="w-8 h-8" />,
     href: '/math-rush',
     color: 'text-blue-400',
   },
