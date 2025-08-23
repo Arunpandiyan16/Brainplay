@@ -8,6 +8,7 @@ import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForw
 import { generateQuizQuestion, QuizQuestion } from '@/ai/flows/quiz-flow';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
 
 const TOTAL_TIME = 20; // Daily Challenge: Time Attack!
 const SKIP_LIMIT = 1;
@@ -127,10 +128,10 @@ export default function DailyChallengePage() {
     const getButtonClass = (index: number) => {
         if (selectedAnswer !== null && question) {
             if (index === question.answerIndex) {
-                return 'bg-green-500 hover:bg-green-600'; // Correct answer
+                return 'bg-green-500 hover:bg-green-600 text-white'; // Correct answer
             }
             if (index === selectedAnswer) {
-                return 'bg-red-500 hover:bg-red-600'; // Incorrectly selected answer
+                return 'bg-red-500 hover:bg-red-600 text-white'; // Incorrectly selected answer
             }
         }
         return 'bg-secondary hover:bg-accent';
@@ -153,8 +154,8 @@ export default function DailyChallengePage() {
         if (Object.keys(breakdown).length === 0) return null;
 
         return (
-            <div className="w-full space-y-2 text-left">
-                <h4 className="font-semibold">Category Breakdown:</h4>
+            <div className="w-full space-y-2 text-left bg-secondary/50 p-4 rounded-lg">
+                <h4 className="font-semibold text-center">Category Breakdown</h4>
                 {Object.entries(breakdown).map(([category, stats]) => (
                     <div key={category} className="flex justify-between items-center text-sm">
                         <p>{category}</p>
@@ -168,13 +169,13 @@ export default function DailyChallengePage() {
     if (gameState === 'start') {
         return (
             <div className="flex justify-center items-center py-8">
-                <Card className="w-full max-w-2xl text-center p-8 border-primary glow-shadow">
+                <Card className="w-full max-w-2xl text-center p-8 border-primary/50 glow-shadow">
                     <CardHeader>
                         <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
                            <Sparkles className="w-10 h-10 text-primary"/>
                            Daily Challenge
                         </CardTitle>
-                        <CardDescription className="text-lg">
+                        <CardDescription className="text-lg mt-2">
                            Today's challenge is <span className="font-bold text-primary">Quiz Clash: Time Attack!</span>
                            <br />
                            You have {TOTAL_TIME} seconds to answer as many questions as possible. Correct answers are worth double points!
@@ -196,7 +197,7 @@ export default function DailyChallengePage() {
         const accuracy = attemptedQuestions > 0 ? (correctAnswers / attemptedQuestions) * 100 : 0;
         return (
             <div className="flex justify-center items-center py-8">
-                <Card className="w-full max-w-2xl text-center p-8 border-primary glow-shadow">
+                <Card className="w-full max-w-2xl text-center p-8 border-primary/50 glow-shadow">
                     <CardHeader>
                         <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
                            <Trophy className="w-10 h-10 text-yellow-400"/>
@@ -206,14 +207,14 @@ export default function DailyChallengePage() {
                     <CardContent className="space-y-6">
                         <div className="text-2xl">Your Final Score:</div>
                         <div className="text-7xl font-bold text-primary">{score}</div>
-                        <div className="flex justify-around text-lg w-full">
+                        <div className="flex justify-around text-lg w-full bg-secondary/50 p-4 rounded-lg">
                              <div>
                                 <p className="text-muted-foreground">Correct</p>
-                                <p className="font-bold">{correctAnswers}/{attemptedQuestions}</p>
+                                <p className="font-bold text-xl">{correctAnswers}/{attemptedQuestions}</p>
                             </div>
                             <div>
                                 <p className="text-muted-foreground">Accuracy</p>
-                                <p className="font-bold">{accuracy.toFixed(0)}%</p>
+                                <p className="font-bold text-xl">{accuracy.toFixed(0)}%</p>
                             </div>
                         </div>
                         {renderCategoryBreakdown()}
@@ -236,7 +237,7 @@ export default function DailyChallengePage() {
     if (isLoading || !question) {
         return (
             <div className="flex justify-center items-center py-8">
-                <Card className="w-full max-w-2xl border-primary glow-shadow">
+                <Card className="w-full max-w-2xl border-primary/50 glow-shadow">
                     <CardContent className="p-8 text-center space-y-4">
                         <Loader2 className="h-16 w-16 animate-spin mx-auto text-primary"/>
                         <p className="text-xl text-muted-foreground">Generating question {questionNumber}...</p>
@@ -248,7 +249,7 @@ export default function DailyChallengePage() {
 
     return (
         <div className="flex justify-center items-center py-8">
-            <Card className="w-full max-w-2xl border-primary glow-shadow">
+            <Card className="w-full max-w-2xl border-primary/50 glow-shadow">
                 <CardHeader>
                     <CardTitle className="flex items-center justify-between text-2xl">
                         <div className="flex items-center gap-2">
@@ -260,13 +261,16 @@ export default function DailyChallengePage() {
                             <span className={timeLeft <= 5 ? 'text-red-500' : ''}>{timeLeft}</span>
                         </div>
                     </CardTitle>
-                    <CardDescription>Question {questionNumber} ({question.category})</CardDescription>
+                    <CardDescription className="flex justify-between items-center">
+                        <span>Question {questionNumber}</span>
+                        <Badge variant="outline">{question.category}</Badge>
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <Progress value={(timeLeft / TOTAL_TIME) * 100} className="w-full h-2" />
                     
-                    <div className="p-4 rounded-lg bg-secondary text-center min-h-[80px] flex items-center justify-center">
-                        <p className="text-lg font-semibold">{question.question}</p>
+                    <div className="p-4 rounded-lg bg-secondary text-center min-h-[120px] flex items-center justify-center">
+                        <p className="text-xl font-semibold">{question.question}</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -274,7 +278,7 @@ export default function DailyChallengePage() {
                             <Button 
                                 key={index} 
                                 size="lg" 
-                                className={`justify-start h-auto py-3 text-left whitespace-normal ${getButtonClass(index)}`}
+                                className={`justify-start h-auto py-4 text-base text-left whitespace-normal ${getButtonClass(index)}`}
                                 onClick={() => handleAnswer(index)}
                                 disabled={selectedAnswer !== null}
                             >
@@ -303,7 +307,7 @@ export default function DailyChallengePage() {
 
 
                     {isCorrect !== null && (
-                         <Card className="bg-secondary/50">
+                         <Card className={isCorrect ? "bg-green-500/10" : "bg-red-500/10"}>
                             <CardContent className="p-4">
                                <div className="flex items-center gap-2">
                                 {isCorrect ? <Check className="text-green-500" /> : <X className="text-red-500" />}
