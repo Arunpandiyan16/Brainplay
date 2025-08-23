@@ -120,12 +120,14 @@ export default function MemoryFlipPage() {
 
   const fetchTrivia = async (topic: string) => {
     setIsTriviaLoading(true);
+    setTrivia({ fact: 'Loading...' }); // Show loading state in dialog
     try {
       const triviaData = await generateTrivia({ topic });
       setTrivia(triviaData);
     } catch (error) {
       console.error("Failed to fetch trivia", error);
       toast({ variant: 'destructive', title: "Couldn't fetch a fun fact right now." });
+      setTrivia(null); // Close dialog on error
     } finally {
       setIsTriviaLoading(false);
     }
@@ -182,7 +184,7 @@ export default function MemoryFlipPage() {
             <Card className="w-full max-w-md text-center p-8 border-primary glow-shadow">
                 <CardHeader>
                     <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
-                       <Trophy className="w-10 h-10 text-primary"/>
+                       <Brain className="w-10 h-10 text-primary"/>
                        Memory Flip
                     </CardTitle>
                     <CardDescription className="text-lg">
@@ -225,7 +227,7 @@ export default function MemoryFlipPage() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="text-2xl">{allMatched ? "You matched all the pairs!" : "Time's up!"}</div>
-                        <div className="flex justify-around text-lg w-full">
+                        <div className="flex justify-around text-lg w-full bg-secondary/50 p-4 rounded-lg">
                              <div>
                                 <p className="text-muted-foreground">Moves</p>
                                 <p className="font-bold text-2xl text-primary">{moves}</p>
@@ -275,15 +277,14 @@ export default function MemoryFlipPage() {
                         <button
                             key={index}
                             onClick={() => handleCardClick(index)}
-                            disabled={isChecking}
+                            disabled={isChecking || card.isFlipped || card.isMatched}
                             className={cn(
-                                "aspect-square rounded-lg flex items-center justify-center transition-transform duration-300",
+                                "aspect-square rounded-lg flex items-center justify-center transition-transform duration-300 transform-style-3d",
                                 card.isFlipped || card.isMatched ? 'bg-secondary rotate-y-180' : 'bg-primary/20 hover:bg-primary/40',
-                                card.isMatched && 'opacity-50 cursor-default',
-                                'transform-style-3d'
+                                card.isMatched && 'opacity-50 cursor-default'
                             )}
                         >
-                            <div className={cn("text-3xl md:text-5xl transition-opacity duration-100", (card.isFlipped || card.isMatched) ? 'opacity-100' : 'opacity-0')}>
+                            <div className={cn("text-3xl md:text-5xl transition-opacity duration-100 backface-hidden", (card.isFlipped || card.isMatched) ? 'opacity-100' : 'opacity-0')}>
                                 {EMOJI_PAIRS[card.type]}
                             </div>
                         </button>
@@ -304,7 +305,7 @@ export default function MemoryFlipPage() {
                        <Lightbulb className="w-8 h-8 text-yellow-400" />
                        Fun Fact!
                     </AlertDialogTitle>
-                    <AlertDialogDescription className="text-lg pt-4">
+                    <AlertDialogDescription className="text-lg pt-4 min-h-[6rem] flex items-center justify-center">
                         {isTriviaLoading ? <Loader2 className="animate-spin mx-auto"/> : trivia?.fact}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
@@ -317,12 +318,17 @@ export default function MemoryFlipPage() {
   );
 }
 
-// Add this CSS to globals.css if it's not there
+// Add this to globals.css if it's not there, to support the 3D flip animation
 /*
-.transform-style-3d {
-  transform-style: preserve-3d;
-}
-.rotate-y-180 {
-  transform: rotateY(180deg);
+@layer utilities {
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
 }
 */

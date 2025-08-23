@@ -128,7 +128,7 @@ export default function WordHunterPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="space-y-2">
+                        <div className="space-y-2 text-left">
                             <label className="text-sm font-medium">Language</label>
                             <Select onValueChange={(v: Language) => setLanguage(v)} defaultValue={language}>
                                 <SelectTrigger>
@@ -140,7 +140,7 @@ export default function WordHunterPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                         <div className="space-y-2">
+                         <div className="space-y-2 text-left">
                              <label className="text-sm font-medium">Difficulty</label>
                             <Select onValueChange={(v: Difficulty) => setDifficulty(v)} defaultValue={difficulty}>
                                 <SelectTrigger>
@@ -201,7 +201,7 @@ export default function WordHunterPage() {
     const ScrambledLetters = () => (
         <div className="flex justify-center gap-2 md:gap-4">
             {puzzle?.scrambled.split('').map((char, index) => (
-                <div key={index} className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-secondary text-2xl md:text-4xl font-bold rounded-lg">
+                <div key={index} className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-background text-2xl md:text-4xl font-bold rounded-lg">
                     {char}
                 </div>
             ))}

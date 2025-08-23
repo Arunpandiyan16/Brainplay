@@ -151,7 +151,7 @@ export default function SpotFakeNewsPage() {
                     <CardContent className="space-y-6">
                         <div className="text-2xl">Your Final Score:</div>
                         <div className="text-7xl font-bold text-primary">{score}</div>
-                        <div className="flex justify-around text-lg w-full">
+                        <div className="flex justify-around text-lg w-full bg-secondary/50 p-4 rounded-lg">
                             <div>
                                 <p className="text-muted-foreground">Answered</p>
                                 <p className="font-bold">{correctCount}/{answeredCount}</p>
