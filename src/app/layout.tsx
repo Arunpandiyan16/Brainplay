@@ -4,6 +4,7 @@ import './globals.css';
 import Header from '@/components/layout/header';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
+import { CountryProvider } from '@/hooks/use-country';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -26,11 +27,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header />
-          <main className="container mx-auto px-4 py-8">
-            {children}
-          </main>
-          <Toaster />
+          <CountryProvider>
+            <Header />
+            <main className="container mx-auto px-4 py-8">
+              {children}
+            </main>
+            <Toaster />
+          </CountryProvider>
         </ThemeProvider>
       </body>
     </html>

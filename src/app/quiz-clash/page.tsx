@@ -9,6 +9,7 @@ import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForw
 import { generateQuizQuestion, QuizQuestion } from '@/ai/flows/quiz-flow';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { useCountry } from '@/hooks/use-country.tsx';
 
 const TOTAL_TIME = 30;
 const SKIP_LIMIT = 1;
@@ -29,6 +30,7 @@ export default function QuizClashPage() {
     const [skipsUsed, setSkipsUsed] = useState(0);
     const [answeredQuestions, setAnsweredQuestions] = useState<any[]>([]);
     const { toast } = useToast();
+    const { country } = useCountry();
 
     const fetchQuestion = useCallback(async () => {
         setIsLoading(true);
@@ -36,7 +38,7 @@ export default function QuizClashPage() {
         setIsCorrect(null);
         try {
             const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
-            const nextQuestion = await generateQuizQuestion({ category });
+            const nextQuestion = await generateQuizQuestion({ category, country });
             setQuestion(nextQuestion);
         } catch (error) {
             console.error(error);
@@ -49,7 +51,7 @@ export default function QuizClashPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast]);
+    }, [toast, country]);
     
     useEffect(() => {
         if (gameState === 'playing' && !question) {
@@ -321,5 +323,3 @@ export default function QuizClashPage() {
         </div>
     );
 }
-
-    

@@ -11,6 +11,7 @@ import { z } from 'zod';
 
 const QuizQuestionInputSchema = z.object({
   category: z.string().describe('The category of the quiz question. Examples: General Knowledge, Movies, Cricket, Tech, Tamil Nadu GK'),
+  country: z.string().describe('The country to generate the quiz question for. e.g., "India", "Global"'),
 });
 
 const QuizQuestionSchema = z.object({
@@ -33,11 +34,14 @@ const quizFlow = ai.defineFlow(
       model: 'googleai/gemini-1.5-flash-latest',
       prompt: `
         You are a quiz master. Generate a challenging and interesting quiz question for the given category.
+        The question should be tailored to the specified country: ${input.country}.
+        If the country is "Global", the question can be about any topic.
         The question should have 4 choices, with one clear correct answer.
         Provide a brief explanation for the correct answer.
         Ensure the generated question and the category field in the output matches the specified input category.
 
         Category: ${input.category}
+        Country: ${input.country}
       `,
       output: {
         format: 'json',

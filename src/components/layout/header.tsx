@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Brain, User, Languages, Sun, Moon } from 'lucide-react';
+import { Brain, User, Languages, Sun, Moon, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import {
@@ -9,10 +9,16 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { useCountry } from '@/hooks/use-country';
 
 export default function Header() {
   const { setTheme } = useTheme();
+  const { country, setCountry } = useCountry();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -30,10 +36,23 @@ export default function Header() {
           </Link>
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <Button variant="ghost" size="icon">
-            <Languages className="h-5 w-5" />
-            <span className="sr-only">Switch Language</span>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Globe className="h-5 w-5" />
+                <span className="sr-only">Select Country</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Select Region</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup value={country} onValueChange={setCountry}>
+                  <DropdownMenuRadioItem value="India">India</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="Global">Global</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
