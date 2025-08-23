@@ -27,6 +27,10 @@ const wordHunterPrompt = ai.definePrompt({
   name: 'wordHunterPrompt',
   input: { schema: WordHunterInputSchema },
   output: { schema: WordHunterOutputSchema },
+  config: {
+    model: 'gemini-pro',
+    temperature: 0.8,
+  },
   prompt: `
     You are a word game creator. Your task is to generate a word puzzle based on the specified language and difficulty.
 
@@ -52,12 +56,7 @@ const wordHunterFlow = ai.defineFlow(
     outputSchema: WordHunterOutputSchema,
   },
   async (input) => {
-    const { output } = await wordHunterPrompt(input, {
-        config: {
-            model: 'gemini-pro',
-            temperature: 0.8,
-        }
-    });
+    const { output } = await wordHunterPrompt(input);
     return output!;
   }
 );

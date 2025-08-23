@@ -26,6 +26,10 @@ const quizPrompt = ai.definePrompt({
   name: 'quizPrompt',
   input: { schema: QuizQuestionInputSchema },
   output: { schema: QuizQuestionSchema },
+  config: {
+    model: 'gemini-pro',
+    temperature: 1, // Increase creativity for more varied questions
+  },
   prompt: `
     You are a quiz master. Generate a challenging and interesting quiz question for the given category.
     The question should have 4 choices, with one clear correct answer.
@@ -43,12 +47,7 @@ const quizFlow = ai.defineFlow(
     outputSchema: QuizQuestionSchema,
   },
   async (input) => {
-    const { output } = await quizPrompt(input, {
-        config: {
-            model: 'gemini-pro',
-            temperature: 1, // Increase creativity for more varied questions
-        }
-    });
+    const { output } = await quizPrompt(input);
     return output!;
   }
 );
