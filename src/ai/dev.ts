@@ -10,6 +10,7 @@ import { ai } from './genkit'; // This ensures the AI object is configured.
 import './flows/quiz-flow';
 import './flows/word-hunter-flow';
 import './flows/trivia-flow';
+import './flows/spot-fake-news-flow';
 
 // The AI object is already configured in `genkit.ts`,
 // so we just need to start the server here.
