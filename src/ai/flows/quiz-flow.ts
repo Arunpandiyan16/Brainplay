@@ -34,10 +34,6 @@ const quizPrompt = ai.definePrompt({
 
     Category: {{{category}}}
   `,
-  config: {
-    model: 'gemini-pro',
-    temperature: 1, // Increase creativity for more varied questions
-  }
 });
 
 const quizFlow = ai.defineFlow(
@@ -47,7 +43,12 @@ const quizFlow = ai.defineFlow(
     outputSchema: QuizQuestionSchema,
   },
   async (input) => {
-    const { output } = await quizPrompt(input);
+    const { output } = await quizPrompt(input, {
+        config: {
+            model: 'gemini-pro',
+            temperature: 1, // Increase creativity for more varied questions
+        }
+    });
     return output!;
   }
 );

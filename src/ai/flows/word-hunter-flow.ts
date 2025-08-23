@@ -43,10 +43,6 @@ const wordHunterPrompt = ai.definePrompt({
 
     Generate a puzzle now.
   `,
-  config: {
-    model: 'gemini-pro',
-    temperature: 0.8,
-  }
 });
 
 const wordHunterFlow = ai.defineFlow(
@@ -56,7 +52,12 @@ const wordHunterFlow = ai.defineFlow(
     outputSchema: WordHunterOutputSchema,
   },
   async (input) => {
-    const { output } = await wordHunterPrompt(input);
+    const { output } = await wordHunterPrompt(input, {
+        config: {
+            model: 'gemini-pro',
+            temperature: 0.8,
+        }
+    });
     return output!;
   }
 );
