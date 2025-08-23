@@ -75,7 +75,9 @@ export default function Home() {
                     <p className="text-muted-foreground mb-4">A new game with a unique twist, every single day. Today's challenge:</p>
                     <h3 className="text-xl font-semibold mb-2">Quiz Clash: Time Attack!</h3>
                     <p>Timer is reduced to 20 seconds. Correct answers are worth double points!</p>
-                    <Button className="w-full mt-4" variant="default">Play Daily Challenge</Button>
+                    <Button className="w-full mt-4" variant="default" asChild>
+                      <Link href="/daily-challenge">Play Daily Challenge</Link>
+                    </Button>
                 </CardContent>
             </Card>
         </div>
