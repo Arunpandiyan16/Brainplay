@@ -31,7 +31,7 @@ const wordHunterFlow = ai.defineFlow(
   },
   async (input) => {
     const response = await ai.generate({
-      model: 'googleai/gemini-pro',
+      model: 'googleai/gemini-1.5-flash-latest',
       prompt: `
         You are a word game creator. Your task is to generate a word puzzle based on the specified language and difficulty.
 

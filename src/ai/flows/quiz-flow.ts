@@ -30,7 +30,7 @@ const quizFlow = ai.defineFlow(
   },
   async (input) => {
     const response = await ai.generate({
-      model: 'googleai/gemini-pro',
+      model: 'googleai/gemini-1.5-flash-latest',
       prompt: `
         You are a quiz master. Generate a challenging and interesting quiz question for the given category.
         The question should have 4 choices, with one clear correct answer.
