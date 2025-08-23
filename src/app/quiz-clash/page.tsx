@@ -31,6 +31,8 @@ export default function QuizClashPage() {
 
     const fetchQuestion = useCallback(async () => {
         setIsLoading(true);
+        setSelectedAnswer(null);
+        setIsCorrect(null);
         try {
             const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
             const nextQuestion = await generateQuizQuestion({ category });
@@ -42,14 +44,12 @@ export default function QuizClashPage() {
                 title: 'Error',
                 description: 'Failed to generate a new question. Please try again.',
             });
-            // End game if question generation fails
             setGameState('ended');
         } finally {
             setIsLoading(false);
         }
     }, [toast]);
     
-    // Initial question fetch
     useEffect(() => {
         if (gameState === 'playing' && !question) {
             fetchQuestion();
@@ -73,8 +73,6 @@ export default function QuizClashPage() {
     }, [gameState, timeLeft, isLoading]);
 
     const proceedToNextQuestion = useCallback(() => {
-        setSelectedAnswer(null);
-        setIsCorrect(null);
         fetchQuestion();
     }, [fetchQuestion]);
     
