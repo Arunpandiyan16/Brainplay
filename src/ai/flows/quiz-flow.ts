@@ -8,7 +8,6 @@
 
 import { ai } from '../genkit';
 import { z } from 'zod';
-import { geminiPro } from '@genkit-ai/googleai';
 
 const QuizQuestionInputSchema = z.object({
   category: z.string().describe('The category of the quiz question. Examples: General Knowledge, Movies, Cricket, Tech, Tamil Nadu GK'),
@@ -30,7 +29,8 @@ const quizFlow = ai.defineFlow(
     outputSchema: QuizQuestionSchema,
   },
   async (input) => {
-    const response = await geminiPro.generate({
+    const response = await ai.generate({
+      model: 'googleai/gemini-pro',
       prompt: `
         You are a quiz master. Generate a challenging and interesting quiz question for the given category.
         The question should have 4 choices, with one clear correct answer.
@@ -48,7 +48,7 @@ const quizFlow = ai.defineFlow(
       }
     });
     
-    return response.output()!;
+    return response.output!;
   }
 );
 

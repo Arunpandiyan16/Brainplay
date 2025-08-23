@@ -9,7 +9,6 @@
 
 import { ai } from '../genkit';
 import { z } from 'zod';
-import { geminiPro } from '@genkit-ai/googleai';
 
 const WordHunterInputSchema = z.object({
   language: z.enum(['English', 'Tamil']).describe('The language of the word.'),
@@ -31,7 +30,8 @@ const wordHunterFlow = ai.defineFlow(
     outputSchema: WordHunterOutputSchema,
   },
   async (input) => {
-    const response = await geminiPro.generate({
+    const response = await ai.generate({
+      model: 'googleai/gemini-pro',
       prompt: `
         You are a word game creator. Your task is to generate a word puzzle based on the specified language and difficulty.
 
@@ -56,7 +56,7 @@ const wordHunterFlow = ai.defineFlow(
         temperature: 0.8,
       }
     });
-    return response.output()!;
+    return response.output!;
   }
 );
 
