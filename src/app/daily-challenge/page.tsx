@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -128,13 +129,13 @@ export default function DailyChallengePage() {
     const getButtonClass = (index: number) => {
         if (selectedAnswer !== null && question) {
             if (index === question.answerIndex) {
-                return 'bg-green-500 hover:bg-green-600 text-white'; // Correct answer
+                return 'bg-green-500 hover:bg-green-600 text-primary-foreground'; // Correct answer
             }
             if (index === selectedAnswer) {
-                return 'bg-red-500 hover:bg-red-600 text-white'; // Incorrectly selected answer
+                return 'bg-red-500 hover:bg-red-600 text-primary-foreground'; // Incorrectly selected answer
             }
         }
-        return 'bg-secondary hover:bg-accent';
+        return 'bg-secondary hover:bg-accent text-secondary-foreground';
     };
 
     const renderCategoryBreakdown = () => {
@@ -328,3 +329,5 @@ export default function DailyChallengePage() {
         </div>
     );
 }
+
+    
