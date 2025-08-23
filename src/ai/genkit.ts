@@ -6,10 +6,12 @@
  * AI flows and other Genkit functionalities.
  */
 import {googleAI} from '@genkit-ai/googleai';
-import {genkit} from 'genkit';
+import {genkit, configureGenkit} from 'genkit';
 
-export const ai = genkit({
+configureGenkit({
   plugins: [googleAI()],
   logLevel: 'debug',
   enableTracingAndMetrics: true,
 });
+
+export const ai = genkit();
