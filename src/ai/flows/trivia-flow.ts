@@ -10,12 +10,12 @@
 import { ai } from '../genkit';
 import { z } from 'zod';
 
-export const TriviaInputSchema = z.object({
+const TriviaInputSchema = z.object({
   topic: z.string().describe('The topic for which to generate a trivia fact. e.g., "Dog", "Sun", "Pizza"'),
 });
 export type TriviaInput = z.infer<typeof TriviaInputSchema>;
 
-export const TriviaOutputSchema = z.object({
+const TriviaOutputSchema = z.object({
   fact: z.string().describe('A short, interesting, and fun trivia fact about the given topic.'),
 });
 export type TriviaOutput = z.infer<typeof TriviaOutputSchema>;
