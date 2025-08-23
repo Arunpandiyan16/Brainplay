@@ -12,6 +12,7 @@ import { z } from 'zod';
 
 const NewsHeadlineInputSchema = z.object({
   difficulty: z.enum(['Easy', 'Medium', 'Hard']).describe('The difficulty level, which influences the subtlety of the headline.'),
+  country: z.string().describe('The country for which to generate the news headline. e.g., "India", "Global"'),
 });
 export type NewsHeadlineInput = z.infer<typeof NewsHeadlineInputSchema>;
 
@@ -34,12 +35,13 @@ const newsFlow = ai.defineFlow(
       model: 'googleai/gemini-1.5-flash-latest',
       prompt: `
         You are a content creator for a "Spot the Fake News" game.
-        Your task is to generate a single news headline based on the given difficulty.
-        The headline should be for a general audience, covering topics like science, tech, world events, or weird news.
+        Your task is to generate a single news headline based on the given difficulty and country.
+        The headline should be for a general audience, covering topics like science, tech, world events, or weird news, tailored to the specified country.
+        If the country is "Global", the topic can be from anywhere.
         About half the time, the headline should be FAKE, and half the time it should be REAL.
 
-        - For a REAL headline, base it on a real, verifiable, and interesting news event. The explanation should confirm its validity with a brief context.
-        - For a FAKE headline, create a plausible but entirely fictional story. The explanation must clearly state it's fake and explain why it might sound believable.
+        - For a REAL headline, base it on a real, verifiable, and interesting news event relevant to ${input.country}. The explanation should confirm its validity with a brief context.
+        - For a FAKE headline, create a plausible but entirely fictional story relevant to ${input.country}. The explanation must clearly state it's fake and explain why it might sound believable.
         - The 'source' field should always be a fabricated, generic-sounding news source name.
         - Difficulty ${input.difficulty}:
           - Easy: The fake news should be quite obvious or absurd. The real news should be easily recognizable.

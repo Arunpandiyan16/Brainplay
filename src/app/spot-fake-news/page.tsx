@@ -9,6 +9,7 @@ import { generateNewsHeadline, NewsHeadlineOutput } from '@/ai/flows/spot-fake-n
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { useCountry } from '@/hooks/use-country';
 
 const TOTAL_TIME = 90; // 90 seconds for the game
 
@@ -29,6 +30,7 @@ export default function SpotFakeNewsPage() {
     const [correctCount, setCorrectCount] = useState(0);
 
     const { toast } = useToast();
+    const { country } = useCountry();
 
     const fetchHeadline = useCallback(async () => {
         setIsLoading(true);
@@ -36,7 +38,7 @@ export default function SpotFakeNewsPage() {
         setIsCorrect(null);
         setHeadline(null);
         try {
-            const newHeadline = await generateNewsHeadline({ difficulty });
+            const newHeadline = await generateNewsHeadline({ difficulty, country });
             setHeadline(newHeadline);
         } catch (error) {
             console.error(error);
@@ -49,7 +51,7 @@ export default function SpotFakeNewsPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [difficulty, toast]);
+    }, [difficulty, toast, country]);
     
     const startGame = () => {
         setScore(0);
@@ -192,7 +194,7 @@ export default function SpotFakeNewsPage() {
                     {isLoading || !headline ? (
                         <div className="min-h-[300px] flex flex-col justify-center items-center text-center space-y-4">
                             <Loader2 className="h-16 w-16 animate-spin text-primary"/>
-                            <p className="text-xl text-muted-foreground">Fetching today's headlines...</p>
+                            <p className="text-xl text-muted-foreground">Fetching headlines from {country}...</p>
                         </div>
                     ) : (
                         <div className="min-h-[300px] flex flex-col justify-between">
