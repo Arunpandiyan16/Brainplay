@@ -8,6 +8,7 @@
 
 import { ai } from '../genkit';
 import { z } from 'zod';
+import { geminiPro } from '@genkit-ai/googleai';
 
 const QuizQuestionInputSchema = z.object({
   category: z.string().describe('The category of the quiz question. Examples: General Knowledge, Movies, Cricket, Tech, Tamil Nadu GK'),
@@ -22,24 +23,6 @@ const QuizQuestionSchema = z.object({
 });
 export type QuizQuestion = z.infer<typeof QuizQuestionSchema>;
 
-const quizPrompt = ai.definePrompt({
-  name: 'quizPrompt',
-  input: { schema: QuizQuestionInputSchema },
-  output: { schema: QuizQuestionSchema },
-  config: {
-    model: 'gemini-pro',
-    temperature: 1, // Increase creativity for more varied questions
-  },
-  prompt: `
-    You are a quiz master. Generate a challenging and interesting quiz question for the given category.
-    The question should have 4 choices, with one clear correct answer.
-    Provide a brief explanation for the correct answer.
-    Ensure the generated question and the category field in the output matches the specified input category.
-
-    Category: {{{category}}}
-  `,
-});
-
 const quizFlow = ai.defineFlow(
   {
     name: 'quizFlow',
@@ -47,8 +30,25 @@ const quizFlow = ai.defineFlow(
     outputSchema: QuizQuestionSchema,
   },
   async (input) => {
-    const { output } = await quizPrompt(input);
-    return output!;
+    const response = await geminiPro.generate({
+      prompt: `
+        You are a quiz master. Generate a challenging and interesting quiz question for the given category.
+        The question should have 4 choices, with one clear correct answer.
+        Provide a brief explanation for the correct answer.
+        Ensure the generated question and the category field in the output matches the specified input category.
+
+        Category: ${input.category}
+      `,
+      output: {
+        format: 'json',
+        schema: QuizQuestionSchema,
+      },
+      config: {
+        temperature: 1, // Increase creativity for more varied questions
+      }
+    });
+    
+    return response.output()!;
   }
 );
 

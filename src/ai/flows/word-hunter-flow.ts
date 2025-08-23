@@ -9,6 +9,7 @@
 
 import { ai } from '../genkit';
 import { z } from 'zod';
+import { geminiPro } from '@genkit-ai/googleai';
 
 const WordHunterInputSchema = z.object({
   language: z.enum(['English', 'Tamil']).describe('The language of the word.'),
@@ -23,32 +24,6 @@ const WordHunterOutputSchema = z.object({
 });
 export type WordHunterOutput = z.infer<typeof WordHunterOutputSchema>;
 
-const wordHunterPrompt = ai.definePrompt({
-  name: 'wordHunterPrompt',
-  input: { schema: WordHunterInputSchema },
-  output: { schema: WordHunterOutputSchema },
-  config: {
-    model: 'gemini-pro',
-    temperature: 0.8,
-  },
-  prompt: `
-    You are a word game creator. Your task is to generate a word puzzle based on the specified language and difficulty.
-
-    Language: {{{language}}}
-    Difficulty: {{{difficulty}}}
-
-    Rules:
-    - For 'Easy' difficulty, the word should be 4-5 letters long.
-    - For 'Medium' difficulty, the word should be 6-7 letters long.
-    - For 'Hard' difficulty, the word should be 8+ letters long.
-    - The 'scrambled' field must contain the exact same letters as the 'word' field, just in a different order.
-    - The 'hint' should be a simple, clear clue for the word.
-    - For Tamil words, ensure the output is in Tamil script.
-
-    Generate a puzzle now.
-  `,
-});
-
 const wordHunterFlow = ai.defineFlow(
   {
     name: 'wordHunterFlow',
@@ -56,8 +31,32 @@ const wordHunterFlow = ai.defineFlow(
     outputSchema: WordHunterOutputSchema,
   },
   async (input) => {
-    const { output } = await wordHunterPrompt(input);
-    return output!;
+    const response = await geminiPro.generate({
+      prompt: `
+        You are a word game creator. Your task is to generate a word puzzle based on the specified language and difficulty.
+
+        Language: ${input.language}
+        Difficulty: ${input.difficulty}
+
+        Rules:
+        - For 'Easy' difficulty, the word should be 4-5 letters long.
+        - For 'Medium' difficulty, the word should be 6-7 letters long.
+        - For 'Hard' difficulty, the word should be 8+ letters long.
+        - The 'scrambled' field must contain the exact same letters as the 'word' field, just in a different order.
+        - The 'hint' should be a simple, clear clue for the word.
+        - For Tamil words, ensure the output is in Tamil script.
+
+        Generate a puzzle now.
+      `,
+      output: {
+        format: 'json',
+        schema: WordHunterOutputSchema,
+      },
+      config: {
+        temperature: 0.8,
+      }
+    });
+    return response.output()!;
   }
 );
 
