@@ -39,35 +39,24 @@ export default function SpotFakeNewsPage() {
         setSelection(null);
         setIsCorrect(null);
         setHeadline(null);
-        
-        if (availableHeadlines.length === 0) {
-            const filtered = fakeNewsData.filter(h => 
-                h.difficulty === difficulty && 
-                (h.country === country || h.country === 'Global')
-            );
-            const shuffled = filtered.sort(() => 0.5 - Math.random());
-            setAvailableHeadlines(shuffled);
-            
-            if (shuffled.length === 0) {
-                 toast({
-                    variant: 'destructive',
-                    title: 'Out of Headlines!',
-                    description: 'You have seen all headlines for this difficulty. Try another setting!',
-                });
-                setGameState('ended');
-                setIsLoading(false);
-                return;
-            }
-        }
-        
-        setTimeout(() => {
-            const nextHeadline = availableHeadlines.pop();
-            setHeadline(nextHeadline!);
-            setAvailableHeadlines([...availableHeadlines]); // Update state
-            setIsLoading(false);
-        }, 500);
 
-    }, [difficulty, country, availableHeadlines, toast]);
+        if (availableHeadlines.length === 0) {
+             toast({
+                variant: 'destructive',
+                title: 'Out of Headlines!',
+                description: 'You have seen all headlines for this difficulty. Try another setting!',
+            });
+            setGameState('ended');
+            setIsLoading(false);
+            return;
+        }
+
+        const nextHeadline = availableHeadlines.pop();
+        setHeadline(nextHeadline!);
+        setAvailableHeadlines([...availableHeadlines]);
+        setIsLoading(false);
+
+    }, [availableHeadlines, toast]);
     
     const startGame = () => {
         setScore(0);
@@ -75,15 +64,34 @@ export default function SpotFakeNewsPage() {
         setGameState('playing');
         setAnsweredCount(0);
         setCorrectCount(0);
-        setAvailableHeadlines([]); // Reset available headlines
-        setHeadline(null); // Force fetch on start
+        setHeadline(null);
+        setIsLoading(true);
+        
+        // Pre-load and shuffle all questions for the selected settings
+        const filtered = fakeNewsData.filter(h => 
+            h.difficulty === difficulty && 
+            (h.country === country || h.country === 'Global')
+        );
+        
+        if(filtered.length === 0) {
+            toast({
+                variant: 'destructive',
+                title: 'No Headlines Available!',
+                description: 'There are no headlines for the selected region and difficulty.',
+            });
+            setGameState('settings');
+            setIsLoading(false);
+            return;
+        }
+
+        setAvailableHeadlines(filtered.sort(() => 0.5 - Math.random()));
     };
 
     useEffect(() => {
-        if(gameState === 'playing' && !headline && !isLoading){
+        if(gameState === 'playing' && availableHeadlines.length > 0 && !headline){
             fetchHeadline();
         }
-    }, [gameState, headline, isLoading, fetchHeadline]);
+    }, [gameState, headline, availableHeadlines, fetchHeadline]);
 
     useEffect(() => {
         if (gameState !== 'playing' || isLoading) return;
@@ -186,7 +194,7 @@ export default function SpotFakeNewsPage() {
                                 <p className="font-bold">{accuracy.toFixed(0)}%</p>
                             </div>
                         </div>
-                        <Button size="lg" className="text-xl w-full" onClick={startGame}>
+                        <Button size="lg" className="text-xl w-full" onClick={() => setGameState('settings')}>
                            <Sparkles className="mr-2"/> Play Again
                         </Button>
                     </CardContent>
@@ -217,7 +225,7 @@ export default function SpotFakeNewsPage() {
                     {isLoading || !headline ? (
                         <div className="min-h-[300px] flex flex-col justify-center items-center text-center space-y-4">
                             <Loader2 className="h-16 w-16 animate-spin text-primary"/>
-                            <p className="text-xl text-muted-foreground">Getting headline for {country}...</p>
+                            <p className="text-xl text-muted-foreground">Loading headlines for {country}...</p>
                         </div>
                     ) : (
                         <div className="min-h-[300px] flex flex-col justify-between">
@@ -264,3 +272,5 @@ export default function SpotFakeNewsPage() {
         </div>
     );
 }
+
+    
