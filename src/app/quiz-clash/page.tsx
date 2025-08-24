@@ -6,15 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward } from 'lucide-react';
-import { generateQuizQuestion, QuizQuestion } from '@/ai/flows/quiz-flow';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { useCountry } from '@/hooks/use-country.tsx';
+import { getQuizQuestion, QuizQuestion, CATEGORIES } from '@/lib/quiz-data';
+
 
 const TOTAL_TIME = 30;
 const SKIP_LIMIT = 1;
-
-const CATEGORIES = ['General Knowledge', 'Movies', 'Cricket', 'Tech', 'Tamil Nadu GK'];
 
 type GameState = 'start' | 'playing' | 'ended';
 
@@ -32,25 +31,29 @@ export default function QuizClashPage() {
     const { toast } = useToast();
     const { country } = useCountry();
 
-    const fetchQuestion = useCallback(async () => {
+    const fetchQuestion = useCallback(() => {
         setIsLoading(true);
         setSelectedAnswer(null);
         setIsCorrect(null);
-        try {
-            const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
-            const nextQuestion = await generateQuizQuestion({ category, country });
-            setQuestion(nextQuestion);
-        } catch (error) {
-            console.error(error);
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Failed to generate a new question. Please try again.',
-            });
-            setGameState('ended');
-        } finally {
-            setIsLoading(false);
-        }
+        
+        // Simulate a small delay for a smoother loading experience
+        setTimeout(() => {
+            try {
+                const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+                const nextQuestion = getQuizQuestion(category, country);
+                setQuestion(nextQuestion);
+            } catch (error) {
+                console.error(error);
+                toast({
+                    variant: 'destructive',
+                    title: 'Error',
+                    description: 'Failed to load a new question. Please try again.',
+                });
+                setGameState('ended');
+            } finally {
+                setIsLoading(false);
+            }
+        }, 500); // 500ms delay
     }, [toast, country]);
     
     useEffect(() => {
@@ -235,7 +238,7 @@ export default function QuizClashPage() {
                 <Card className="w-full max-w-2xl border-primary/50 glow-shadow">
                     <CardContent className="p-8 text-center space-y-4">
                         <Loader2 className="h-16 w-16 animate-spin mx-auto text-primary"/>
-                        <p className="text-xl text-muted-foreground">Generating question {questionNumber}...</p>
+                        <p className="text-xl text-muted-foreground">Loading question {questionNumber}...</p>
                     </CardContent>
                 </Card>
             </div>
@@ -283,7 +286,7 @@ export default function QuizClashPage() {
                                             index === question.answerIndex ? <Check/> : (index === selectedAnswer ? <X/> : <span/>)
                                         )}
                                     </div>
-                                    <span>{choice}</span>
+                                    <span className="text-primary-foreground">{choice}</span>
                                 </div>
                             </Button>
                         ))}
