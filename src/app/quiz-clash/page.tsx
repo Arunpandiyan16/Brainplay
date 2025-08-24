@@ -6,13 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward } from 'lucide-react';
+import { generateQuizQuestion, QuizQuestion } from '@/ai/flows/quiz-flow';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
-import { useCountry } from '@/hooks/use-country.tsx';
-import { getQuizQuestion, QuizQuestion, CATEGORIES } from '@/lib/quiz-data';
+import { useCountry } from '@/hooks/use-country';
 
 
 const TOTAL_TIME = 30;
+const CATEGORIES = ['General Knowledge', 'Movies', 'Cricket', 'Tech', 'Tamil Nadu GK'];
 const SKIP_LIMIT = 1;
 
 type GameState = 'start' | 'playing' | 'ended';
@@ -31,29 +32,26 @@ export default function QuizClashPage() {
     const { toast } = useToast();
     const { country } = useCountry();
 
-    const fetchQuestion = useCallback(() => {
+    const fetchQuestion = useCallback(async () => {
         setIsLoading(true);
         setSelectedAnswer(null);
         setIsCorrect(null);
         
-        // Simulate a small delay for a smoother loading experience
-        setTimeout(() => {
-            try {
-                const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
-                const nextQuestion = getQuizQuestion(category, country);
-                setQuestion(nextQuestion);
-            } catch (error) {
-                console.error(error);
-                toast({
-                    variant: 'destructive',
-                    title: 'Error',
-                    description: 'Failed to load a new question. Please try again.',
-                });
-                setGameState('ended');
-            } finally {
-                setIsLoading(false);
-            }
-        }, 500); // 500ms delay
+        try {
+            const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+            const nextQuestion = await generateQuizQuestion({ category, country });
+            setQuestion(nextQuestion);
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Failed to load a new question. Please try again.',
+            });
+            setGameState('ended');
+        } finally {
+            setIsLoading(false);
+        }
     }, [toast, country]);
     
     useEffect(() => {
