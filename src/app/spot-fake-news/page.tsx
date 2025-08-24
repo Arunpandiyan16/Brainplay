@@ -5,22 +5,24 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Clock, X, Check, Newspaper, Loader2, Trophy, Zap, Sparkles, Lightbulb } from 'lucide-react';
+import { Clock, X, Check, Newspaper, Loader2, Trophy, Zap, Sparkles, Lightbulb, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useCountry } from '@/hooks/use-country';
 import { fakeNewsData, NewsHeadline } from '@/lib/spot-fake-news-data';
 
 const TOTAL_TIME = 90; // 90 seconds for the game
+const XP_PER_CORRECT = 15;
+const getXpToNextLevel = (level: number) => 75 + (level - 1) * 25;
+const STORAGE_KEY = 'fakeNewsProgress';
+
 
 type GameState = 'settings' | 'playing' | 'ended';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
 export default function SpotFakeNewsPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
-    const [difficulty, setDifficulty] = useState<Difficulty>('Medium');
-
+    
     const [headline, setHeadline] = useState<NewsHeadline | null>(null);
     const [selection, setSelection] = useState<'real' | 'fake' | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -31,8 +33,41 @@ export default function SpotFakeNewsPage() {
     const [correctCount, setCorrectCount] = useState(0);
     const [availableHeadlines, setAvailableHeadlines] = useState<NewsHeadline[]>([]);
 
+    // Leveling state
+    const [level, setLevel] = useState(1);
+    const [xp, setXp] = useState(0);
+    const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
+
     const { toast } = useToast();
     const { country } = useCountry();
+
+    // Load progress from localStorage
+    useEffect(() => {
+        try {
+            const savedProgress = localStorage.getItem(STORAGE_KEY);
+            if (savedProgress) {
+                const { savedLevel, savedXp, savedXpToNextLevel } = JSON.parse(savedProgress);
+                if (savedLevel && typeof savedLevel === 'number') {
+                    setLevel(savedLevel);
+                    setXp(savedXp || 0);
+                    setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
+                }
+            }
+        } catch (error) {
+            console.error("Failed to load progress from localStorage", error);
+        }
+    }, []);
+
+    // Save progress to localStorage
+    useEffect(() => {
+        try {
+            const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel });
+            localStorage.setItem(STORAGE_KEY, progress);
+        } catch (error) {
+            console.error("Failed to save progress to localStorage", error);
+        }
+    }, [level, xp, xpToNextLevel]);
+
 
     const fetchHeadline = useCallback(() => {
         setIsLoading(true);
@@ -44,7 +79,7 @@ export default function SpotFakeNewsPage() {
              toast({
                 variant: 'destructive',
                 title: 'Out of Headlines!',
-                description: 'You have seen all headlines for this difficulty. Try another setting!',
+                description: 'You have seen all headlines for this level. Try another region!',
             });
             setGameState('ended');
             setIsLoading(false);
@@ -67,9 +102,12 @@ export default function SpotFakeNewsPage() {
         setHeadline(null);
         setIsLoading(true);
         
-        // Pre-load and shuffle all questions for the selected settings
+        const difficulties: Difficulty[] = ['Easy'];
+        if (level >= 3) difficulties.push('Medium');
+        if (level >= 5) difficulties.push('Hard');
+
         const filtered = fakeNewsData.filter(h => 
-            h.difficulty === difficulty && 
+            difficulties.includes(h.difficulty) && 
             (h.country === country || h.country === 'Global')
         );
         
@@ -77,7 +115,7 @@ export default function SpotFakeNewsPage() {
             toast({
                 variant: 'destructive',
                 title: 'No Headlines Available!',
-                description: 'There are no headlines for the selected region and difficulty.',
+                description: 'There are no headlines for your current level and region.',
             });
             setGameState('settings');
             setIsLoading(false);
@@ -117,9 +155,21 @@ export default function SpotFakeNewsPage() {
         setAnsweredCount(prev => prev + 1);
 
         if (correct) {
-            toast({ title: "Correct!", description: "+15 points", className: 'bg-green-500' });
-            setScore(prev => prev + 15);
+            const points = headline.difficulty === 'Easy' ? 10 : headline.difficulty === 'Medium' ? 15 : 20;
+            toast({ title: "Correct!", description: `+${points} points & +${XP_PER_CORRECT} XP`, className: 'bg-green-500' });
+            setScore(prev => prev + points);
             setCorrectCount(prev => prev + 1);
+            
+            const newXp = xp + XP_PER_CORRECT;
+            if (newXp >= xpToNextLevel) {
+                const nextLevel = level + 1;
+                setLevel(nextLevel);
+                setXp(newXp - xpToNextLevel);
+                setXpToNextLevel(getXpToNextLevel(nextLevel));
+                toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! Harder headlines unlocked.`, className: 'bg-primary text-primary-foreground' });
+            } else {
+                setXp(newXp);
+            }
         } else {
             toast({ title: "Incorrect!", description: "-10 points", variant: 'destructive' });
             setScore(prev => prev - 10);
@@ -133,6 +183,14 @@ export default function SpotFakeNewsPage() {
             setGameState('ended');
         }
     }
+    
+    const resetProgress = () => {
+        setLevel(1);
+        setXp(0);
+        setXpToNextLevel(getXpToNextLevel(1));
+        localStorage.removeItem(STORAGE_KEY);
+        toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
+    };
 
     if (gameState === 'settings') {
         return (
@@ -144,25 +202,17 @@ export default function SpotFakeNewsPage() {
                            Spot the Fake News
                         </CardTitle>
                         <CardDescription className="text-lg">
-                           Can you tell real headlines from fakes? Test your skills!
+                           Your current level is <span className="font-bold text-primary">{level}</span>.
+                           <br/>
+                           Tell real headlines from fakes to earn XP and level up!
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                         <div className="space-y-2 text-left">
-                             <label className="text-sm font-medium">Difficulty</label>
-                            <Select onValueChange={(v: Difficulty) => setDifficulty(v)} defaultValue={difficulty}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select difficulty" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Easy">Easy</SelectItem>
-                                    <SelectItem value="Medium">Medium</SelectItem>
-                                    <SelectItem value="Hard">Hard</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                    <CardContent className="flex flex-col gap-4">
                         <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame}>
                            <Zap className="mr-2"/> Start Game
+                        </Button>
+                         <Button size="sm" variant="outline" onClick={resetProgress}>
+                           <RotateCcw className="mr-2"/> Reset Progress
                         </Button>
                     </CardContent>
                 </Card>
@@ -184,6 +234,7 @@ export default function SpotFakeNewsPage() {
                     <CardContent className="space-y-6">
                         <div className="text-2xl">Your Final Score:</div>
                         <div className="text-7xl font-bold text-primary">{score}</div>
+                         <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
                         <div className="flex justify-around text-lg w-full bg-secondary/50 p-4 rounded-lg">
                             <div>
                                 <p className="text-muted-foreground">Answered</p>
@@ -217,10 +268,19 @@ export default function SpotFakeNewsPage() {
                             <span className={timeLeft <= 10 ? 'text-red-500' : ''}>{timeLeft}</span>
                         </div>
                     </CardTitle>
-                    <CardDescription>Score: <span className="font-bold text-primary">{score}</span></CardDescription>
+                    <CardDescription className="flex justify-between">
+                        <span>Score: <span className="font-bold text-primary">{score}</span></span>
+                        <span>Level: <span className="font-bold text-primary">{level}</span></span>
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <Progress value={(timeLeft / TOTAL_TIME) * 100} className="w-full h-2" />
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-sm font-medium text-muted-foreground">
+                            <span>Level {level}</span>
+                            <span>{xp} / {xpToNextLevel} XP</span>
+                        </div>
+                        <Progress value={(xp / xpToNextLevel) * 100} className="w-full h-2" />
+                    </div>
                     
                     {isLoading || !headline ? (
                         <div className="min-h-[300px] flex flex-col justify-center items-center text-center space-y-4">
@@ -272,5 +332,3 @@ export default function SpotFakeNewsPage() {
         </div>
     );
 }
-
-    
