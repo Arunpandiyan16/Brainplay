@@ -65,6 +65,24 @@ export const quizQuestions: QuizQuestion[] = [
     country: "Global",
     difficulty: "Easy"
   },
+  {
+    question: "How many continents are there?",
+    choices: ["5", "6", "7", "8"],
+    answerIndex: 2,
+    explanation: "There are seven continents: Asia, Africa, North America, South America, Antarctica, Europe, and Australia.",
+    category: "General Knowledge",
+    country: "Global",
+    difficulty: "Easy"
+  },
+  {
+    question: "What is the tallest mammal?",
+    choices: ["Elephant", "Giraffe", "Whale", "Rhino"],
+    answerIndex: 1,
+    explanation: "The giraffe is the tallest mammal in the world, known for its long neck.",
+    category: "General Knowledge",
+    country: "Global",
+    difficulty: "Easy"
+  },
 
   // General Knowledge - India - Easy
   {
@@ -112,6 +130,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "India",
     difficulty: "Easy"
   },
+  {
+    question: "What is the national currency of India?",
+    choices: ["Rupee", "Taka", "Riyal", "Dollar"],
+    answerIndex: 0,
+    explanation: "The Indian Rupee (INR) is the official currency of India.",
+    category: "General Knowledge",
+    country: "India",
+    difficulty: "Easy"
+  },
 
   // General Knowledge - Global - Medium
   {
@@ -145,7 +172,16 @@ export const quizQuestions: QuizQuestion[] = [
     question: "Who composed the 'Four Seasons'?",
     choices: ["Mozart", "Bach", "Beethoven", "Vivaldi"],
     answerIndex: 3,
-    explanation: "The 'Four Seasons' is a set of four violin concertos composed by the Italian composer Antonio Vivaldi.",
+    explanation: "The 'Four Seasons' is a set of four violin concertos by the Italian composer Antonio Vivaldi.",
+    category: "General Knowledge",
+    country: "Global",
+    difficulty: "Medium"
+  },
+  {
+    question: "Mount Everest is located in which mountain range?",
+    choices: ["The Andes", "The Rockies", "The Alps", "The Himalayas"],
+    answerIndex: 3,
+    explanation: "Mount Everest, the world's highest peak, is part of the Himalayas mountain range.",
     category: "General Knowledge",
     country: "Global",
     difficulty: "Medium"
@@ -179,6 +215,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "Global",
     difficulty: "Easy"
   },
+  {
+    question: "What is the name of the friendly ghost in the 1995 film?",
+    choices: ["Casper", "Slimer", "Beetlejuice", "Moaning Myrtle"],
+    answerIndex: 0,
+    explanation: "The friendly ghost's name is Casper in the film of the same name.",
+    category: "Movies",
+    country: "Global",
+    difficulty: "Easy"
+  },
 
   // Movies - India - Easy
   {
@@ -195,6 +240,15 @@ export const quizQuestions: QuizQuestion[] = [
     choices: ["Amitabh Bachchan", "Salman Khan", "Aamir Khan", "Shah Rukh Khan"],
     answerIndex: 3,
     explanation: "Shah Rukh Khan is widely referred to as 'King Khan' or 'SRK' by his fans and the media.",
+    category: "Movies",
+    country: "India",
+    difficulty: "Easy"
+  },
+  {
+    question: "Which movie features the song 'Jai Ho', which won an Academy Award?",
+    choices: ["Lagaan", "Slumdog Millionaire", "3 Idiots", "My Name is Khan"],
+    answerIndex: 1,
+    explanation: "'Jai Ho' from the film 'Slumdog Millionaire' won the Academy Award for Best Original Song in 2009.",
     category: "Movies",
     country: "India",
     difficulty: "Easy"
@@ -219,6 +273,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "Global",
     difficulty: "Medium"
   },
+  {
+    question: "Who directed the 'Lord of the Rings' trilogy?",
+    choices: ["George Lucas", "James Cameron", "Peter Jackson", "Christopher Nolan"],
+    answerIndex: 2,
+    explanation: "Peter Jackson directed the acclaimed 'The Lord of the Rings' film trilogy.",
+    category: "Movies",
+    country: "Global",
+    difficulty: "Medium"
+  },
 
   // Movies - India - Medium
   {
@@ -235,6 +298,15 @@ export const quizQuestions: QuizQuestion[] = [
     choices: ["Ranchhoddas Chanchad", "Phunsukh Wangdu", "Chatur Ramalingam", "Raju Rastogi"],
     answerIndex: 1,
     explanation: "While he used the name Ranchhoddas, his actual name was revealed to be Phunsukh Wangdu, a famous scientist.",
+    category: "Movies",
+    country: "India",
+    difficulty: "Medium"
+  },
+  {
+    question: "Who played the lead role in the film 'Dangal', portraying Mahavir Singh Phogat?",
+    choices: ["Salman Khan", "Shah Rukh Khan", "Aamir Khan", "Akshay Kumar"],
+    answerIndex: 2,
+    explanation: "Aamir Khan played the role of Mahavir Singh Phogat, a wrestler who trains his daughters to become world-class athletes.",
     category: "Movies",
     country: "India",
     difficulty: "Medium"
@@ -288,6 +360,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "India",
     difficulty: "Easy"
   },
+  {
+    question: "Who is the current captain of the Indian Men's Cricket Team in Test format (as of 2023)?",
+    choices: ["Virat Kohli", "Rohit Sharma", "KL Rahul", "Jasprit Bumrah"],
+    answerIndex: 1,
+    explanation: "Rohit Sharma is the captain of the Indian cricket team across all formats.",
+    category: "Cricket",
+    country: "India",
+    difficulty: "Easy"
+  },
 
   // Cricket - Global - Medium
   {
@@ -328,6 +409,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "India",
     difficulty: "Medium"
   },
+  {
+    question: "In which year did India win its second ICC Cricket World Cup?",
+    choices: ["2003", "2007", "2011", "2015"],
+    answerIndex: 2,
+    explanation: "India won its second Cricket World Cup in 2011, defeating Sri Lanka in the final held in Mumbai.",
+    category: "Cricket",
+    country: "India",
+    difficulty: "Medium"
+  },
 
   // Tech - Global - Easy
   {
@@ -357,6 +447,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "Global",
     difficulty: "Easy"
   },
+  {
+    question: "What company makes the iPhone?",
+    choices: ["Samsung", "Google", "Apple", "Huawei"],
+    answerIndex: 2,
+    explanation: "The iPhone is a line of smartphones designed and marketed by Apple Inc.",
+    category: "Tech",
+    country: "Global",
+    difficulty: "Easy"
+  },
 
   // Tech - India - Easy
   {
@@ -377,6 +476,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "India",
     difficulty: "Easy"
   },
+  {
+    question: "Which of these is a popular Indian e-commerce company?",
+    choices: ["Amazon", "Alibaba", "Flipkart", "eBay"],
+    answerIndex: 2,
+    explanation: "Flipkart is an Indian e-commerce company, headquartered in Bengaluru.",
+    category: "Tech",
+    country: "India",
+    difficulty: "Easy"
+  },
 
   // Tech - Global - Medium
   {
@@ -384,6 +492,15 @@ export const quizQuestions: QuizQuestion[] = [
     choices: ["HyperText Transfer Protocol", "High-Text Transfer Protocol", "HyperText Transmission Protocol", "HyperText Transfer Program"],
     answerIndex: 0,
     explanation: "HTTP stands for HyperText Transfer Protocol, the foundation of data communication for the World Wide Web.",
+    category: "Tech",
+    country: "Global",
+    difficulty: "Medium"
+  },
+  {
+    question: "What is the name of the open-source operating system created by Linus Torvalds?",
+    choices: ["Windows", "macOS", "Android", "Linux"],
+    answerIndex: 3,
+    explanation: "Linux is a family of open-source Unix-like operating systems based on the Linux kernel, created by Linus Torvalds.",
     category: "Tech",
     country: "Global",
     difficulty: "Medium"
@@ -400,7 +517,7 @@ export const quizQuestions: QuizQuestion[] = [
     difficulty: "Medium"
   },
   {
-    question: "What is the ISRO, India's space agency, full form?",
+    question: "What is ISRO's full form, India's space agency?",
     choices: ["Indian Space Research Organization", "Indian Scientific Research Organization", "International Space Research Organization", "Indian Satellite Research Organization"],
     answerIndex: 0,
     explanation: "ISRO stands for the Indian Space Research Organisation, the national space agency of India.",
@@ -409,10 +526,10 @@ export const quizQuestions: QuizQuestion[] = [
     difficulty: "Medium"
   },
   {
-    question: "Which Indian company is a major manufacturer of two-wheelers and motorcycles?",
-    choices: ["Tata Motors", "Mahindra & Mahindra", "Maruti Suzuki", "Hero MotoCorp"],
-    answerIndex: 3,
-    explanation: "Hero MotoCorp Ltd. is the world's largest manufacturer of two-wheelers, based in India.",
+    question: "Which Indian company is a major multinational provider of IT services and consulting?",
+    choices: ["Reliance Industries", "Tata Consultancy Services (TCS)", "State Bank of India", "Adani Group"],
+    answerIndex: 1,
+    explanation: "Tata Consultancy Services (TCS) is a leading global IT services, consulting, and business solutions organization.",
     category: "Tech",
     country: "India",
     difficulty: "Medium"
@@ -437,6 +554,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "India",
     difficulty: "Easy"
   },
+  {
+    question: "Which is the most widely spoken language in Tamil Nadu?",
+    choices: ["Telugu", "Kannada", "Tamil", "Malayalam"],
+    answerIndex: 2,
+    explanation: "Tamil is the official language of Tamil Nadu and is the most widely spoken language in the state.",
+    category: "Tamil Nadu GK",
+    country: "India",
+    difficulty: "Easy"
+  },
   
   // Tamil Nadu GK - Medium
   {
@@ -453,6 +579,15 @@ export const quizQuestions: QuizQuestion[] = [
     choices: ["Thanjavur", "Madurai", "Kanchipuram", "Rameswaram"],
     answerIndex: 1,
     explanation: "The Meenakshi Amman Temple is located on the southern bank of the Vaigai River in the temple city of Madurai.",
+    category: "Tamil Nadu GK",
+    country: "India",
+    difficulty: "Medium"
+  },
+  {
+    question: "Which famous leader and former Chief Minister of Tamil Nadu was popularly known as 'MGR'?",
+    choices: ["C. N. Annadurai", "K. Kamaraj", "M. G. Ramachandran", "M. Karunanidhi"],
+    answerIndex: 2,
+    explanation: "M. G. Ramachandran, popularly known as MGR, was an actor who later became a three-term Chief Minister of Tamil Nadu.",
     category: "Tamil Nadu GK",
     country: "India",
     difficulty: "Medium"
@@ -477,6 +612,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "Global",
     difficulty: "Hard"
   },
+  {
+    question: "Which war was fought between the north and south of the United States?",
+    choices: ["The Revolutionary War", "The War of 1812", "The Civil War", "World War I"],
+    answerIndex: 2,
+    explanation: "The American Civil War (1861-1865) was fought between the United States (the Union) and the Confederate States of America (the Confederacy).",
+    category: "General Knowledge",
+    country: "Global",
+    difficulty: "Hard"
+  },
 
   // Movies - Global - Hard
   {
@@ -497,6 +641,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "Global",
     difficulty: "Hard"
   },
+  {
+    question: "Which 1994 film, directed by Quentin Tarantino, is known for its non-linear storyline?",
+    choices: ["Reservoir Dogs", "Jackie Brown", "Pulp Fiction", "Kill Bill"],
+    answerIndex: 2,
+    explanation: "'Pulp Fiction' is celebrated for its eclectic dialogue, ironic mix of humor and violence, and non-linear narrative.",
+    category: "Movies",
+    country: "Global",
+    difficulty: "Hard"
+  },
 
   // Movies - India - Hard
   {
@@ -504,6 +657,15 @@ export const quizQuestions: QuizQuestion[] = [
     choices: ["Sanjay Leela Bhansali", "Ashutosh Gowariker", "Karan Johar", "Rajkumar Hirani"],
     answerIndex: 1,
     explanation: "Ashutosh Gowariker is known for directing epic films, including the Oscar-nominated 'Lagaan' (2001) and 'Jodhaa Akbar' (2008).",
+    category: "Movies",
+    country: "India",
+    difficulty: "Hard"
+  },
+  {
+    question: "Satyajit Ray's 'Pather Panchali' is part of which famous film trilogy?",
+    choices: ["The Apu Trilogy", "The Calcutta Trilogy", "The Bharata Trilogy", "The Bengal Trilogy"],
+    answerIndex: 0,
+    explanation: "'Pather Panchali' (1955) is the first film in Satyajit Ray's critically acclaimed Apu Trilogy.",
     category: "Movies",
     country: "India",
     difficulty: "Hard"
@@ -528,6 +690,7 @@ export const quizQuestions: QuizQuestion[] = [
     country: "Global",
     difficulty: "Hard"
   },
+
   // Cricket - India - Hard
   {
     question: "Who was the first Indian cricketer to score a century in all three formats of the game (Test, ODI, T20I)?",
@@ -538,13 +701,22 @@ export const quizQuestions: QuizQuestion[] = [
     country: "India",
     difficulty: "Hard"
   },
+  {
+    question: "Who is the only bowler to have taken all ten wickets in a Test innings twice?",
+    choices: ["Anil Kumble", "Jim Laker", "Muttiah Muralitharan", "Shane Warne"],
+    answerIndex: 1,
+    explanation: "Jim Laker of England is the only bowler to have taken all ten wickets in a Test innings, and he did it against Australia in 1956.",
+    category: "Cricket",
+    country: "Global",
+    difficulty: "Hard"
+  },
 
   // Tech - Global - Hard
   {
-    question: "Which company developed the Python programming language?",
-    choices: ["Google", "Microsoft", "It was developed by Guido van Rossum, an independent developer", "Apple"],
-    answerIndex: 2,
-    explanation: "Python was created by Guido van Rossum and first released in 1991. He worked at CWI in the Netherlands at the time.",
+    question: "What does the acronym 'LASER' stand for?",
+    choices: ["Light Amplification by Stimulated Emission of Radiation", "Light Absorption by Stimulated Energy of Radiation", "Light Alteration by Stimulated Emission of Rays", "Light Amplification by Spontaneous Emission of Radiation"],
+    answerIndex: 0,
+    explanation: "LASER is an acronym for Light Amplification by Stimulated Emission of Radiation.",
     category: "Tech",
     country: "Global",
     difficulty: "Hard"
@@ -554,6 +726,15 @@ export const quizQuestions: QuizQuestion[] = [
     choices: ["Alan Turing", "Charles Babbage", "John von Neumann", "Thomas Edison"],
     answerIndex: 1,
     explanation: "Charles Babbage, an English mechanical engineer and polymath, originated the concept of a digital programmable computer.",
+    category: "Tech",
+    country: "Global",
+    difficulty: "Hard"
+  },
+  {
+    question: "In what year was the first email sent?",
+    choices: ["1965", "1971", "1983", "1990"],
+    answerIndex: 1,
+    explanation: "Ray Tomlinson is credited with sending the first email in 1971. The message was sent between two computers right next to each other.",
     category: "Tech",
     country: "Global",
     difficulty: "Hard"
@@ -570,10 +751,10 @@ export const quizQuestions: QuizQuestion[] = [
     difficulty: "Hard"
   },
   {
-    question: "Which Indian tech company is the largest IT services firm in the country by revenue?",
-    choices: ["Infosys", "Wipro", "HCL Technologies", "Tata Consultancy Services (TCS)"],
-    answerIndex: 3,
-    explanation: "Tata Consultancy Services (TCS) is a multinational IT services and consulting company, and consistently ranks as the largest in India.",
+    question: "Who is known as the 'Father of the Indian IT Industry'?",
+    choices: ["Azim Premji", "Narayana Murthy", "F. C. Kohli", "Shiv Nadar"],
+    answerIndex: 2,
+    explanation: "Faqir Chand Kohli (F. C. Kohli) is regarded as the Father of the Indian IT Industry for his pivotal role in founding and building Tata Consultancy Services.",
     category: "Tech",
     country: "India",
     difficulty: "Hard"
@@ -581,10 +762,10 @@ export const quizQuestions: QuizQuestion[] = [
   
   // Tamil Nadu GK - Hard
   {
-    question: "Which is the longest river that flows in Tamil Nadu?",
+    question: "Which is the longest river that flows mainly within Tamil Nadu?",
     choices: ["Vaigai", "Palar", "Kaveri", "Thamirabarani"],
-    answerIndex: 2,
-    explanation: "The Kaveri (or Cauvery) is the longest river in Tamil Nadu and is often called the 'Ganges of the South'.",
+    answerIndex: 0,
+    explanation: "While the Kaveri is the longest river in Tamil Nadu, the Vaigai is the longest river that flows primarily within the state's borders.",
     category: "Tamil Nadu GK",
     country: "India",
     difficulty: "Hard"
@@ -606,5 +787,16 @@ export const quizQuestions: QuizQuestion[] = [
     category: "Tamil Nadu GK",
     country: "India",
     difficulty: "Hard"
+  },
+  {
+    question: "Which UNESCO World Heritage site in Tamil Nadu is known for its rock-cut monuments?",
+    choices: ["Great Living Chola Temples", "Nilgiri Mountain Railway", "Group of Monuments at Mahabalipuram", "Western Ghats"],
+    answerIndex: 2,
+    explanation: "The Group of Monuments at Mahabalipuram, dating back to the 7th and 8th centuries, is famous for its rathas (temples in the form of chariots), mandapas (cave sanctuaries), and giant open-air reliefs.",
+    category: "Tamil Nadu GK",
+    country: "India",
+    difficulty: "Hard"
   }
 ];
+
+    

@@ -43,16 +43,27 @@ export default function QuizClashPage() {
     const { country } = useCountry();
 
     const loadAndShuffleQuestions = useCallback(() => {
-        const difficultyLevels: Difficulty[] = ['Easy'];
-        if (level >= 3) difficultyLevels.push('Medium');
-        if (level >= 6) difficultyLevels.push('Hard');
+        // Determine available difficulties based on level
+        const difficulties: Difficulty[] = ['Easy'];
+        if (level >= 3) difficulties.push('Medium');
+        if (level >= 6) difficulties.push('Hard');
 
+        // Filter questions by country and available difficulties
         const countryFiltered = quizQuestions.filter(q => 
             (q.country === country || q.country === 'Global') &&
-            difficultyLevels.includes(q.difficulty)
+            difficulties.includes(q.difficulty)
         );
-        setAvailableQuestions(countryFiltered.sort(() => 0.5 - Math.random()));
+
+        // Smart difficulty weighting: higher levels get harder questions more often
+        const weightedQuestions = countryFiltered.flatMap(q => {
+            if (q.difficulty === 'Hard') return Array(level >= 8 ? 4 : 2).fill(q);
+            if (q.difficulty === 'Medium') return Array(level >= 5 ? 3 : 1).fill(q);
+            return [q]; // Easy questions have a base weight of 1
+        });
+        
+        setAvailableQuestions(weightedQuestions.sort(() => 0.5 - Math.random()));
     }, [country, level]);
+
 
     const fetchQuestion = useCallback(() => {
         setIsLoading(true);
@@ -183,10 +194,10 @@ export default function QuizClashPage() {
     const getButtonClass = (index: number) => {
         if (selectedAnswer !== null && question) {
             if (index === question.answerIndex) {
-                return 'bg-green-500 hover:bg-green-600 text-primary-foreground'; // Correct answer
+                return 'bg-green-500 hover:bg-green-600 text-white'; // Correct answer
             }
             if (index === selectedAnswer) {
-                return 'bg-red-500 hover:bg-red-600 text-primary-foreground'; // Incorrectly selected answer
+                return 'bg-red-500 hover:bg-red-600 text-white'; // Incorrectly selected answer
             }
         }
         return 'bg-secondary hover:bg-accent text-secondary-foreground';
@@ -346,7 +357,7 @@ export default function QuizClashPage() {
                                             index === question.answerIndex ? <Check/> : (index === selectedAnswer ? <X/> : <span/>)
                                         )}
                                     </div>
-                                    <span className="text-primary-foreground">{choice}</span>
+                                    <span>{choice}</span>
                                 </div>
                             </Button>
                         ))}
@@ -386,3 +397,5 @@ export default function QuizClashPage() {
         </div>
     );
 }
+
+    
