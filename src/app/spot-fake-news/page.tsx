@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -5,11 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Clock, X, Check, Newspaper, Loader2, Trophy, Zap, Sparkles, Lightbulb } from 'lucide-react';
-import { generateNewsHeadline, NewsHeadlineOutput } from '@/ai/flows/spot-fake-news-flow';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useCountry } from '@/hooks/use-country';
+import { fakeNewsData, NewsHeadline } from '@/lib/spot-fake-news-data';
 
 const TOTAL_TIME = 90; // 90 seconds for the game
 
@@ -20,7 +21,7 @@ export default function SpotFakeNewsPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
     const [difficulty, setDifficulty] = useState<Difficulty>('Medium');
 
-    const [headline, setHeadline] = useState<NewsHeadlineOutput | null>(null);
+    const [headline, setHeadline] = useState<NewsHeadline | null>(null);
     const [selection, setSelection] = useState<'real' | 'fake' | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [score, setScore] = useState(0);
@@ -28,30 +29,45 @@ export default function SpotFakeNewsPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [answeredCount, setAnsweredCount] = useState(0);
     const [correctCount, setCorrectCount] = useState(0);
+    const [availableHeadlines, setAvailableHeadlines] = useState<NewsHeadline[]>([]);
 
     const { toast } = useToast();
     const { country } = useCountry();
 
-    const fetchHeadline = useCallback(async () => {
+    const fetchHeadline = useCallback(() => {
         setIsLoading(true);
         setSelection(null);
         setIsCorrect(null);
         setHeadline(null);
-        try {
-            const newHeadline = await generateNewsHeadline({ difficulty, country });
-            setHeadline(newHeadline);
-        } catch (error) {
-            console.error(error);
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Failed to generate a new headline. Please try again.',
-            });
-            setGameState('ended');
-        } finally {
-            setIsLoading(false);
+        
+        if (availableHeadlines.length === 0) {
+            const filtered = fakeNewsData.filter(h => 
+                h.difficulty === difficulty && 
+                (h.country === country || h.country === 'Global')
+            );
+            const shuffled = filtered.sort(() => 0.5 - Math.random());
+            setAvailableHeadlines(shuffled);
+            
+            if (shuffled.length === 0) {
+                 toast({
+                    variant: 'destructive',
+                    title: 'Out of Headlines!',
+                    description: 'You have seen all headlines for this difficulty. Try another setting!',
+                });
+                setGameState('ended');
+                setIsLoading(false);
+                return;
+            }
         }
-    }, [difficulty, toast, country]);
+        
+        setTimeout(() => {
+            const nextHeadline = availableHeadlines.pop();
+            setHeadline(nextHeadline!);
+            setAvailableHeadlines([...availableHeadlines]); // Update state
+            setIsLoading(false);
+        }, 500);
+
+    }, [difficulty, country, availableHeadlines, toast]);
     
     const startGame = () => {
         setScore(0);
@@ -59,8 +75,15 @@ export default function SpotFakeNewsPage() {
         setGameState('playing');
         setAnsweredCount(0);
         setCorrectCount(0);
-        fetchHeadline();
+        setAvailableHeadlines([]); // Reset available headlines
+        setHeadline(null); // Force fetch on start
     };
+
+    useEffect(() => {
+        if(gameState === 'playing' && !headline && !isLoading){
+            fetchHeadline();
+        }
+    }, [gameState, headline, isLoading, fetchHeadline]);
 
     useEffect(() => {
         if (gameState !== 'playing' || isLoading) return;
@@ -113,7 +136,7 @@ export default function SpotFakeNewsPage() {
                            Spot the Fake News
                         </CardTitle>
                         <CardDescription className="text-lg">
-                           Can you tell real headlines from AI-generated fakes? Test your skills!
+                           Can you tell real headlines from fakes? Test your skills!
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -194,7 +217,7 @@ export default function SpotFakeNewsPage() {
                     {isLoading || !headline ? (
                         <div className="min-h-[300px] flex flex-col justify-center items-center text-center space-y-4">
                             <Loader2 className="h-16 w-16 animate-spin text-primary"/>
-                            <p className="text-xl text-muted-foreground">Fetching headlines from {country}...</p>
+                            <p className="text-xl text-muted-foreground">Getting headline for {country}...</p>
                         </div>
                     ) : (
                         <div className="min-h-[300px] flex flex-col justify-between">
