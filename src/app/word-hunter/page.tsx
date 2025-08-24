@@ -1,17 +1,19 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { Clock, Loader2, Zap, Brain, Lightbulb, Trophy, Sparkles, Languages, Award, ShieldQuestion } from 'lucide-react';
-import { generateWord, WordHunterInput, WordHunterOutput } from '@/ai/flows/word-hunter-flow';
+import { Clock, Zap, Brain, Lightbulb, Trophy, Sparkles, Loader2, Award, Languages, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { wordBank, WordPuzzle } from '@/lib/word-hunter-data';
 
 const TOTAL_TIME = 120; // 2 minutes
-const ROUND_TIME = 30;
+const HINT_COST = 5;
+const getXpToNextLevel = (level: number) => 50 + (level - 1) * 25;
+const STORAGE_KEY = 'wordHunterProgress';
 
 type GameState = 'settings' | 'playing' | 'ended';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
@@ -19,50 +21,113 @@ type Language = 'English' | 'Tamil';
 
 export default function WordHunterPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
-    const [difficulty, setDifficulty] = useState<Difficulty>('Medium');
     const [language, setLanguage] = useState<Language>('English');
     
-    const [puzzle, setPuzzle] = useState<WordHunterOutput | null>(null);
+    const [puzzle, setPuzzle] = useState<WordPuzzle | null>(null);
     const [guess, setGuess] = useState('');
     const [score, setScore] = useState(0);
     const [gameTimeLeft, setGameTimeLeft] = useState(TOTAL_TIME);
-    const [roundTimeLeft, setRoundTimeLeft] = useState(ROUND_TIME);
     
     const [isLoading, setIsLoading] = useState(false);
     const [hintTaken, setHintTaken] = useState(false);
     const [showHint, setShowHint] = useState(false);
-    const [solvedWords, setSolvedWords] = useState<WordHunterOutput[]>([]);
+    const [solvedWords, setSolvedWords] = useState<WordPuzzle[]>([]);
 
+    // Leveling state
+    const [level, setLevel] = useState(1);
+    const [xp, setXp] = useState(0);
+    const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
+    const [availablePuzzles, setAvailablePuzzles] = useState<WordPuzzle[]>([]);
+    
+    const inputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
+    
+    // Load progress from localStorage on initial render
+    useEffect(() => {
+        try {
+            const savedProgress = localStorage.getItem(STORAGE_KEY);
+            if (savedProgress) {
+                const { savedLevel, savedXp, savedXpToNextLevel } = JSON.parse(savedProgress);
+                if (savedLevel && typeof savedLevel === 'number') {
+                    setLevel(savedLevel);
+                    setXp(savedXp || 0);
+                    setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
+                }
+            }
+        } catch (error) {
+            console.error("Failed to load progress from localStorage", error);
+        }
+    }, []);
 
-    const fetchPuzzle = useCallback(async () => {
+    // Save progress to localStorage whenever it changes
+    useEffect(() => {
+        try {
+            const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel });
+            localStorage.setItem(STORAGE_KEY, progress);
+        } catch (error) {
+            console.error("Failed to save progress to localStorage", error);
+        }
+    }, [level, xp, xpToNextLevel]);
+    
+    const loadAndShufflePuzzles = useCallback(() => {
+        const difficulties: Difficulty[] = ['Easy'];
+        if (level >= 3) difficulties.push('Medium');
+        if (level >= 6) difficulties.push('Hard');
+        
+        const languagePuzzles = wordBank[language];
+        const filteredPuzzles = difficulties.flatMap(diff => languagePuzzles[diff] || []);
+        
+        // Filter out already solved words from the current session
+        const unsolvedPuzzles = filteredPuzzles.filter(p => !solvedWords.some(s => s.word === p.word));
+
+        setAvailablePuzzles(unsolvedPuzzles.sort(() => 0.5 - Math.random()));
+    }, [language, level, solvedWords]);
+
+
+    const fetchPuzzle = useCallback(() => {
         setIsLoading(true);
         setHintTaken(false);
         setShowHint(false);
         setGuess('');
-        try {
-            const newPuzzle = await generateWord({ difficulty, language });
-            setPuzzle(newPuzzle);
-            setRoundTimeLeft(ROUND_TIME);
-        } catch (error) {
-            console.error(error);
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Failed to generate a new word. Please try again.',
-            });
-            setGameState('ended');
-        } finally {
+
+        setTimeout(() => {
+             if (availablePuzzles.length === 0) {
+                 toast({
+                    variant: 'destructive',
+                    title: 'Out of Words!',
+                    description: 'You\'ve solved all available words for your level. Level up or reset progress!',
+                });
+                setGameState('ended');
+                setIsLoading(false);
+                return;
+            }
+            
+            const nextPuzzle = availablePuzzles.pop();
+            setPuzzle(nextPuzzle!);
+            setAvailablePuzzles(availablePuzzles);
             setIsLoading(false);
+        }, 500)
+       
+    }, [availablePuzzles, toast]);
+    
+    useEffect(() => {
+        if (gameState === 'playing') {
+            loadAndShufflePuzzles();
         }
-    }, [difficulty, language, toast]);
+    }, [gameState, loadAndShufflePuzzles]);
+
+    useEffect(() => {
+        if (gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
+            fetchPuzzle();
+        }
+    }, [gameState, puzzle, availablePuzzles, fetchPuzzle])
 
     const startGame = () => {
         setScore(0);
         setGameTimeLeft(TOTAL_TIME);
         setSolvedWords([]);
         setGameState('playing');
-        fetchPuzzle();
+        setPuzzle(null); // Ensure loading screen shows
     };
 
     useEffect(() => {
@@ -75,27 +140,51 @@ export default function WordHunterPage() {
 
         const gameTimer = setInterval(() => {
             setGameTimeLeft(prev => Math.max(0, prev - 1));
-            setRoundTimeLeft(prev => Math.max(0, prev - 1));
         }, 1000);
 
         return () => clearInterval(gameTimer);
     }, [gameState, gameTimeLeft]);
 
-    useEffect(() => {
-        if (roundTimeLeft <= 0 && gameState === 'playing') {
-            toast({ title: "Time's up for this word!", description: "Moving to the next one." });
-            fetchPuzzle();
+     useEffect(() => {
+        if (gameState === 'playing' && !isLoading) {
+            inputRef.current?.focus();
         }
-    }, [roundTimeLeft, gameState, fetchPuzzle, toast]);
+    }, [puzzle, gameState, isLoading]);
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!puzzle || !guess) return;
 
-        if (guess.toLowerCase() === puzzle.word.toLowerCase()) {
-            toast({ title: "Correct!", description: "+10 points", className: 'bg-green-500' });
-            setScore(prev => prev + 10);
+        if (guess.trim().toLowerCase() === puzzle.word.toLowerCase()) {
+            let points = 10;
+            let awardedXp = 10;
+             if (puzzle.difficulty === 'Medium') {
+                points = 15;
+                awardedXp = 15;
+            }
+            if (puzzle.difficulty === 'Hard') {
+                points = 20;
+                awardedXp = 20;
+            }
+            
+            toast({ title: "Correct!", description: `+${points} points & +${awardedXp} XP`, className: 'bg-green-500' });
+            setScore(prev => prev + points);
             setSolvedWords(prev => [...prev, puzzle]);
+            
+            // Handle XP and leveling up
+            const newXp = xp + awardedXp;
+            if (newXp >= xpToNextLevel) {
+                const nextLevel = level + 1;
+                setLevel(nextLevel);
+                setXp(newXp - xpToNextLevel);
+                setXpToNextLevel(getXpToNextLevel(nextLevel));
+                toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! Harder words unlocked.`, className: 'bg-primary text-primary-foreground' });
+                loadAndShufflePuzzles(); // Reload puzzles for new level
+            } else {
+                setXp(newXp);
+            }
+            
             fetchPuzzle();
         } else {
             toast({ title: "Incorrect!", description: "-3 points", variant: 'destructive' });
@@ -105,13 +194,21 @@ export default function WordHunterPage() {
     };
     
     const handleHint = () => {
-        if (hintTaken || score < 2) {
+        if (hintTaken || score < HINT_COST) {
              toast({ title: "Can't take hint", description: hintTaken ? "You've already used it for this word." : "Not enough points.", variant: 'destructive' });
             return;
         }
         setShowHint(true);
         setHintTaken(true);
-        setScore(prev => prev - 2);
+        setScore(prev => prev - HINT_COST);
+    };
+
+    const resetProgress = () => {
+        setLevel(1);
+        setXp(0);
+        setXpToNextLevel(getXpToNextLevel(1));
+        localStorage.removeItem(STORAGE_KEY);
+        toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
     };
 
     if (gameState === 'settings') {
@@ -124,7 +221,8 @@ export default function WordHunterPage() {
                            Word Hunter
                         </CardTitle>
                         <CardDescription className="text-lg">
-                           Unscramble words against the clock. Choose your challenge!
+                           Your current level is <span className="font-bold text-primary">{level}</span>.
+                           Unscramble words to earn XP and level up!
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -140,21 +238,11 @@ export default function WordHunterPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                         <div className="space-y-2 text-left">
-                             <label className="text-sm font-medium">Difficulty</label>
-                            <Select onValueChange={(v: Difficulty) => setDifficulty(v)} defaultValue={difficulty}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select difficulty" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Easy">Easy</SelectItem>
-                                    <SelectItem value="Medium">Medium</SelectItem>
-                                    <SelectItem value="Hard">Hard</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
                         <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame}>
                            <Zap className="mr-2"/> Start Game
+                        </Button>
+                         <Button size="sm" variant="outline" onClick={resetProgress}>
+                           <RotateCcw className="mr-2"/> Reset Progress
                         </Button>
                     </CardContent>
                 </Card>
@@ -179,16 +267,17 @@ export default function WordHunterPage() {
                             <p className="text-muted-foreground">Words Solved</p>
                             <p className="font-bold">{solvedWords.length}</p>
                         </div>
+                         <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
+                        {solvedWords.length > 0 &&
                         <Card>
                             <CardHeader><CardTitle>Solved Words</CardTitle></CardHeader>
                             <CardContent>
-                                {solvedWords.length > 0 ? (
-                                    <ul className="space-y-1 text-left">
-                                        {solvedWords.map(w => <li key={w.word}>{w.word} - <i className="text-muted-foreground">{w.hint}</i></li>)}
-                                    </ul>
-                                ) : <p>You didn't solve any words.</p>}
+                                <ul className="space-y-1 text-left max-h-40 overflow-y-auto">
+                                    {solvedWords.map(w => <li key={w.word}>{w.word} <span className="text-muted-foreground text-sm">({w.difficulty})</span></li>)}
+                                </ul>
                             </CardContent>
                         </Card>
+                        }
                         <Button size="lg" className="text-xl w-full" onClick={() => setGameState('settings')}>
                            <Sparkles className="mr-2"/> Play Again
                         </Button>
@@ -199,9 +288,9 @@ export default function WordHunterPage() {
     }
 
     const ScrambledLetters = () => (
-        <div className="flex justify-center gap-2 md:gap-4">
+        <div className="flex justify-center gap-2 md:gap-4 flex-wrap">
             {puzzle?.scrambled.split('').map((char, index) => (
-                <div key={index} className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-background text-2xl md:text-4xl font-bold rounded-lg">
+                <div key={index} className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-background text-2xl md:text-4xl font-bold rounded-lg shadow-inner">
                     {char}
                 </div>
             ))}
@@ -218,7 +307,7 @@ export default function WordHunterPage() {
                            Word Hunter
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2 text-xl font-mono px-3 py-1 rounded-md bg-secondary">
+                             <div className="flex items-center gap-2 text-xl font-mono px-3 py-1 rounded-md bg-secondary">
                                 <Award />
                                 <span>{score}</span>
                             </div>
@@ -229,12 +318,18 @@ export default function WordHunterPage() {
                         </div>
                     </CardTitle>
                      <CardDescription className="flex justify-between">
-                        <span>{language} - {difficulty}</span>
-                        <span>Words Solved: {solvedWords.length}</span>
+                        <span>{language} - Words Solved: {solvedWords.length}</span>
+                        <span className="font-semibold">{puzzle?.difficulty}</span>
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8">
-                     <Progress value={(gameTimeLeft / TOTAL_TIME) * 100} className="w-full h-2" />
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-sm font-medium text-muted-foreground">
+                            <span>Level {level}</span>
+                            <span>{xp} / {xpToNextLevel} XP</span>
+                        </div>
+                        <Progress value={(xp / xpToNextLevel) * 100} className="w-full h-2" />
+                    </div>
 
                     {isLoading || !puzzle ? (
                         <div className="text-center space-y-4 min-h-[250px] flex flex-col justify-center">
@@ -257,24 +352,21 @@ export default function WordHunterPage() {
                             )}
                             
                             <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
-                                <Input 
+                                <Input
+                                    ref={inputRef}
                                     value={guess}
                                     onChange={(e) => setGuess(e.target.value)}
                                     placeholder="Your guess..."
-                                    className="text-lg h-12"
+                                    className="text-lg h-12 text-center text-2xl"
                                     disabled={isLoading}
                                 />
-                                <Button type="submit" size="lg" className="h-12" disabled={isLoading}>Guess</Button>
+                                <Button type="submit" size="lg" className="h-12 text-lg" disabled={isLoading}>Guess</Button>
                             </form>
                              <div className="flex justify-between items-center">
-                                <Button variant="outline" onClick={handleHint} disabled={hintTaken || isLoading || score < 2}>
+                                <Button variant="outline" onClick={handleHint} disabled={hintTaken || isLoading || score < HINT_COST}>
                                     <Lightbulb className="mr-2"/>
-                                    Hint (-2 pts)
+                                    Hint (-{HINT_COST} pts)
                                 </Button>
-                                 <div className="w-2/5">
-                                    <p className="text-sm text-muted-foreground text-right mb-1">Round time</p>
-                                    <Progress value={(roundTimeLeft / ROUND_TIME) * 100} className="h-1" />
-                                </div>
                             </div>
                         </div>
                     )}
