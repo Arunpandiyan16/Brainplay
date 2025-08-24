@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -5,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Brain, Clock, Trophy, Sparkles, Zap, Loader2, Lightbulb, Repeat } from 'lucide-react';
-import { generateTrivia, TriviaOutput } from '@/ai/flows/trivia-flow';
 import { useToast } from '@/hooks/use-toast';
 import {
   Select,
@@ -24,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-
+import { triviaData } from '@/lib/trivia-data';
 
 type GameState = 'settings' | 'playing' | 'ended';
 type GridSize = '4x4' | '5x4' | '6x5';
@@ -53,6 +53,10 @@ const GRID_CONFIG = {
   '6x5': { pairs: 15, cols: 6 },
 };
 
+interface TriviaFact {
+    fact: string;
+}
+
 export default function MemoryFlipPage() {
   const [gameState, setGameState] = useState<GameState>('settings');
   const [gridSize, setGridSize] = useState<GridSize>('4x4');
@@ -63,7 +67,7 @@ export default function MemoryFlipPage() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
   const [isChecking, setIsChecking] = useState(false);
-  const [trivia, setTrivia] = useState<TriviaOutput | null>(null);
+  const [trivia, setTrivia] = useState<TriviaFact | null>(null);
   const [isTriviaLoading, setIsTriviaLoading] = useState(false);
   
   const { toast } = useToast();
@@ -118,19 +122,16 @@ export default function MemoryFlipPage() {
   }, [cards]);
   
 
-  const fetchTrivia = async (topic: string) => {
+  const fetchTrivia = (topic: string) => {
     setIsTriviaLoading(true);
-    setTrivia({ fact: 'Loading...' }); // Show loading state in dialog
-    try {
-      const triviaData = await generateTrivia({ topic });
-      setTrivia(triviaData);
-    } catch (error) {
-      console.error("Failed to fetch trivia", error);
-      toast({ variant: 'destructive', title: "Couldn't fetch a fun fact right now." });
-      setTrivia(null); // Close dialog on error
-    } finally {
-      setIsTriviaLoading(false);
+    const facts = triviaData[topic];
+    if (facts && facts.length > 0) {
+      const randomFact = facts[Math.floor(Math.random() * facts.length)];
+      setTrivia({ fact: randomFact });
+    } else {
+       setTrivia({ fact: 'No fun fact found for this topic!' });
     }
+    setIsTriviaLoading(false);
   };
 
   useEffect(() => {
@@ -166,7 +167,7 @@ export default function MemoryFlipPage() {
         }, 1000);
       }
     }
-  }, [flippedIndices, cards, toast]);
+  }, [flippedIndices, cards]);
 
   const handleCardClick = (index: number) => {
     if (isChecking || cards[index].isFlipped || cards[index].isMatched || flippedIndices.length === 2) {
