@@ -12,73 +12,28 @@ export interface QuizQuestion {
 export const quizQuestions: QuizQuestion[] = [
   // General Knowledge - Global - Easy
   {
-    question: "What is the capital of France?",
-    choices: ["London", "Berlin", "Paris", "Madrid"],
+    question: "What is the capital of Japan?",
+    choices: ["Beijing", "Seoul", "Tokyo", "Bangkok"],
     answerIndex: 2,
-    explanation: "Paris is the capital and most populous city of France.",
+    explanation: "Tokyo is the capital and largest city of Japan.",
     category: "General Knowledge",
     country: "Global",
     difficulty: "Easy"
   },
   {
-    question: "Which planet is known as the Red Planet?",
-    choices: ["Earth", "Mars", "Jupiter", "Venus"],
-    answerIndex: 1,
-    explanation: "Mars is often referred to as the 'Red Planet' because the iron oxide prevalent on its surface gives it a reddish appearance.",
-    category: "General Knowledge",
-    country: "Global",
-    difficulty: "Easy"
-  },
-    {
-    question: "What is the largest ocean on Earth?",
-    choices: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
-    answerIndex: 3,
-    explanation: "The Pacific Ocean is the largest and deepest of the world's five oceans.",
-    category: "General Knowledge",
-    country: "Global",
-    difficulty: "Easy"
-  },
-  {
-    question: "Which gas is most abundant in the Earth's atmosphere?",
-    choices: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Argon"],
-    answerIndex: 2,
-    explanation: "Nitrogen makes up about 78% of the Earth's atmosphere.",
-    category: "General Knowledge",
-    country: "Global",
-    difficulty: "Easy"
-  },
-  {
-    question: "Who painted the Mona Lisa?",
-    choices: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"],
-    answerIndex: 2,
-    explanation: "The Mona Lisa is a world-famous portrait painted by the Italian artist Leonardo da Vinci.",
-    category: "General Knowledge",
-    country: "Global",
-    difficulty: "Easy"
-  },
-  {
-    question: "What is the chemical symbol for gold?",
-    choices: ["Ag", "Au", "Gd", "Go"],
-    answerIndex: 1,
-    explanation: "The chemical symbol for gold is Au, from the Latin word 'aurum'.",
-    category: "General Knowledge",
-    country: "Global",
-    difficulty: "Easy"
-  },
-  {
-    question: "How many continents are there?",
+    question: "How many colors are in a rainbow?",
     choices: ["5", "6", "7", "8"],
     answerIndex: 2,
-    explanation: "There are seven continents: Asia, Africa, North America, South America, Antarctica, Europe, and Australia.",
+    explanation: "There are seven colors in a rainbow: red, orange, yellow, green, blue, indigo, and violet.",
     category: "General Knowledge",
     country: "Global",
     difficulty: "Easy"
   },
   {
-    question: "What is the tallest mammal?",
-    choices: ["Elephant", "Giraffe", "Whale", "Rhino"],
+    question: "What is the largest animal on Earth?",
+    choices: ["Elephant", "Blue Whale", "Giraffe", "Great White Shark"],
     answerIndex: 1,
-    explanation: "The giraffe is the tallest mammal in the world, known for its long neck.",
+    explanation: "The Blue Whale is the largest animal on Earth, both in terms of length and weight.",
     category: "General Knowledge",
     country: "Global",
     difficulty: "Easy"
@@ -86,55 +41,28 @@ export const quizQuestions: QuizQuestion[] = [
 
   // General Knowledge - India - Easy
   {
-    question: "What is the capital of India?",
-    choices: ["Mumbai", "Kolkata", "Chennai", "New Delhi"],
-    answerIndex: 3,
-    explanation: "New Delhi is the capital of India and an administrative district of NCT Delhi.",
-    category: "General Knowledge",
-    country: "India",
-    difficulty: "Easy"
-  },
-  {
-    question: "Who is known as the 'Father of the Nation' in India?",
-    choices: ["Jawaharlal Nehru", "Sardar Patel", "Mahatma Gandhi", "Subhas Chandra Bose"],
-    answerIndex: 2,
-    explanation: "Mahatma Gandhi is revered in India as the 'Father of the Nation'.",
-    category: "General Knowledge",
-    country: "India",
-    difficulty: "Easy"
-  },
-  {
-    question: "Which river is considered the holiest in India?",
-    choices: ["Yamuna", "Ganges", "Brahmaputra", "Godavari"],
+    question: "Which Indian festival is known as the festival of lights?",
+    choices: ["Holi", "Diwali", "Eid", "Christmas"],
     answerIndex: 1,
-    explanation: "The Ganges (Ganga) is the most sacred river to Hindus and is a lifeline to millions of Indians who live along its course.",
+    explanation: "Diwali, or Deepavali, is the Hindu festival of lights, which symbolizes the spiritual victory of light over darkness.",
     category: "General Knowledge",
     country: "India",
     difficulty: "Easy"
   },
-   {
-    question: "What is the national animal of India?",
-    choices: ["Lion", "Tiger", "Elephant", "Leopard"],
+  {
+    question: "What is India's national flower?",
+    choices: ["Rose", "Lotus", "Jasmine", "Marigold"],
     answerIndex: 1,
-    explanation: "The Bengal tiger is the national animal of India.",
+    explanation: "The Lotus is the national flower of India and holds a sacred status in the country's culture and mythology.",
     category: "General Knowledge",
     country: "India",
     difficulty: "Easy"
   },
   {
-    question: "The famous 'Taj Mahal' is located in which Indian city?",
-    choices: ["Delhi", "Jaipur", "Mumbai", "Agra"],
-    answerIndex: 3,
-    explanation: "The Taj Mahal is an ivory-white marble mausoleum on the south bank of the Yamuna river in the Indian city of Agra.",
-    category: "General Knowledge",
-    country: "India",
-    difficulty: "Easy"
-  },
-  {
-    question: "What is the national currency of India?",
-    choices: ["Rupee", "Taka", "Riyal", "Dollar"],
-    answerIndex: 0,
-    explanation: "The Indian Rupee (INR) is the official currency of India.",
+    question: "Which city in India is famous for its tea plantations?",
+    choices: ["Shimla", "Darjeeling", "Nainital", "Munnar"],
+    answerIndex: 1,
+    explanation: "Darjeeling is world-renowned for its tea plantations and the unique flavor of Darjeeling tea.",
     category: "General Knowledge",
     country: "India",
     difficulty: "Easy"
@@ -142,84 +70,39 @@ export const quizQuestions: QuizQuestion[] = [
 
   // General Knowledge - Global - Medium
   {
-    question: "Who wrote 'To Kill a Mockingbird'?",
-    choices: ["Harper Lee", "J.K. Rowling", "Ernest Hemingway", "Mark Twain"],
-    answerIndex: 0,
-    explanation: "'To Kill a Mockingbird' was written by Harper Lee and published in 1960.",
+    question: "What is the largest desert in the world?",
+    choices: ["Sahara Desert", "Arabian Desert", "Gobi Desert", "Antarctic Polar Desert"],
+    answerIndex: 3,
+    explanation: "By the measure of low precipitation, the Antarctic Polar Desert is the largest desert in the world.",
     category: "General Knowledge",
     country: "Global",
     difficulty: "Medium"
   },
   {
-    question: "In what year did the Titanic sink?",
-    choices: ["1905", "1912", "1918", "1923"],
+    question: "Who developed the theory of relativity?",
+    choices: ["Isaac Newton", "Albert Einstein", "Galileo Galilei", "Stephen Hawking"],
     answerIndex: 1,
-    explanation: "The RMS Titanic sank in the early morning hours of 15 April 1912, in the North Atlantic Ocean.",
+    explanation: "Albert Einstein, a theoretical physicist, developed the theory of relativity, one of the two pillars of modern physics.",
     category: "General Knowledge",
     country: "Global",
     difficulty: "Medium"
   },
-  {
-    question: "What is the smallest country in the world?",
-    choices: ["Monaco", "Nauru", "San Marino", "Vatican City"],
-    answerIndex: 3,
-    explanation: "Vatican City is the smallest independent state in the world, both in terms of area and population.",
-    category: "General Knowledge",
-    country: "Global",
-    difficulty: "Medium"
-  },
-  {
-    question: "Who composed the 'Four Seasons'?",
-    choices: ["Mozart", "Bach", "Beethoven", "Vivaldi"],
-    answerIndex: 3,
-    explanation: "The 'Four Seasons' is a set of four violin concertos by the Italian composer Antonio Vivaldi.",
-    category: "General Knowledge",
-    country: "Global",
-    difficulty: "Medium"
-  },
-  {
-    question: "Mount Everest is located in which mountain range?",
-    choices: ["The Andes", "The Rockies", "The Alps", "The Himalayas"],
-    answerIndex: 3,
-    explanation: "Mount Everest, the world's highest peak, is part of the Himalayas mountain range.",
-    category: "General Knowledge",
-    country: "Global",
-    difficulty: "Medium"
-  },
-  
+
   // Movies - Global - Easy
   {
-    question: "Who directed the movie 'Jurassic Park'?",
-    choices: ["James Cameron", "Steven Spielberg", "George Lucas", "Martin Scorsese"],
-    answerIndex: 1,
-    explanation: "Steven Spielberg directed the 1993 blockbuster 'Jurassic Park'.",
-    category: "Movies",
-    country: "Global",
-    difficulty: "Easy"
-  },
-  {
-    question: "Which actor played the character of Jack Dawson in 'Titanic'?",
-    choices: ["Brad Pitt", "Johnny Depp", "Leonardo DiCaprio", "Tom Cruise"],
+    question: "Which movie features a character named 'Simba'?",
+    choices: ["The Jungle Book", "Finding Nemo", "The Lion King", "Madagascar"],
     answerIndex: 2,
-    explanation: "Leonardo DiCaprio famously portrayed Jack Dawson in James Cameron's 1997 film 'Titanic'.",
+    explanation: "'The Lion King' tells the story of Simba, a young lion who is to succeed his father, Mufasa, as King of the Pride Lands.",
     category: "Movies",
     country: "Global",
     difficulty: "Easy"
   },
   {
-    question: "Which film series is based on the books by J.K. Rowling?",
-    choices: ["The Lord of the Rings", "The Chronicles of Narnia", "Harry Potter", "The Hunger Games"],
-    answerIndex: 2,
-    explanation: "The 'Harry Potter' film series is based on the seven fantasy novels written by British author J. K. Rowling.",
-    category: "Movies",
-    country: "Global",
-    difficulty: "Easy"
-  },
-  {
-    question: "What is the name of the friendly ghost in the 1995 film?",
-    choices: ["Casper", "Slimer", "Beetlejuice", "Moaning Myrtle"],
-    answerIndex: 0,
-    explanation: "The friendly ghost's name is Casper in the film of the same name.",
+    question: "Who plays the character of 'Iron Man' in the Marvel Cinematic Universe?",
+    choices: ["Chris Evans", "Chris Hemsworth", "Mark Ruffalo", "Robert Downey Jr."],
+    answerIndex: 3,
+    explanation: "Robert Downey Jr. portrays Tony Stark / Iron Man in the Marvel Cinematic Universe.",
     category: "Movies",
     country: "Global",
     difficulty: "Easy"
@@ -227,28 +110,19 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Movies - India - Easy
   {
-    question: "Who directed the iconic Bollywood film 'Sholay'?",
-    choices: ["Yash Chopra", "Raj Kapoor", "Ramesh Sippy", "Satyajit Ray"],
-    answerIndex: 2,
-    explanation: "'Sholay' (1975), one of the most famous Indian films, was directed by Ramesh Sippy.",
-    category: "Movies",
-    country: "India",
-    difficulty: "Easy"
-  },
-  {
-    question: "Who is fondly known as the 'King Khan' of Bollywood?",
-    choices: ["Amitabh Bachchan", "Salman Khan", "Aamir Khan", "Shah Rukh Khan"],
-    answerIndex: 3,
-    explanation: "Shah Rukh Khan is widely referred to as 'King Khan' or 'SRK' by his fans and the media.",
-    category: "Movies",
-    country: "India",
-    difficulty: "Easy"
-  },
-  {
-    question: "Which movie features the song 'Jai Ho', which won an Academy Award?",
-    choices: ["Lagaan", "Slumdog Millionaire", "3 Idiots", "My Name is Khan"],
+    question: "Which film starring Shah Rukh Khan and Kajol features the famous train scene?",
+    choices: ["Kuch Kuch Hota Hai", "Dilwale Dulhania Le Jayenge", "Kabhi Khushi Kabhie Gham", "My Name is Khan"],
     answerIndex: 1,
-    explanation: "'Jai Ho' from the film 'Slumdog Millionaire' won the Academy Award for Best Original Song in 2009.",
+    explanation: "The iconic train scene is from 'Dilwale Dulhania Le Jayenge' (DDLJ), a landmark in Bollywood cinema.",
+    category: "Movies",
+    country: "India",
+    difficulty: "Easy"
+  },
+  {
+    question: "What is the name of the superhero played by Hrithik Roshan in a popular Indian film series?",
+    choices: ["G.One", "Shaktimaan", "Krrish", "Ra.One"],
+    answerIndex: 2,
+    explanation: "Hrithik Roshan plays the superhero 'Krrish' in the film series of the same name.",
     category: "Movies",
     country: "India",
     difficulty: "Easy"
@@ -256,28 +130,19 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Movies - Global - Medium
   {
-    question: "Which movie won the first-ever Oscar for Best Picture?",
-    choices: ["The Artist", "Sunrise", "Wings", "Metropolis"],
+    question: "What is the name of the fictional city where Batman operates?",
+    choices: ["Metropolis", "Star City", "Gotham City", "Central City"],
     answerIndex: 2,
-    explanation: "'Wings', a silent film about World War I fighter pilots, won the first Academy Award for Best Picture in 1929.",
+    explanation: "Batman's base of operations is the dark and gritty fictional metropolis, Gotham City.",
     category: "Movies",
     country: "Global",
     difficulty: "Medium"
   },
   {
-    question: "In 'The Matrix', what is the real name of the main character, Neo?",
-    choices: ["Thomas Anderson", "John Wick", "Ted Logan", "Kevin Lomax"],
-    answerIndex: 0,
-    explanation: "Neo's name in the 'real world' before he was freed from the Matrix was Thomas A. Anderson.",
-    category: "Movies",
-    country: "Global",
-    difficulty: "Medium"
-  },
-  {
-    question: "Who directed the 'Lord of the Rings' trilogy?",
-    choices: ["George Lucas", "James Cameron", "Peter Jackson", "Christopher Nolan"],
-    answerIndex: 2,
-    explanation: "Peter Jackson directed the acclaimed 'The Lord of the Rings' film trilogy.",
+    question: "Which 1972 film is a crime drama directed by Francis Ford Coppola?",
+    choices: ["Goodfellas", "The French Connection", "A Clockwork Orange", "The Godfather"],
+    answerIndex: 3,
+    explanation: "'The Godfather', directed by Francis Ford Coppola, is widely regarded as one of the greatest films of all time.",
     category: "Movies",
     country: "Global",
     difficulty: "Medium"
@@ -285,57 +150,39 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Movies - India - Medium
   {
-    question: "Which Indian film was the first to be nominated for an Oscar in the Best Foreign Language Film category?",
-    choices: ["Lagaan", "Salaam Bombay!", "Mother India", "Guide"],
-    answerIndex: 2,
-    explanation: "Mehboob Khan's 'Mother India' (1957) was India's first submission for the Academy Award for Best Foreign Language Film.",
+    question: "In the film 'Baahubali', what is the name of the lead character's powerful uncle?",
+    choices: ["Bhallaladeva", "Kattappa", "Bijjaladeva", "Kalakeya"],
+    answerIndex: 0,
+    explanation: "Bhallaladeva, played by Rana Daggubati, is the powerful and antagonistic cousin/uncle figure to Baahubali.",
     category: "Movies",
     country: "India",
     difficulty: "Medium"
   },
   {
-    question: "In the movie '3 Idiots', what is the real name of the character 'Rancho'?",
-    choices: ["Ranchhoddas Chanchad", "Phunsukh Wangdu", "Chatur Ramalingam", "Raju Rastogi"],
-    answerIndex: 1,
-    explanation: "While he used the name Ranchhoddas, his actual name was revealed to be Phunsukh Wangdu, a famous scientist.",
-    category: "Movies",
-    country: "India",
-    difficulty: "Medium"
-  },
-  {
-    question: "Who played the lead role in the film 'Dangal', portraying Mahavir Singh Phogat?",
-    choices: ["Salman Khan", "Shah Rukh Khan", "Aamir Khan", "Akshay Kumar"],
+    question: "Which actress, a former Miss World, is a major international star from India?",
+    choices: ["Aishwarya Rai Bachchan", "Sushmita Sen", "Priyanka Chopra Jonas", "Deepika Padukone"],
     answerIndex: 2,
-    explanation: "Aamir Khan played the role of Mahavir Singh Phogat, a wrestler who trains his daughters to become world-class athletes.",
+    explanation: "Priyanka Chopra Jonas, who won Miss World 2000, has achieved significant success in both Bollywood and Hollywood.",
     category: "Movies",
     country: "India",
     difficulty: "Medium"
   },
-  
+
   // Cricket - Global - Easy
   {
-    question: "How many balls are there in a standard over in cricket?",
-    choices: ["4", "5", "6", "8"],
+    question: "What is the maximum number of players in a cricket team on the field at one time?",
+    choices: ["9", "10", "11", "12"],
     answerIndex: 2,
-    explanation: "A standard over in cricket consists of six legal deliveries bowled by a single bowler.",
+    explanation: "A cricket team consists of eleven players on the field during a match.",
     category: "Cricket",
     country: "Global",
     difficulty: "Easy"
   },
   {
-    question: "What does LBW stand for in cricket?",
-    choices: ["Leg Before Wicket", "Long Ball Wide", "Leg Bye Warning", "Light Bat Weight"],
-    answerIndex: 0,
-    explanation: "LBW stands for Leg Before Wicket, which is a common way for a batsman to be dismissed.",
-    category: "Cricket",
-    country: "Global",
-    difficulty: "Easy"
-  },
-  {
-    question: "The 20-over format of cricket is also known as?",
-    choices: ["Test", "One Day International", "Twenty20", "The Hundred"],
-    answerIndex: 2,
-    explanation: "Twenty20, often abbreviated as T20, is a shortened format of cricket where each team plays a single innings of 20 overs.",
+    question: "A century in cricket refers to a score of how many runs?",
+    choices: ["50", "100", "150", "200"],
+    answerIndex: 1,
+    explanation: "A century is a score of 100 or more runs by a single batsman in an innings.",
     category: "Cricket",
     country: "Global",
     difficulty: "Easy"
@@ -343,28 +190,19 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Cricket - India - Easy
   {
-    question: "What is the name of the premier domestic T20 cricket league in India?",
-    choices: ["Ranji Trophy", "Indian Premier League (IPL)", "Duleep Trophy", "Syed Mushtaq Ali Trophy"],
-    answerIndex: 1,
-    explanation: "The Indian Premier League (IPL) is the most-attended cricket league in the world and a premier T20 competition.",
+    question: "Which Indian city has the Wankhede Stadium?",
+    choices: ["Delhi", "Kolkata", "Chennai", "Mumbai"],
+    answerIndex: 3,
+    explanation: "Wankhede Stadium is an international cricket stadium in Mumbai, India.",
     category: "Cricket",
     country: "India",
     difficulty: "Easy"
   },
   {
-    question: "Which Indian city is home to the iconic Eden Gardens cricket stadium?",
-    choices: ["Mumbai", "Chennai", "Kolkata", "Delhi"],
+    question: "Who captained India to victory in the 2011 ICC Cricket World Cup?",
+    choices: ["Sachin Tendulkar", "Virender Sehwag", "MS Dhoni", "Yuvraj Singh"],
     answerIndex: 2,
-    explanation: "Eden Gardens, located in Kolkata, is the oldest and second-largest cricket stadium in India.",
-    category: "Cricket",
-    country: "India",
-    difficulty: "Easy"
-  },
-  {
-    question: "Who is the current captain of the Indian Men's Cricket Team in Test format (as of 2023)?",
-    choices: ["Virat Kohli", "Rohit Sharma", "KL Rahul", "Jasprit Bumrah"],
-    answerIndex: 1,
-    explanation: "Rohit Sharma is the captain of the Indian cricket team across all formats.",
+    explanation: "Mahendra Singh Dhoni (MS Dhoni) was the captain of the Indian team that won the 2011 World Cup.",
     category: "Cricket",
     country: "India",
     difficulty: "Easy"
@@ -372,19 +210,19 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Cricket - Global - Medium
   {
-    question: "Which country won the first-ever Cricket World Cup in 1975?",
-    choices: ["Australia", "England", "West Indies", "India"],
+    question: "Which bowler has taken the most wickets in Test cricket history?",
+    choices: ["Shane Warne", "Anil Kumble", "Muttiah Muralitharan", "James Anderson"],
     answerIndex: 2,
-    explanation: "The West Indies, led by Clive Lloyd, won the inaugural Cricket World Cup by defeating Australia in the final.",
+    explanation: "Muttiah Muralitharan of Sri Lanka holds the record for the most wickets in Test cricket, with 800 wickets.",
     category: "Cricket",
     country: "Global",
     difficulty: "Medium"
   },
   {
-    question: "The term 'Ashes' is used to describe a Test cricket series played between which two countries?",
-    choices: ["India and Pakistan", "Australia and England", "South Africa and New Zealand", "West Indies and India"],
+    question: "What is the Duckworth-Lewis-Stern (DLS) method used for in cricket?",
+    choices: ["Deciding the man of the match", "Calculating run rates in rain-affected matches", "Choosing the batting order", "Measuring pitch hardness"],
     answerIndex: 1,
-    explanation: "The Ashes is a historic Test cricket series played between England and Australia.",
+    explanation: "The DLS method is a mathematical formulation designed to calculate the target score for the team batting second in a limited-overs match interrupted by weather or other circumstances.",
     category: "Cricket",
     country: "Global",
     difficulty: "Medium"
@@ -392,28 +230,19 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Cricket - India - Medium
   {
-    question: "Who was the captain of the Indian cricket team that won the 1983 World Cup?",
-    choices: ["Sunil Gavaskar", "Kapil Dev", "Ravi Shastri", "Mohinder Amarnath"],
-    answerIndex: 1,
-    explanation: "Kapil Dev famously captained the Indian team to its first-ever World Cup victory in 1983.",
-    category: "Cricket",
-    country: "India",
-    difficulty: "Medium"
-  },
-  {
-    question: "Which Indian cricketer is known as the 'God of Cricket'?",
-    choices: ["Virat Kohli", "Kapil Dev", "MS Dhoni", "Sachin Tendulkar"],
-    answerIndex: 3,
-    explanation: "Sachin Tendulkar is widely regarded as one of the greatest batsmen of all time and is often called the 'God of Cricket'.",
-    category: "Cricket",
-    country: "India",
-    difficulty: "Medium"
-  },
-  {
-    question: "In which year did India win its second ICC Cricket World Cup?",
-    choices: ["2003", "2007", "2011", "2015"],
+    question: "Who is the first Indian batsman to score a triple century in Test cricket?",
+    choices: ["Sunil Gavaskar", "Sachin Tendulkar", "Virender Sehwag", "Rahul Dravid"],
     answerIndex: 2,
-    explanation: "India won its second Cricket World Cup in 2011, defeating Sri Lanka in the final held in Mumbai.",
+    explanation: "Virender Sehwag was the first Indian to score a triple century (309) in Test cricket, against Pakistan in 2004.",
+    category: "Cricket",
+    country: "India",
+    difficulty: "Medium"
+  },
+  {
+    question: "What is Rahul Dravid's famous nickname in the cricket world?",
+    choices: ["The God of Cricket", "The Wall", "The Turbanator", "Captain Cool"],
+    answerIndex: 1,
+    explanation: "Rahul Dravid is known as 'The Wall' for his incredible defensive technique and ability to bat for long periods.",
     category: "Cricket",
     country: "India",
     difficulty: "Medium"
@@ -421,37 +250,19 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Tech - Global - Easy
   {
-    question: "What does 'CPU' stand for?",
-    choices: ["Central Processing Unit", "Computer Personal Unit", "Central Program Unit", "Control Panel Unit"],
-    answerIndex: 0,
-    explanation: "CPU stands for Central Processing Unit, the primary component of a computer that executes instructions.",
+    question: "What do you call a program that can replicate itself and spread to other computers?",
+    choices: ["A bug", "A virus", "A cookie", "A cache"],
+    answerIndex: 1,
+    explanation: "A computer virus is a type of malicious software that, when executed, replicates itself by modifying other computer programs and inserting its own code.",
     category: "Tech",
     country: "Global",
     difficulty: "Easy"
   },
   {
-    question: "Who is the co-founder of Microsoft Corporation?",
-    choices: ["Steve Jobs", "Larry Page", "Bill Gates", "Mark Zuckerberg"],
-    answerIndex: 2,
-    explanation: "Bill Gates co-founded Microsoft with Paul Allen in 1975.",
-    category: "Tech",
-    country: "Global",
-    difficulty: "Easy"
-  },
-  {
-    question: "What does the 'G' in 5G stand for?",
-    choices: ["Gateway", "Gigabyte", "Generation", "Global"],
-    answerIndex: 2,
-    explanation: "The 'G' in cellular technology like 3G, 4G, and 5G stands for 'Generation'.",
-    category: "Tech",
-    country: "Global",
-    difficulty: "Easy"
-  },
-  {
-    question: "What company makes the iPhone?",
-    choices: ["Samsung", "Google", "Apple", "Huawei"],
-    answerIndex: 2,
-    explanation: "The iPhone is a line of smartphones designed and marketed by Apple Inc.",
+    question: "Which social media platform is known for its 280-character limit messages?",
+    choices: ["Facebook", "Instagram", "LinkedIn", "X (formerly Twitter)"],
+    answerIndex: 3,
+    explanation: "X (formerly known as Twitter) is famous for its short-form posts, originally 140 characters and later expanded to 280.",
     category: "Tech",
     country: "Global",
     difficulty: "Easy"
@@ -459,28 +270,10 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Tech - India - Easy
   {
-    question: "The '.in' domain extension represents which country?",
-    choices: ["Indonesia", "Indiana (US State)", "India", "Iran"],
-    answerIndex: 2,
-    explanation: "The '.in' is the Internet country code top-level domain (ccTLD) for India.",
-    category: "Tech",
-    country: "India",
-    difficulty: "Easy"
-  },
-  {
-    question: "What does UPI, a popular payment system in India, stand for?",
-    choices: ["Universal Payment Interface", "Unified Payments Interface", "Unique Payment Identifier", "Universal Payments Identification"],
+    question: "Paytm is a popular Indian company primarily in which sector?",
+    choices: ["E-commerce", "Digital Payments", "Social Media", "Ride-sharing"],
     answerIndex: 1,
-    explanation: "UPI stands for Unified Payments Interface, an instant real-time payment system developed by National Payments Corporation of India.",
-    category: "Tech",
-    country: "India",
-    difficulty: "Easy"
-  },
-  {
-    question: "Which of these is a popular Indian e-commerce company?",
-    choices: ["Amazon", "Alibaba", "Flipkart", "eBay"],
-    answerIndex: 2,
-    explanation: "Flipkart is an Indian e-commerce company, headquartered in Bengaluru.",
+    explanation: "Paytm is a leading Indian digital payments and financial services company, based in Noida.",
     category: "Tech",
     country: "India",
     difficulty: "Easy"
@@ -488,19 +281,19 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Tech - Global - Medium
   {
-    question: "What does 'HTTP' stand for?",
-    choices: ["HyperText Transfer Protocol", "High-Text Transfer Protocol", "HyperText Transmission Protocol", "HyperText Transfer Program"],
-    answerIndex: 0,
-    explanation: "HTTP stands for HyperText Transfer Protocol, the foundation of data communication for the World Wide Web.",
+    question: "What does 'Wi-Fi' stand for?",
+    choices: ["Wireless Fidelity", "Wireless Firewall", "Wide Fidelity", "It's not an acronym"],
+    answerIndex: 3,
+    explanation: "Despite common belief, 'Wi-Fi' is a trademarked name and does not stand for 'Wireless Fidelity'. It was a marketing name created by a branding firm.",
     category: "Tech",
     country: "Global",
     difficulty: "Medium"
   },
   {
-    question: "What is the name of the open-source operating system created by Linus Torvalds?",
-    choices: ["Windows", "macOS", "Android", "Linux"],
+    question: "The first successful personal computer was the...",
+    choices: ["IBM PC", "Commodore PET", "Apple I", "Kenbak-1"],
     answerIndex: 3,
-    explanation: "Linux is a family of open-source Unix-like operating systems based on the Linux kernel, created by Linus Torvalds.",
+    explanation: "The Kenbak-1, released in 1971, is considered by the Computer History Museum to be the world's first personal computer.",
     category: "Tech",
     country: "Global",
     difficulty: "Medium"
@@ -508,115 +301,61 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Tech - India - Medium
   {
-    question: "Which Indian city is known as the 'Silicon Valley of India'?",
-    choices: ["Hyderabad", "Pune", "Bengaluru", "Gurugram"],
-    answerIndex: 2,
-    explanation: "Bengaluru (formerly Bangalore) is known as the Silicon Valley of India because of its role as the nation's leading information technology (IT) exporter.",
-    category: "Tech",
-    country: "India",
-    difficulty: "Medium"
-  },
-  {
-    question: "What is ISRO's full form, India's space agency?",
-    choices: ["Indian Space Research Organization", "Indian Scientific Research Organization", "International Space Research Organization", "Indian Satellite Research Organization"],
-    answerIndex: 0,
-    explanation: "ISRO stands for the Indian Space Research Organisation, the national space agency of India.",
-    category: "General Knowledge",
-    country: "India",
-    difficulty: "Medium"
-  },
-  {
-    question: "Which Indian company is a major multinational provider of IT services and consulting?",
-    choices: ["Reliance Industries", "Tata Consultancy Services (TCS)", "State Bank of India", "Adani Group"],
+    question: "What is Aadhaar in the context of India?",
+    choices: ["A tax identification number", "A unique 12-digit identity number", "A driver's license", "A mobile payment app"],
     answerIndex: 1,
-    explanation: "Tata Consultancy Services (TCS) is a leading global IT services, consulting, and business solutions organization.",
+    explanation: "Aadhaar is a 12-digit unique identity number issued by the UIDAI to all residents of India.",
     category: "Tech",
     country: "India",
     difficulty: "Medium"
   },
-  
+
   // Tamil Nadu GK - Easy
   {
-    question: "What is the capital city of Tamil Nadu?",
-    choices: ["Coimbatore", "Madurai", "Chennai", "Tiruchirappalli"],
-    answerIndex: 2,
-    explanation: "Chennai (formerly known as Madras) is the capital city of the Indian state of Tamil Nadu.",
+    question: "Marina Beach, one of the longest urban beaches in the world, is in which city?",
+    choices: ["Kanyakumari", "Rameswaram", "Puducherry", "Chennai"],
+    answerIndex: 3,
+    explanation: "Marina Beach is a natural urban beach in Chennai, Tamil Nadu, along the Bay of Bengal.",
     category: "Tamil Nadu GK",
     country: "India",
     difficulty: "Easy"
   },
-  {
-    question: "Which classical dance form originated in Tamil Nadu?",
-    choices: ["Kathak", "Kuchipudi", "Bharatanatyam", "Mohiniyattam"],
-    answerIndex: 2,
-    explanation: "Bharatanatyam is a major form of Indian classical dance that originated in the temples of Tamil Nadu.",
-    category: "Tamil Nadu GK",
-    country: "India",
-    difficulty: "Easy"
-  },
-  {
-    question: "Which is the most widely spoken language in Tamil Nadu?",
-    choices: ["Telugu", "Kannada", "Tamil", "Malayalam"],
-    answerIndex: 2,
-    explanation: "Tamil is the official language of Tamil Nadu and is the most widely spoken language in the state.",
-    category: "Tamil Nadu GK",
-    country: "India",
-    difficulty: "Easy"
-  },
-  
+
   // Tamil Nadu GK - Medium
   {
-    question: "What is the traditional harvest festival of Tamil Nadu called?",
-    choices: ["Diwali", "Onam", "Holi", "Pongal"],
-    answerIndex: 3,
-    explanation: "Pongal is a multi-day Hindu harvest festival of South India, particularly in the Tamil community.",
-    category: "Tamil Nadu GK",
-    country: "India",
-    difficulty: "Medium"
-  },
-  {
-    question: "The Meenakshi Amman Temple, a historic Hindu temple, is located in which city of Tamil Nadu?",
-    choices: ["Thanjavur", "Madurai", "Kanchipuram", "Rameswaram"],
-    answerIndex: 1,
-    explanation: "The Meenakshi Amman Temple is located on the southern bank of the Vaigai River in the temple city of Madurai.",
-    category: "Tamil Nadu GK",
-    country: "India",
-    difficulty: "Medium"
-  },
-  {
-    question: "Which famous leader and former Chief Minister of Tamil Nadu was popularly known as 'MGR'?",
-    choices: ["C. N. Annadurai", "K. Kamaraj", "M. G. Ramachandran", "M. Karunanidhi"],
+    question: "Which of these is a famous hill station in Tamil Nadu?",
+    choices: ["Shimla", "Darjeeling", "Ooty", "Munnar"],
     answerIndex: 2,
-    explanation: "M. G. Ramachandran, popularly known as MGR, was an actor who later became a three-term Chief Minister of Tamil Nadu.",
+    explanation: "Ooty, officially known as Udhagamandalam, is a popular hill station located in the Nilgiri Hills.",
     category: "Tamil Nadu GK",
     country: "India",
     difficulty: "Medium"
   },
-  
+  {
+    question: "Who is the famous Tamil poet and philosopher who wrote the Tirukkuṟaḷ?",
+    choices: ["Kambar", "Thiruvalluvar", "Avvaiyar", "Bharathiyar"],
+    answerIndex: 1,
+    explanation: "Thiruvalluvar is the celebrated author of the Tirukkuṟaḷ, a classic Tamil text on ethics and morality.",
+    category: "Tamil Nadu GK",
+    country: "India",
+    difficulty: "Medium"
+  },
+
   // General Knowledge - Global - Hard
   {
-    question: "Who is credited with discovering penicillin?",
-    choices: ["Marie Curie", "Alexander Fleming", "Louis Pasteur", "Robert Koch"],
-    answerIndex: 1,
-    explanation: "Sir Alexander Fleming discovered the antibiotic substance penicillin from the fungus Penicillium notatum in 1928.",
-    category: "General Knowledge",
-    country: "Global",
-    difficulty: "Hard"
-  },
-  {
-    question: "What is the name of the galaxy that contains our Solar System?",
-    choices: ["Andromeda Galaxy", "Triangulum Galaxy", "Whirlpool Galaxy", "Milky Way Galaxy"],
-    answerIndex: 3,
-    explanation: "Our Solar System is located within the Milky Way Galaxy, a barred spiral galaxy.",
-    category: "General Knowledge",
-    country: "Global",
-    difficulty: "Hard"
-  },
-  {
-    question: "Which war was fought between the north and south of the United States?",
-    choices: ["The Revolutionary War", "The War of 1812", "The Civil War", "World War I"],
+    question: "Which two countries are separated by the Bering Strait?",
+    choices: ["USA and Canada", "Russia and China", "USA and Russia", "Japan and Russia"],
     answerIndex: 2,
-    explanation: "The American Civil War (1861-1865) was fought between the United States (the Union) and the Confederate States of America (the Confederacy).",
+    explanation: "The Bering Strait is a strait connecting the Pacific and Arctic oceans between Russia and the United States (Alaska).",
+    category: "General Knowledge",
+    country: "Global",
+    difficulty: "Hard"
+  },
+  {
+    question: "The ancient city of Rome was built on how many hills?",
+    choices: ["Five", "Seven", "Nine", "Ten"],
+    answerIndex: 1,
+    explanation: "The ancient city of Rome was famously built on seven hills, which are central to Roman mythology and history.",
     category: "General Knowledge",
     country: "Global",
     difficulty: "Hard"
@@ -624,28 +363,19 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Movies - Global - Hard
   {
-    question: "What is the highest-grossing film of all time (unadjusted for inflation)?",
-    choices: ["Titanic", "Avengers: Endgame", "Avatar", "Star Wars: The Force Awakens"],
+    question: "In the film '2001: A Space Odyssey', what is the name of the rogue AI?",
+    choices: ["Skynet", "GLaDOS", "HAL 9000", "VIKI"],
     answerIndex: 2,
-    explanation: "As of the early 2020s, 'Avatar' (2009) holds the title for the highest-grossing film worldwide.",
+    explanation: "HAL 9000 (Heuristically programmed ALgorithmic computer) is the sentient AI that controls the systems of the Discovery One spacecraft.",
     category: "Movies",
     country: "Global",
     difficulty: "Hard"
   },
   {
-    question: "For which movie did Tom Hanks win his first Academy Award for Best Actor?",
-    choices: ["Forrest Gump", "Philadelphia", "Saving Private Ryan", "Cast Away"],
-    answerIndex: 1,
-    explanation: "Tom Hanks won his first Best Actor Oscar for his role as Andrew Beckett in the 1993 film 'Philadelphia'.",
-    category: "Movies",
-    country: "Global",
-    difficulty: "Hard"
-  },
-  {
-    question: "Which 1994 film, directed by Quentin Tarantino, is known for its non-linear storyline?",
-    choices: ["Reservoir Dogs", "Jackie Brown", "Pulp Fiction", "Kill Bill"],
+    question: "Which director is known for the use of the 'oner' or long continuous take in films like 'Birdman' and 'The Revenant'?",
+    choices: ["Wes Anderson", "Denis Villeneuve", "Alejandro G. Iñárritu", "Christopher Nolan"],
     answerIndex: 2,
-    explanation: "'Pulp Fiction' is celebrated for its eclectic dialogue, ironic mix of humor and violence, and non-linear narrative.",
+    explanation: "Alejandro G. Iñárritu is acclaimed for his use of long, seamless takes to create immersive and visceral cinematic experiences.",
     category: "Movies",
     country: "Global",
     difficulty: "Hard"
@@ -653,19 +383,10 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Movies - India - Hard
   {
-    question: "Which Indian director is known for epic historical films like 'Jodhaa Akbar' and 'Lagaan'?",
-    choices: ["Sanjay Leela Bhansali", "Ashutosh Gowariker", "Karan Johar", "Rajkumar Hirani"],
-    answerIndex: 1,
-    explanation: "Ashutosh Gowariker is known for directing epic films, including the Oscar-nominated 'Lagaan' (2001) and 'Jodhaa Akbar' (2008).",
-    category: "Movies",
-    country: "India",
-    difficulty: "Hard"
-  },
-  {
-    question: "Satyajit Ray's 'Pather Panchali' is part of which famous film trilogy?",
-    choices: ["The Apu Trilogy", "The Calcutta Trilogy", "The Bharata Trilogy", "The Bengal Trilogy"],
-    answerIndex: 0,
-    explanation: "'Pather Panchali' (1955) is the first film in Satyajit Ray's critically acclaimed Apu Trilogy.",
+    question: "Which film by Mira Nair won the Golden Lion at the Venice Film Festival?",
+    choices: ["Salaam Bombay!", "The Namesake", "Monsoon Wedding", "Queen of Katwe"],
+    answerIndex: 2,
+    explanation: "'Monsoon Wedding' (2001) won the Golden Lion, the highest prize at the Venice Film Festival, making Mira Nair one of the few women to have received the honor.",
     category: "Movies",
     country: "India",
     difficulty: "Hard"
@@ -673,19 +394,10 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Cricket - Global - Hard
   {
-    question: "Who holds the record for the highest individual score in a Test innings?",
-    choices: ["Sachin Tendulkar", "Don Bradman", "Brian Lara", "Virender Sehwag"],
-    answerIndex: 2,
-    explanation: "Brian Lara of the West Indies scored 400 not out against England in 2004, the highest individual score in Test history.",
-    category: "Cricket",
-    country: "Global",
-    difficulty: "Hard"
-  },
-  {
-    question: "Who holds the record for the most wickets in Test cricket history?",
-    choices: ["Shane Warne", "Anil Kumble", "Muttiah Muralitharan", "James Anderson"],
-    answerIndex: 2,
-    explanation: "Sri Lankan spinner Muttiah Muralitharan holds the world record for the most wickets in Test cricket with 800.",
+    question: "What is the term for a bowler taking three wickets on three consecutive deliveries?",
+    choices: ["A hat-trick", "A trifecta", "A maiden", "A clean sweep"],
+    answerIndex: 0,
+    explanation: "A hat-trick occurs in cricket when a bowler dismisses three batsmen with consecutive deliveries.",
     category: "Cricket",
     country: "Global",
     difficulty: "Hard"
@@ -693,48 +405,21 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Cricket - India - Hard
   {
-    question: "Who was the first Indian cricketer to score a century in all three formats of the game (Test, ODI, T20I)?",
-    choices: ["Virat Kohli", "Rohit Sharma", "Suresh Raina", "Virender Sehwag"],
-    answerIndex: 2,
-    explanation: "Suresh Raina was the first Indian batsman to score a century in all three formats of international cricket.",
+    question: "Which Indian bowler is the highest wicket-taker for India in Test cricket?",
+    choices: ["Kapil Dev", "Harbhajan Singh", "Ravichandran Ashwin", "Anil Kumble"],
+    answerIndex: 3,
+    explanation: "Anil Kumble is India's leading wicket-taker in Test cricket, with 619 wickets in his career.",
     category: "Cricket",
     country: "India",
-    difficulty: "Hard"
-  },
-  {
-    question: "Who is the only bowler to have taken all ten wickets in a Test innings twice?",
-    choices: ["Anil Kumble", "Jim Laker", "Muttiah Muralitharan", "Shane Warne"],
-    answerIndex: 1,
-    explanation: "Jim Laker of England is the only bowler to have taken all ten wickets in a Test innings, and he did it against Australia in 1956.",
-    category: "Cricket",
-    country: "Global",
     difficulty: "Hard"
   },
 
   // Tech - Global - Hard
   {
-    question: "What does the acronym 'LASER' stand for?",
-    choices: ["Light Amplification by Stimulated Emission of Radiation", "Light Absorption by Stimulated Energy of Radiation", "Light Alteration by Stimulated Emission of Rays", "Light Amplification by Spontaneous Emission of Radiation"],
-    answerIndex: 0,
-    explanation: "LASER is an acronym for Light Amplification by Stimulated Emission of Radiation.",
-    category: "Tech",
-    country: "Global",
-    difficulty: "Hard"
-  },
-  {
-    question: "Who is considered the 'Father of the Computer'?",
-    choices: ["Alan Turing", "Charles Babbage", "John von Neumann", "Thomas Edison"],
-    answerIndex: 1,
-    explanation: "Charles Babbage, an English mechanical engineer and polymath, originated the concept of a digital programmable computer.",
-    category: "Tech",
-    country: "Global",
-    difficulty: "Hard"
-  },
-  {
-    question: "In what year was the first email sent?",
-    choices: ["1965", "1971", "1983", "1990"],
-    answerIndex: 1,
-    explanation: "Ray Tomlinson is credited with sending the first email in 1971. The message was sent between two computers right next to each other.",
+    question: "What was the name of the first-ever web browser?",
+    choices: ["Netscape Navigator", "Internet Explorer", "Mosaic", "WorldWideWeb"],
+    answerIndex: 3,
+    explanation: "The first web browser, named WorldWideWeb (later renamed Nexus), was created by Tim Berners-Lee in 1990.",
     category: "Tech",
     country: "Global",
     difficulty: "Hard"
@@ -742,19 +427,10 @@ export const quizQuestions: QuizQuestion[] = [
 
   // Tech - India - Hard
   {
-    question: "What is the name of India's first domestically developed supercomputer?",
-    choices: ["PARAM", "SAGA", "EKA", "Vikram-100"],
-    answerIndex: 0,
-    explanation: "PARAM 8000, launched in 1991, is considered India's first supercomputer. It was developed by C-DAC.",
-    category: "Tech",
-    country: "India",
-    difficulty: "Hard"
-  },
-  {
-    question: "Who is known as the 'Father of the Indian IT Industry'?",
-    choices: ["Azim Premji", "Narayana Murthy", "F. C. Kohli", "Shiv Nadar"],
-    answerIndex: 2,
-    explanation: "Faqir Chand Kohli (F. C. Kohli) is regarded as the Father of the Indian IT Industry for his pivotal role in founding and building Tata Consultancy Services.",
+    question: "Which Indian-born CEO is the current head of Google's parent company, Alphabet?",
+    choices: ["Satya Nadella", "Sundar Pichai", "Arvind Krishna", "Shantanu Narayen"],
+    answerIndex: 1,
+    explanation: "Sundar Pichai is the Chief Executive Officer of Alphabet Inc. and its subsidiary Google.",
     category: "Tech",
     country: "India",
     difficulty: "Hard"
@@ -762,41 +438,24 @@ export const quizQuestions: QuizQuestion[] = [
   
   // Tamil Nadu GK - Hard
   {
-    question: "Which is the longest river that flows mainly within Tamil Nadu?",
-    choices: ["Vaigai", "Palar", "Kaveri", "Thamirabarani"],
-    answerIndex: 0,
-    explanation: "While the Kaveri is the longest river in Tamil Nadu, the Vaigai is the longest river that flows primarily within the state's borders.",
+    question: "The Brihadeeswarar Temple, a UNESCO World Heritage site, was built by which Chola king?",
+    choices: ["Rajendra Chola I", "Karikala Chola", "Rajaraja Chola I", "Vijayalaya Chola"],
+    answerIndex: 2,
+    explanation: "The Brihadeeswarar Temple (or Peruvudaiyar Kovil) in Thanjavur was built by the great Chola emperor Rajaraja I in the 11th century CE.",
     category: "Tamil Nadu GK",
     country: "India",
     difficulty: "Hard"
   },
   {
-    question: "The Thirukkural, a classic Tamil text, was written by which famous poet?",
-    choices: ["Kambar", "Avvaiyar", "Thiruvalluvar", "Bharathiyar"],
-    answerIndex: 2,
-    explanation: "The Thirukkural is a classic Tamil text consisting of 1,330 couplets or kurals, authored by the poet Thiruvalluvar.",
-    category: "Tamil Nadu GK",
-    country: "India",
-    difficulty: "Hard"
-  },
-  {
-    question: "Jallikattu, a traditional event, is typically practiced in which state?",
-    choices: ["Kerala", "Andhra Pradesh", "Tamil Nadu", "Karnataka"],
-    answerIndex: 2,
-    explanation: "Jallikattu is a traditional bull-taming sport that is popular in the Indian state of Tamil Nadu as part of Pongal celebrations.",
-    category: "Tamil Nadu GK",
-    country: "India",
-    difficulty: "Hard"
-  },
-  {
-    question: "Which UNESCO World Heritage site in Tamil Nadu is known for its rock-cut monuments?",
-    choices: ["Great Living Chola Temples", "Nilgiri Mountain Railway", "Group of Monuments at Mahabalipuram", "Western Ghats"],
-    answerIndex: 2,
-    explanation: "The Group of Monuments at Mahabalipuram, dating back to the 7th and 8th centuries, is famous for its rathas (temples in the form of chariots), mandapas (cave sanctuaries), and giant open-air reliefs.",
+    question: "What is the southernmost tip of mainland India, located in Tamil Nadu?",
+    choices: ["Rameswaram", "Kanyakumari", "Dhanushkodi", "Thoothukudi"],
+    answerIndex: 1,
+    explanation: "Kanyakumari (Cape Comorin) is the southernmost town in mainland India, located in the state of Tamil Nadu.",
     category: "Tamil Nadu GK",
     country: "India",
     difficulty: "Hard"
   }
 ];
+
 
     

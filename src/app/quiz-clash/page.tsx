@@ -53,15 +53,8 @@ export default function QuizClashPage() {
             (q.country === country || q.country === 'Global') &&
             difficulties.includes(q.difficulty)
         );
-
-        // Smart difficulty weighting: higher levels get harder questions more often
-        const weightedQuestions = countryFiltered.flatMap(q => {
-            if (q.difficulty === 'Hard') return Array(level >= 8 ? 4 : 2).fill(q);
-            if (q.difficulty === 'Medium') return Array(level >= 5 ? 3 : 1).fill(q);
-            return [q]; // Easy questions have a base weight of 1
-        });
         
-        setAvailableQuestions(weightedQuestions.sort(() => 0.5 - Math.random()));
+        setAvailableQuestions(countryFiltered.sort(() => 0.5 - Math.random()));
     }, [country, level]);
 
 
@@ -397,5 +390,7 @@ export default function QuizClashPage() {
         </div>
     );
 }
+
+    
 
     
