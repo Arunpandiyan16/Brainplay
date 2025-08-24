@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 import { CountryProvider } from '@/hooks/use-country';
 import { AuthProvider } from '@/hooks/use-auth';
+import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
   title: 'BrainPlay - Play. Learn. Compete. | Fun Brain Games',
   description: 'A 5-in-1 hub for fun and knowledge games. Challenge yourself with quizzes, word puzzles, math problems, memory games, and more. Play, learn, and compete on the leaderboards!',
   keywords: ['brain games', 'quiz', 'word game', 'math game', 'memory game', 'trivia', 'puzzle games', 'online games', 'educational games'],
+  manifest: '/manifest.json',
   openGraph: {
     title: 'BrainPlay - Play. Learn. Compete.',
     description: 'The ultimate hub for fun and knowledge games.',
@@ -72,6 +74,7 @@ export default function RootLayout({
             </CountryProvider>
           </AuthProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
