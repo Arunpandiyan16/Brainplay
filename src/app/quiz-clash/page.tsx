@@ -5,18 +5,20 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward } from 'lucide-react';
+import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward, BarChart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { useCountry } from '@/hooks/use-country.tsx';
 import { quizQuestions, QuizQuestion } from '@/lib/quiz-data';
 
-
-const TOTAL_TIME = 30;
-const CATEGORIES = ['General Knowledge', 'Movies', 'Cricket', 'Tech', 'Tamil Nadu GK'];
-const SKIP_LIMIT = 1;
+const TOTAL_TIME = 90; // Increased total time for level progression
+const SKIP_LIMIT = 2; // Allow more skips
 
 type GameState = 'start' | 'playing' | 'ended';
+type Difficulty = 'Easy' | 'Medium' | 'Hard';
+
+const XP_PER_CORRECT = 10;
+const getXpToNextLevel = (level: number) => 50 + (level - 1) * 20;
 
 export default function QuizClashPage() {
     const [gameState, setGameState] = useState<GameState>('start');
@@ -29,28 +31,40 @@ export default function QuizClashPage() {
     const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
     const [skipsUsed, setSkipsUsed] = useState(0);
     const [answeredQuestions, setAnsweredQuestions] = useState<any[]>([]);
+    
+    // Leveling state
+    const [level, setLevel] = useState(1);
+    const [xp, setXp] = useState(0);
+    const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
+
     const [availableQuestions, setAvailableQuestions] = useState<QuizQuestion[]>([]);
 
     const { toast } = useToast();
     const { country } = useCountry();
 
     const loadAndShuffleQuestions = useCallback(() => {
-        const countryFiltered = quizQuestions.filter(q => q.country === country || q.country === 'Global');
+        const difficultyLevels: Difficulty[] = ['Easy'];
+        if (level >= 3) difficultyLevels.push('Medium');
+        if (level >= 6) difficultyLevels.push('Hard');
+
+        const countryFiltered = quizQuestions.filter(q => 
+            (q.country === country || q.country === 'Global') &&
+            difficultyLevels.includes(q.difficulty)
+        );
         setAvailableQuestions(countryFiltered.sort(() => 0.5 - Math.random()));
-    }, [country]);
+    }, [country, level]);
 
     const fetchQuestion = useCallback(() => {
         setIsLoading(true);
         setSelectedAnswer(null);
         setIsCorrect(null);
         
-        // Use a timeout to simulate loading and prevent screen flicker
         setTimeout(() => {
             if (availableQuestions.length === 0) {
                  toast({
                     variant: 'destructive',
                     title: 'Out of Questions!',
-                    description: 'You have answered all available questions for this region. Please try another region or come back later!',
+                    description: 'You have answered all available questions for this level and region. Try leveling up or changing regions!',
                 });
                 setGameState('ended');
                 setIsLoading(false);
@@ -95,8 +109,9 @@ export default function QuizClashPage() {
     }, [gameState, timeLeft, isLoading]);
 
     const proceedToNextQuestion = useCallback(() => {
+        loadAndShuffleQuestions(); // Reload questions in case level changed
         fetchQuestion();
-    }, [fetchQuestion]);
+    }, [fetchQuestion, loadAndShuffleQuestions]);
     
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null || !question) return;
@@ -108,6 +123,9 @@ export default function QuizClashPage() {
 
         if (correct) {
             let points = 10;
+            if (question.difficulty === 'Medium') points = 15;
+            if (question.difficulty === 'Hard') points = 20;
+
             const newConsecutiveCorrect = consecutiveCorrect + 1;
             setConsecutiveCorrect(newConsecutiveCorrect);
 
@@ -116,6 +134,19 @@ export default function QuizClashPage() {
                 toast({ title: "Streak Bonus!", description: "+5 extra points!" });
             }
             setScore(prev => prev + points);
+
+            // Handle XP and leveling up
+            const newXp = xp + XP_PER_CORRECT;
+            if (newXp >= xpToNextLevel) {
+                const nextLevel = level + 1;
+                setLevel(nextLevel);
+                setXp(newXp - xpToNextLevel);
+                setXpToNextLevel(getXpToNextLevel(nextLevel));
+                toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! Harder questions unlocked.`, className: 'bg-primary text-primary-foreground' });
+            } else {
+                setXp(newXp);
+            }
+
         } else {
             setScore(prev => prev - 5);
             setConsecutiveCorrect(0);
@@ -144,6 +175,9 @@ export default function QuizClashPage() {
         setSelectedAnswer(null);
         setIsCorrect(null);
         setAnsweredQuestions([]);
+        setLevel(1);
+        setXp(0);
+        setXpToNextLevel(getXpToNextLevel(1));
     };
     
     const getButtonClass = (index: number) => {
@@ -197,7 +231,7 @@ export default function QuizClashPage() {
                            Quiz Clash
                         </CardTitle>
                         <CardDescription className="text-lg mt-2">
-                           Answer as many questions as you can in {TOTAL_TIME} seconds. Good luck!
+                           Answer questions to earn XP and level up. Good luck!
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -226,6 +260,7 @@ export default function QuizClashPage() {
                     <CardContent className="space-y-6">
                         <div className="text-2xl">Your Final Score:</div>
                         <div className="text-7xl font-bold text-primary">{score}</div>
+                         <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
                         <div className="flex justify-around text-lg w-full bg-secondary/50 p-4 rounded-lg">
                              <div>
                                 <p className="text-muted-foreground">Correct</p>
@@ -277,11 +312,20 @@ export default function QuizClashPage() {
                     </CardTitle>
                     <CardDescription className="flex justify-between items-center">
                         <span>Question {questionNumber}</span>
-                        <Badge variant="outline">{question.category}</Badge>
+                        <div className="flex gap-2">
+                          <Badge variant="secondary">{question.difficulty}</Badge>
+                          <Badge variant="outline">{question.category}</Badge>
+                        </div>
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <Progress value={(timeLeft / TOTAL_TIME) * 100} className="w-full h-2" />
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-sm font-medium text-muted-foreground">
+                            <span>Level {level}</span>
+                            <span>{xp} / {xpToNextLevel} XP</span>
+                        </div>
+                        <Progress value={(xp / xpToNextLevel) * 100} className="w-full h-2" />
+                    </div>
                     
                     <div className="p-4 rounded-lg bg-secondary text-center min-h-[120px] flex items-center justify-center">
                         <p className="text-xl font-semibold">{question.question}</p>
