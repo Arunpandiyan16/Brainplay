@@ -56,6 +56,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "Global",
     difficulty: "Easy"
   },
+  {
+    question: "What is the chemical symbol for gold?",
+    choices: ["Ag", "Au", "Gd", "Go"],
+    answerIndex: 1,
+    explanation: "The chemical symbol for gold is Au, from the Latin word 'aurum'.",
+    category: "General Knowledge",
+    country: "Global",
+    difficulty: "Easy"
+  },
 
   // General Knowledge - India - Easy
   {
@@ -128,6 +137,15 @@ export const quizQuestions: QuizQuestion[] = [
     choices: ["Monaco", "Nauru", "San Marino", "Vatican City"],
     answerIndex: 3,
     explanation: "Vatican City is the smallest independent state in the world, both in terms of area and population.",
+    category: "General Knowledge",
+    country: "Global",
+    difficulty: "Medium"
+  },
+  {
+    question: "Who composed the 'Four Seasons'?",
+    choices: ["Mozart", "Bach", "Beethoven", "Vivaldi"],
+    answerIndex: 3,
+    explanation: "The 'Four Seasons' is a set of four violin concertos composed by the Italian composer Antonio Vivaldi.",
     category: "General Knowledge",
     country: "Global",
     difficulty: "Medium"
@@ -241,6 +259,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "Global",
     difficulty: "Easy"
   },
+  {
+    question: "The 20-over format of cricket is also known as?",
+    choices: ["Test", "One Day International", "Twenty20", "The Hundred"],
+    answerIndex: 2,
+    explanation: "Twenty20, often abbreviated as T20, is a shortened format of cricket where each team plays a single innings of 20 overs.",
+    category: "Cricket",
+    country: "Global",
+    difficulty: "Easy"
+  },
 
   // Cricket - India - Easy
   {
@@ -321,6 +348,15 @@ export const quizQuestions: QuizQuestion[] = [
     country: "Global",
     difficulty: "Easy"
   },
+  {
+    question: "What does the 'G' in 5G stand for?",
+    choices: ["Gateway", "Gigabyte", "Generation", "Global"],
+    answerIndex: 2,
+    explanation: "The 'G' in cellular technology like 3G, 4G, and 5G stands for 'Generation'.",
+    category: "Tech",
+    country: "Global",
+    difficulty: "Easy"
+  },
 
   // Tech - India - Easy
   {
@@ -359,6 +395,24 @@ export const quizQuestions: QuizQuestion[] = [
     choices: ["Hyderabad", "Pune", "Bengaluru", "Gurugram"],
     answerIndex: 2,
     explanation: "Bengaluru (formerly Bangalore) is known as the Silicon Valley of India because of its role as the nation's leading information technology (IT) exporter.",
+    category: "Tech",
+    country: "India",
+    difficulty: "Medium"
+  },
+  {
+    question: "What is the ISRO, India's space agency, full form?",
+    choices: ["Indian Space Research Organization", "Indian Scientific Research Organization", "International Space Research Organization", "Indian Satellite Research Organization"],
+    answerIndex: 0,
+    explanation: "ISRO stands for the Indian Space Research Organisation, the national space agency of India.",
+    category: "General Knowledge",
+    country: "India",
+    difficulty: "Medium"
+  },
+  {
+    question: "Which Indian company is a major manufacturer of two-wheelers and motorcycles?",
+    choices: ["Tata Motors", "Mahindra & Mahindra", "Maruti Suzuki", "Hero MotoCorp"],
+    answerIndex: 3,
+    explanation: "Hero MotoCorp Ltd. is the world's largest manufacturer of two-wheelers, based in India.",
     category: "Tech",
     country: "India",
     difficulty: "Medium"
@@ -444,6 +498,17 @@ export const quizQuestions: QuizQuestion[] = [
     difficulty: "Hard"
   },
 
+  // Movies - India - Hard
+  {
+    question: "Which Indian director is known for epic historical films like 'Jodhaa Akbar' and 'Lagaan'?",
+    choices: ["Sanjay Leela Bhansali", "Ashutosh Gowariker", "Karan Johar", "Rajkumar Hirani"],
+    answerIndex: 1,
+    explanation: "Ashutosh Gowariker is known for directing epic films, including the Oscar-nominated 'Lagaan' (2001) and 'Jodhaa Akbar' (2008).",
+    category: "Movies",
+    country: "India",
+    difficulty: "Hard"
+  },
+
   // Cricket - Global - Hard
   {
     question: "Who holds the record for the highest individual score in a Test innings?",
@@ -461,6 +526,16 @@ export const quizQuestions: QuizQuestion[] = [
     explanation: "Sri Lankan spinner Muttiah Muralitharan holds the world record for the most wickets in Test cricket with 800.",
     category: "Cricket",
     country: "Global",
+    difficulty: "Hard"
+  },
+  // Cricket - India - Hard
+  {
+    question: "Who was the first Indian cricketer to score a century in all three formats of the game (Test, ODI, T20I)?",
+    choices: ["Virat Kohli", "Rohit Sharma", "Suresh Raina", "Virender Sehwag"],
+    answerIndex: 2,
+    explanation: "Suresh Raina was the first Indian batsman to score a century in all three formats of international cricket.",
+    category: "Cricket",
+    country: "India",
     difficulty: "Hard"
   },
 
@@ -523,78 +598,6 @@ export const quizQuestions: QuizQuestion[] = [
     country: "India",
     difficulty: "Hard"
   },
-    {
-    question: "What is the chemical symbol for gold?",
-    choices: ["Ag", "Au", "Gd", "Go"],
-    answerIndex: 1,
-    explanation: "The chemical symbol for gold is Au, from the Latin word 'aurum'.",
-    category: "General Knowledge",
-    country: "Global",
-    difficulty: "Easy"
-  },
-  {
-    question: "Who composed the 'Four Seasons'?",
-    choices: ["Mozart", "Bach", "Beethoven", "Vivaldi"],
-    answerIndex: 3,
-    explanation: "The 'Four Seasons' is a set of four violin concertos composed by the Italian composer Antonio Vivaldi.",
-    category: "General Knowledge",
-    country: "Global",
-    difficulty: "Medium"
-  },
-  {
-    question: "The 20-over format of cricket is also known as?",
-    choices: ["Test", "One Day International", "Twenty20", "The Hundred"],
-    answerIndex: 2,
-    explanation: "Twenty20, often abbreviated as T20, is a shortened format of cricket where each team plays a single innings of 20 overs.",
-    category: "Cricket",
-    country: "Global",
-    difficulty: "Easy"
-  },
-  {
-    question: "What does the 'G' in 5G stand for?",
-    choices: ["Gateway", "Gigabyte", "Generation", "Global"],
-    answerIndex: 2,
-    explanation: "The 'G' in cellular technology like 3G, 4G, and 5G stands for 'Generation'.",
-    category: "Tech",
-    country: "Global",
-    difficulty: "Easy"
-  },
-  {
-    question: "What is the ISRO, India's space agency, full form?",
-    choices: ["Indian Space Research Organization", "Indian Scientific Research Organization", "International Space Research Organization", "Indian Satellite Research Organization"],
-    answerIndex: 0,
-    explanation: "ISRO stands for the Indian Space Research Organisation, the national space agency of India.",
-    category: "General Knowledge",
-    country: "India",
-    difficulty: "Medium"
-  },
-  {
-    question: "Which Indian director is known for epic historical films like 'Jodhaa Akbar' and 'Lagaan'?",
-    choices: ["Sanjay Leela Bhansali", "Ashutosh Gowariker", "Karan Johar", "Rajkumar Hirani"],
-    answerIndex: 1,
-    explanation: "Ashutosh Gowariker is known for directing epic films, including the Oscar-nominated 'Lagaan' (2001) and 'Jodhaa Akbar' (2008).",
-    category: "Movies",
-    country: "India",
-    difficulty: "Hard"
-  },
-  {
-    question: "Who was the first Indian cricketer to score a century in all three formats of the game (Test, ODI, T20I)?",
-    choices: ["Virat Kohli", "Rohit Sharma", "Suresh Raina", "Virender Sehwag"],
-    answerIndex: 2,
-    explanation: "Suresh Raina was the first Indian batsman to score a century in all three formats of international cricket.",
-    category: "Cricket",
-    country: "India",
-    difficulty: "Hard"
-  },
-  {
-    question: "Which Indian company is a major manufacturer of two-wheelers and motorcycles?",
-    choices: ["Tata Motors", "Mahindra & Mahindra", "Maruti Suzuki", "Hero MotoCorp"],
-    answerIndex: 3,
-    explanation: "Hero MotoCorp Ltd. is the world's largest manufacturer of two-wheelers, based in India.",
-    category: "Tech",
-    country: "India",
-    difficulty: "Medium"
-  },
   {
     question: "Jallikattu, a traditional event, is typically practiced in which state?",
     choices: ["Kerala", "Andhra Pradesh", "Tamil Nadu", "Karnataka"],
@@ -605,27 +608,3 @@ export const quizQuestions: QuizQuestion[] = [
     difficulty: "Hard"
   }
 ];
-
-// To make the list much larger, you would continue adding entries in the same format.
-// For the purpose of this demonstration, the above list represents the structure and variety.
-// A real-world 2000-question list would be extremely long.
-
-function duplicateAndVary(questions: QuizQuestion[], targetCount: number): QuizQuestion[] {
-  const finalQuestions: QuizQuestion[] = [...questions];
-  if (questions.length === 0) return [];
-  
-  while (finalQuestions.length < targetCount) {
-    const originalQuestion = questions[finalQuestions.length % questions.length];
-    // Create a new object to avoid reference issues
-    const newQuestion = { ...originalQuestion };
-    // This is a simplistic way to make it 'different' for the key prop.
-    // In a real scenario, you'd want genuinely unique questions.
-    newQuestion.question = `${originalQuestion.question} (v${Math.floor(finalQuestions.length / questions.length) + 1})`;
-    finalQuestions.push(newQuestion);
-  }
-  
-  return finalQuestions;
-}
-
-// export const quizQuestions = duplicateAndVary(initialQuestions, 2000);
-// For now, we will use the smaller set to avoid performance issues. The logic supports a larger set.
