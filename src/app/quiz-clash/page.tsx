@@ -5,20 +5,22 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward, BarChart } from 'lucide-react';
+import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { useCountry } from '@/hooks/use-country.tsx';
 import { quizQuestions, QuizQuestion } from '@/lib/quiz-data';
 
-const TOTAL_TIME = 90; // Increased total time for level progression
-const SKIP_LIMIT = 2; // Allow more skips
+const TOTAL_TIME = 90; 
+const SKIP_LIMIT = 2; 
 
 type GameState = 'start' | 'playing' | 'ended';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
 const XP_PER_CORRECT = 10;
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 20;
+
+const STORAGE_KEY = 'quizClashProgress';
 
 export default function QuizClashPage() {
     const [gameState, setGameState] = useState<GameState>('start');
@@ -41,6 +43,33 @@ export default function QuizClashPage() {
 
     const { toast } = useToast();
     const { country } = useCountry();
+
+    // Load progress from localStorage on initial render
+    useEffect(() => {
+        try {
+            const savedProgress = localStorage.getItem(STORAGE_KEY);
+            if (savedProgress) {
+                const { savedLevel, savedXp, savedXpToNextLevel } = JSON.parse(savedProgress);
+                if (savedLevel && typeof savedLevel === 'number') {
+                    setLevel(savedLevel);
+                    setXp(savedXp || 0);
+                    setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
+                }
+            }
+        } catch (error) {
+            console.error("Failed to load progress from localStorage", error);
+        }
+    }, []);
+
+    // Save progress to localStorage whenever it changes
+    useEffect(() => {
+        try {
+            const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel });
+            localStorage.setItem(STORAGE_KEY, progress);
+        } catch (error) {
+            console.error("Failed to save progress to localStorage", error);
+        }
+    }, [level, xp, xpToNextLevel]);
 
     const loadAndShuffleQuestions = useCallback(() => {
         // Determine available difficulties based on level
@@ -179,9 +208,14 @@ export default function QuizClashPage() {
         setSelectedAnswer(null);
         setIsCorrect(null);
         setAnsweredQuestions([]);
+    };
+
+    const resetProgress = () => {
         setLevel(1);
         setXp(0);
         setXpToNextLevel(getXpToNextLevel(1));
+        localStorage.removeItem(STORAGE_KEY);
+        toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
     };
     
     const getButtonClass = (index: number) => {
@@ -235,12 +269,16 @@ export default function QuizClashPage() {
                            Quiz Clash
                         </CardTitle>
                         <CardDescription className="text-lg mt-2">
+                           Your current level is <span className="font-bold text-primary">{level}</span>.
                            Answer questions to earn XP and level up. Good luck!
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex flex-col gap-4">
                         <Button size="lg" className="text-xl w-full glow-shadow" onClick={startGame}>
                            <Zap className="mr-2"/> Start Game
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={resetProgress}>
+                           <RotateCcw className="mr-2"/> Reset Progress
                         </Button>
                     </CardContent>
                 </Card>
