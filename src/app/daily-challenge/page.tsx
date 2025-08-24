@@ -6,11 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward } from 'lucide-react';
-import { generateQuizQuestion, QuizQuestion } from '@/ai/flows/quiz-flow';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { useCountry } from '@/hooks/use-country.tsx';
+import { quizQuestions, QuizQuestion } from '@/lib/quiz-data';
+
 
 const TOTAL_TIME = 20; // Daily Challenge: Time Attack!
 const CATEGORIES = ['General Knowledge', 'Movies', 'Cricket', 'Tech', 'Tamil Nadu GK'];
@@ -29,35 +30,52 @@ export default function DailyChallengePage() {
     const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
     const [skipsUsed, setSkipsUsed] = useState(0);
     const [answeredQuestions, setAnsweredQuestions] = useState<any[]>([]);
+    const [availableQuestions, setAvailableQuestions] = useState<QuizQuestion[]>([]);
     const { toast } = useToast();
     const { country } = useCountry();
+
+    const loadAndShuffleQuestions = useCallback(() => {
+        const countryFiltered = quizQuestions.filter(q => q.country === country || q.country === 'Global');
+        setAvailableQuestions(countryFiltered.sort(() => 0.5 - Math.random()));
+    }, [country]);
+
 
     const fetchQuestion = useCallback(async () => {
         setIsLoading(true);
         setSelectedAnswer(null);
         setIsCorrect(null);
-        try {
-            const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
-            const nextQuestion = await generateQuizQuestion({ category, country });
-            setQuestion(nextQuestion);
-        } catch (error) {
-            console.error(error);
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Failed to load a new question. Please try again.',
-            });
-            setGameState('ended');
-        } finally {
+
+        setTimeout(() => {
+            if (availableQuestions.length === 0) {
+                 toast({
+                    variant: 'destructive',
+                    title: 'Out of Questions!',
+                    description: 'You have answered all available questions for this region. Please try another region or come back later!',
+                });
+                setGameState('ended');
+                setIsLoading(false);
+                return;
+            }
+
+            const nextQuestion = availableQuestions.pop();
+            setQuestion(nextQuestion!);
+            setAvailableQuestions(availableQuestions);
             setIsLoading(false);
-        }
-    }, [toast, country]);
+        }, 500);
+
+    }, [availableQuestions, toast]);
     
     useEffect(() => {
-        if (gameState === 'playing' && !question) {
+        if (gameState === 'playing') {
+            loadAndShuffleQuestions();
+        }
+    }, [gameState, loadAndShuffleQuestions]);
+
+    useEffect(() => {
+        if (gameState === 'playing' && availableQuestions.length > 0 && !question) {
             fetchQuestion();
         }
-    }, [gameState, question, fetchQuestion]);
+    }, [gameState, question, fetchQuestion, availableQuestions]);
 
 
     useEffect(() => {
