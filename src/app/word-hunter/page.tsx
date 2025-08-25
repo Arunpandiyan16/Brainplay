@@ -137,7 +137,7 @@ export default function WordHunterPage() {
     }, [gameState, puzzle, availablePuzzles, fetchPuzzle]);
     
     const checkAnswer = useCallback(() => {
-        if (!puzzle || answerSlots.length !== puzzle.word.length) return;
+        if (!puzzle) return;
 
         const guessedWord = answerSlots.map(s => s.char).join('');
         
@@ -190,8 +190,10 @@ export default function WordHunterPage() {
     }, [answerSlots, puzzle, hintTaken, xp, xpToNextLevel, level, loadAndShufflePuzzles, fetchPuzzle, toast]);
 
     useEffect(() => {
-        checkAnswer();
-    }, [answerSlots, checkAnswer]);
+        if (puzzle && answerSlots.length === puzzle.word.length) {
+            checkAnswer();
+        }
+    }, [answerSlots, puzzle, checkAnswer]);
 
     const startGame = () => {
         setScore(0);
