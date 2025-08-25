@@ -40,13 +40,13 @@ export default function DailyChallengePage() {
     }, [country]);
 
 
-    const fetchQuestion = useCallback(async () => {
+    const fetchQuestion = useCallback((currentQuestions: QuizQuestion[]) => {
         setIsLoading(true);
         setSelectedAnswer(null);
         setIsCorrect(null);
 
         setTimeout(() => {
-            if (availableQuestions.length === 0) {
+            if (currentQuestions.length === 0) {
                  toast({
                     variant: 'destructive',
                     title: 'Out of Questions!',
@@ -57,13 +57,13 @@ export default function DailyChallengePage() {
                 return;
             }
 
-            const nextQuestion = availableQuestions.pop();
+            const nextQuestion = currentQuestions.pop();
             setQuestion(nextQuestion!);
-            setAvailableQuestions(availableQuestions);
+            setAvailableQuestions(currentQuestions);
             setIsLoading(false);
         }, 500);
 
-    }, [availableQuestions, toast]);
+    }, [toast]);
     
     useEffect(() => {
         if (gameState === 'playing') {
@@ -73,7 +73,7 @@ export default function DailyChallengePage() {
 
     useEffect(() => {
         if (gameState === 'playing' && availableQuestions.length > 0 && !question) {
-            fetchQuestion();
+            fetchQuestion(availableQuestions);
         }
     }, [gameState, question, fetchQuestion, availableQuestions]);
 
@@ -94,8 +94,8 @@ export default function DailyChallengePage() {
     }, [gameState, timeLeft, isLoading]);
 
     const proceedToNextQuestion = useCallback(() => {
-        fetchQuestion();
-    }, [fetchQuestion]);
+        fetchQuestion(availableQuestions);
+    }, [fetchQuestion, availableQuestions]);
     
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null || !question) return;
@@ -348,3 +348,5 @@ export default function DailyChallengePage() {
         </div>
     );
 }
+
+    

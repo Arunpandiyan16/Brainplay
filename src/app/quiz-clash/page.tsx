@@ -87,13 +87,13 @@ export default function QuizClashPage() {
     }, [country, level]);
 
 
-    const fetchQuestion = useCallback(() => {
+    const fetchQuestion = useCallback((currentQuestions: QuizQuestion[]) => {
         setIsLoading(true);
         setSelectedAnswer(null);
         setIsCorrect(null);
         
         setTimeout(() => {
-            if (availableQuestions.length === 0) {
+            if (currentQuestions.length === 0) {
                  toast({
                     variant: 'destructive',
                     title: 'Out of Questions!',
@@ -104,14 +104,14 @@ export default function QuizClashPage() {
                 return;
             }
             
-            const nextQuestion = availableQuestions.pop();
+            const nextQuestion = currentQuestions.pop();
             setQuestion(nextQuestion!);
-            setAvailableQuestions(availableQuestions);
+            setAvailableQuestions(currentQuestions);
             setIsLoading(false);
 
         }, 500);
 
-    }, [availableQuestions, toast]);
+    }, [toast]);
     
     useEffect(() => {
         if (gameState === 'playing') {
@@ -121,7 +121,7 @@ export default function QuizClashPage() {
 
     useEffect(() => {
         if (gameState === 'playing' && availableQuestions.length > 0 && !question) {
-            fetchQuestion();
+            fetchQuestion(availableQuestions);
         }
     }, [gameState, availableQuestions, question, fetchQuestion]);
 
@@ -142,9 +142,8 @@ export default function QuizClashPage() {
     }, [gameState, timeLeft, isLoading]);
 
     const proceedToNextQuestion = useCallback(() => {
-        loadAndShuffleQuestions(); // Reload questions in case level changed
-        fetchQuestion();
-    }, [fetchQuestion, loadAndShuffleQuestions]);
+        fetchQuestion(availableQuestions);
+    }, [fetchQuestion, availableQuestions]);
     
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null || !question) return;
@@ -174,7 +173,8 @@ export default function QuizClashPage() {
                 const nextLevel = level + 1;
                 setLevel(nextLevel);
                 setXp(newXp - xpToNextLevel);
-                setXpToNextLevel(getXpToNextLevel(nextLevel));
+                const newXpToNext = getXpToNextLevel(nextLevel);
+                setXpToNextLevel(newXpToNext);
                 toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! Harder questions unlocked.`, className: 'bg-primary text-primary-foreground' });
             } else {
                 setXp(newXp);
@@ -302,7 +302,7 @@ export default function QuizClashPage() {
                     <CardContent className="space-y-6">
                         <div className="text-2xl">Your Final Score:</div>
                         <div className="text-7xl font-bold text-primary">{score}</div>
-                         <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
+                         <div className="text-2xl">Final Level: <span className="font-bold text-primary">{level}</span></div>
                         <div className="flex justify-around text-lg w-full bg-secondary/50 p-4 rounded-lg">
                              <div>
                                 <p className="text-muted-foreground">Correct</p>
@@ -428,9 +428,5 @@ export default function QuizClashPage() {
         </div>
     );
 }
-
-    
-
-    
 
     
