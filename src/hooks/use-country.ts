@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { createContext, useState, useContext, useMemo } from 'react';
+import React, { createContext, useState, useContext, useMemo, useEffect } from 'react';
 
 type CountryContextType = {
   country: string;
@@ -10,7 +11,19 @@ type CountryContextType = {
 const CountryContext = createContext<CountryContextType | undefined>(undefined);
 
 export function CountryProvider({ children }: { children: React.ReactNode }) {
-  const [country, setCountry] = useState('India');
+  const [country, setCountryState] = useState('India');
+
+  useEffect(() => {
+    const savedCountry = localStorage.getItem('country');
+    if (savedCountry) {
+      setCountryState(savedCountry);
+    }
+  }, []);
+
+  const setCountry = (newCountry: string) => {
+    localStorage.setItem('country', newCountry);
+    setCountryState(newCountry);
+  };
 
   const value = useMemo(() => ({ country, setCountry }), [country]);
 
@@ -28,3 +41,5 @@ export function useCountry() {
   }
   return context;
 }
+
+    

@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Brain, Clock, Trophy, Sparkles, Zap, Loader2, Lightbulb, Repeat } from 'lucide-react';
+import { Brain, Clock, Trophy, Sparkles, Zap, Loader2, Lightbulb, Repeat, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   Select,
@@ -28,6 +28,7 @@ import { triviaData } from '@/lib/trivia-data';
 
 type GameState = 'settings' | 'playing' | 'ended';
 type GridSize = '4x4' | '5x4' | '6x5';
+type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
 interface CardData {
   id: number;
@@ -48,10 +49,15 @@ const EMOJI_PAIRS: { [key: string]: string } = {
 };
 
 const GRID_CONFIG = {
-  '4x4': { pairs: 8, cols: 4 },
-  '5x4': { pairs: 10, cols: 5 },
-  '6x5': { pairs: 15, cols: 6 },
+  'Easy': { pairs: 8, cols: 4, time: 80 },
+  'Medium': { pairs: 10, cols: 5, time: 100 },
+  'Hard': { pairs: 15, cols: 6, time: 150 },
 };
+
+const XP_PER_MATCH = 5;
+const getXpToNextLevel = (level: number) => 50 + (level - 1) * 20;
+const STORAGE_KEY = 'memoryFlipProgress';
+
 
 interface TriviaFact {
     fact: string;
@@ -59,7 +65,6 @@ interface TriviaFact {
 
 export default function MemoryFlipPage() {
   const [gameState, setGameState] = useState<GameState>('settings');
-  const [gridSize, setGridSize] = useState<GridSize>('4x4');
 
   const [cards, setCards] = useState<CardData[]>([]);
   const [flippedIndices, setFlippedIndices] = useState<number[]>([]);
@@ -70,11 +75,51 @@ export default function MemoryFlipPage() {
   const [trivia, setTrivia] = useState<TriviaFact | null>(null);
   const [isTriviaLoading, setIsTriviaLoading] = useState(false);
   
+  // Leveling state
+  const [level, setLevel] = useState(1);
+  const [xp, setXp] = useState(0);
+  const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
+
   const { toast } = useToast();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Load progress from localStorage on initial render
+    useEffect(() => {
+        try {
+            const savedProgress = localStorage.getItem(STORAGE_KEY);
+            if (savedProgress) {
+                const { savedLevel, savedXp, savedXpToNextLevel } = JSON.parse(savedProgress);
+                if (savedLevel && typeof savedLevel === 'number') {
+                    setLevel(savedLevel);
+                    setXp(savedXp || 0);
+                    setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
+                }
+            }
+        } catch (error) {
+            console.error("Failed to load progress from localStorage", error);
+        }
+    }, []);
+
+    // Save progress to localStorage whenever it changes
+    useEffect(() => {
+        try {
+            const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel });
+            localStorage.setItem(STORAGE_KEY, progress);
+        } catch (error) {
+            console.error("Failed to save progress to localStorage", error);
+        }
+    }, [level, xp, xpToNextLevel]);
+
+
+  const getDifficulty = useCallback((): Difficulty => {
+    if (level >= 6) return 'Hard';
+    if (level >= 3) return 'Medium';
+    return 'Easy';
+  }, [level]);
 
   const setupGame = useCallback(() => {
-    const { pairs } = GRID_CONFIG[gridSize];
+    const difficulty = getDifficulty();
+    const { pairs, time } = GRID_CONFIG[difficulty];
     const availableIcons = Object.keys(EMOJI_PAIRS);
     const selectedIcons = availableIcons.sort(() => 0.5 - Math.random()).slice(0, pairs);
     const gameCards = [...selectedIcons, ...selectedIcons]
@@ -82,11 +127,10 @@ export default function MemoryFlipPage() {
       .map((type, id) => ({ id, type, isFlipped: false, isMatched: false }));
     
     setCards(gameCards);
-    const gameDuration = pairs * 10;
-    setTotalTime(gameDuration);
-    setTimeLeft(gameDuration);
+    setTotalTime(time);
+    setTimeLeft(time);
 
-  }, [gridSize]);
+  }, [getDifficulty]);
 
   const startGame = () => {
     setGameState('playing');
@@ -95,6 +139,14 @@ export default function MemoryFlipPage() {
     setTrivia(null);
     setupGame();
   };
+  
+    const resetProgress = () => {
+        setLevel(1);
+        setXp(0);
+        setXpToNextLevel(getXpToNextLevel(1));
+        localStorage.removeItem(STORAGE_KEY);
+        toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
+    };
 
   useEffect(() => {
     if (gameState === 'playing') {
@@ -150,6 +202,18 @@ export default function MemoryFlipPage() {
           )
         );
         fetchTrivia(firstCard.type);
+
+        const newXp = xp + XP_PER_MATCH;
+        if (newXp >= xpToNextLevel) {
+            const nextLevel = level + 1;
+            setLevel(nextLevel);
+            setXp(newXp - xpToNextLevel);
+            setXpToNextLevel(getXpToNextLevel(nextLevel));
+            toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! Harder grids unlocked.`, className: 'bg-primary text-primary-foreground' });
+        } else {
+            setXp(newXp);
+        }
+
         setFlippedIndices([]);
         setIsChecking(false);
       } else {
@@ -167,7 +231,7 @@ export default function MemoryFlipPage() {
         }, 1000);
       }
     }
-  }, [flippedIndices, cards]);
+  }, [flippedIndices, cards, xp, xpToNextLevel, level, toast]);
 
   const handleCardClick = (index: number) => {
     if (isChecking || cards[index].isFlipped || cards[index].isMatched || flippedIndices.length === 2) {
@@ -189,25 +253,17 @@ export default function MemoryFlipPage() {
                        Memory Flip
                     </CardTitle>
                     <CardDescription className="text-lg">
-                       Match pairs, test your memory, and learn fun facts!
+                       Your current level is <span className="font-bold text-primary">{level}</span>.
+                       <br/>
+                       Match pairs to earn XP and unlock larger grids!
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                     <div className="space-y-2 text-left">
-                         <label className="text-sm font-medium">Grid Size</label>
-                        <Select onValueChange={(v: GridSize) => setGridSize(v)} defaultValue={gridSize}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select grid size" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="4x4">4 x 4 (Easy)</SelectItem>
-                                <SelectItem value="5x4">5 x 4 (Medium)</SelectItem>
-                                <SelectItem value="6x5">6 x 5 (Hard)</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                <CardContent className="flex flex-col gap-4">
                     <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame}>
                        <Zap className="mr-2"/> Start Game
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={resetProgress}>
+                       <RotateCcw className="mr-2"/> Reset Progress
                     </Button>
                 </CardContent>
             </Card>
@@ -238,6 +294,7 @@ export default function MemoryFlipPage() {
                                 <p className="font-bold text-2xl text-primary">{timeLeft}</p>
                             </div>
                         </div>
+                        <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
                         <Button size="lg" className="text-xl w-full" onClick={() => setGameState('settings')}>
                            <Sparkles className="mr-2"/> Play Again
                         </Button>
@@ -246,6 +303,9 @@ export default function MemoryFlipPage() {
             </div>
         )
     }
+  
+  const difficulty = getDifficulty();
+  const { cols } = GRID_CONFIG[difficulty];
 
   return (
     <div className="flex flex-col items-center py-8 gap-8">
@@ -266,13 +326,21 @@ export default function MemoryFlipPage() {
                         </div>
                     </div>
                 </CardTitle>
-                <CardDescription>Match all the pairs before time runs out!</CardDescription>
+                <CardDescription className="flex justify-between">
+                    <span>Level: <span className="font-bold text-primary">{level}</span> ({difficulty})</span>
+                </CardDescription>
             </CardHeader>
              <CardContent className="space-y-4">
-                 <Progress value={(timeLeft / totalTime) * 100} className="w-full h-2" />
+                <div className="space-y-2">
+                    <div className="flex justify-between text-sm font-medium text-muted-foreground">
+                        <span>Level {level} XP</span>
+                        <span>{xp} / {xpToNextLevel}</span>
+                    </div>
+                    <Progress value={(xp / xpToNextLevel) * 100} className="w-full h-2" />
+                </div>
                 <div 
                     className="grid gap-2 md:gap-4 justify-center"
-                    style={{ gridTemplateColumns: `repeat(${GRID_CONFIG[gridSize].cols}, minmax(0, 1fr))` }}
+                    style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
                 >
                     {cards.map((card, index) => (
                         <button
@@ -333,3 +401,5 @@ export default function MemoryFlipPage() {
   }
 }
 */
+
+    

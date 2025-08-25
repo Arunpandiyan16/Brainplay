@@ -365,3 +365,5 @@ export default function MathRushPage() {
         </div>
     );
 }
+
+    
