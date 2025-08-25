@@ -93,10 +93,6 @@ export default function DailyChallengePage() {
 
         return () => clearInterval(timer);
     }, [gameState, timeLeft, isLoading]);
-
-    const proceedToNextQuestion = useCallback(() => {
-        fetchQuestion();
-    }, [fetchQuestion]);
     
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null || !question) return;
@@ -122,7 +118,7 @@ export default function DailyChallengePage() {
         }
 
         setTimeout(() => {
-            proceedToNextQuestion();
+            fetchQuestion();
         }, 1500);
     };
 
@@ -131,7 +127,7 @@ export default function DailyChallengePage() {
         setSkipsUsed(prev => prev + 1);
         setConsecutiveCorrect(0);
         setAnsweredQuestions(prev => [...prev, { ...question, answeredCorrectly: false, skipped: true }]);
-        proceedToNextQuestion();
+        fetchQuestion();
     };
 
     const startGame = () => {
