@@ -74,7 +74,17 @@ export default function MathRushPage() {
 
     const generateProblem = useCallback((): Problem => {
         // Aptitude questions unlocked at level 5
-        const shouldShowAptitude = level >= 5 && Math.random() < 0.25; // 25% chance for aptitude question
+        let aptitudeChance = 0;
+        if (level >= 11) {
+            aptitudeChance = 0.50; // 50% chance
+        } else if (level >= 8) {
+            aptitudeChance = 0.40; // 40% chance
+        } else if (level >= 5) {
+            aptitudeChance = 0.25; // 25% chance
+        }
+        
+        const shouldShowAptitude = Math.random() < aptitudeChance;
+
         if (shouldShowAptitude && aptitudeQuestions.length > 0) {
             const aptitudeProblem = aptitudeQuestions[Math.floor(Math.random() * aptitudeQuestions.length)];
             return { ...aptitudeProblem, type: 'Aptitude' };
