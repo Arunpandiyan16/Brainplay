@@ -34,12 +34,6 @@ export default function DailyChallengePage() {
     const { toast } = useToast();
     const { country } = useCountry();
 
-    const loadAndShuffleQuestions = useCallback(() => {
-        const countryFiltered = quizQuestions.filter(q => q.country === country || q.country === 'Global');
-        setAvailableQuestions(countryFiltered.sort(() => 0.5 - Math.random()));
-    }, [country]);
-
-
     const fetchQuestion = useCallback(() => {
         setIsLoading(true);
         setSelectedAnswer(null);
@@ -65,18 +59,28 @@ export default function DailyChallengePage() {
         });
 
     }, [toast]);
-    
-    useEffect(() => {
-        if (gameState === 'playing') {
-            loadAndShuffleQuestions();
-        }
-    }, [gameState, loadAndShuffleQuestions]);
 
     useEffect(() => {
-        if (gameState === 'playing' && availableQuestions.length > 0 && !question && !isLoading) {
-            fetchQuestion();
+        if (gameState === 'playing') {
+            const countryFiltered = quizQuestions.filter(q => q.country === country || q.country === 'Global');
+            const shuffled = countryFiltered.sort(() => 0.5 - Math.random());
+            setAvailableQuestions(shuffled);
+            
+            if (shuffled.length > 0) {
+                const firstQuestion = shuffled.pop();
+                setQuestion(firstQuestion!);
+                setAvailableQuestions(shuffled);
+            } else {
+                 toast({
+                    variant: 'destructive',
+                    title: 'Out of Questions!',
+                    description: 'You have answered all available questions for this region. Please try another region or come back later!',
+                });
+                setGameState('ended');
+            }
+            setIsLoading(false);
         }
-    }, [gameState, question, fetchQuestion, availableQuestions, isLoading]);
+    }, [gameState, country, toast]);
 
 
     useEffect(() => {
@@ -93,10 +97,10 @@ export default function DailyChallengePage() {
 
         return () => clearInterval(timer);
     }, [gameState, timeLeft, isLoading]);
-    
+
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null || !question) return;
-        
+
         setSelectedAnswer(index);
         const correct = index === question.answerIndex;
         setIsCorrect(correct);
@@ -140,8 +144,9 @@ export default function DailyChallengePage() {
         setSelectedAnswer(null);
         setIsCorrect(null);
         setAnsweredQuestions([]);
+        setIsLoading(true);
     };
-    
+
     const getButtonClass = (index: number) => {
         if (selectedAnswer !== null && question) {
             if (index === question.answerIndex) {
@@ -156,7 +161,7 @@ export default function DailyChallengePage() {
 
     const renderCategoryBreakdown = () => {
         const breakdown: { [key: string]: { correct: number; total: number } } = {};
-        
+
         answeredQuestions.forEach(q => {
              if (q.skipped) return;
             if (!breakdown[q.category]) {
@@ -248,7 +253,7 @@ export default function DailyChallengePage() {
             </div>
         )
     }
-    
+
     const questionNumber = answeredQuestions.length + 1;
 
     if (isLoading || !question) {
@@ -285,16 +290,16 @@ export default function DailyChallengePage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <Progress value={(timeLeft / TOTAL_TIME) * 100} className="w-full h-2" />
-                    
+
                     <div className="p-4 rounded-lg bg-secondary text-center min-h-[120px] flex items-center justify-center">
                         <p className="text-xl font-semibold">{question.question}</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {question.choices.map((choice, index) => (
-                            <Button 
-                                key={index} 
-                                size="lg" 
+                            <Button
+                                key={index}
+                                size="lg"
                                 className={`justify-start h-auto py-4 text-base text-left whitespace-normal ${getButtonClass(index)}`}
                                 onClick={() => handleAnswer(index)}
                                 disabled={selectedAnswer !== null}

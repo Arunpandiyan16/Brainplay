@@ -34,15 +34,15 @@ interface AnswerSlot {
 export default function WordHunterPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
     const [language, setLanguage] = useState<Language>('English');
-    
+
     const [puzzle, setPuzzle] = useState<WordPuzzle | null>(null);
     const [availableLetters, setAvailableLetters] = useState<Letter[]>([]);
     const [answerSlots, setAnswerSlots] = useState<AnswerSlot[]>([]);
     const [isWrong, setIsWrong] = useState(false);
-    
+
     const [score, setScore] = useState(0);
     const [gameTimeLeft, setGameTimeLeft] = useState(TOTAL_TIME);
-    
+
     const [isLoading, setIsLoading] = useState(false);
     const [hintTaken, setHintTaken] = useState(false);
     const [showHint, setShowHint] = useState(false);
@@ -52,9 +52,9 @@ export default function WordHunterPage() {
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
     const [availablePuzzles, setAvailablePuzzles] = useState<WordPuzzle[]>([]);
-    
+
     const { toast } = useToast();
-    
+
     useEffect(() => {
         try {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
@@ -79,19 +79,6 @@ export default function WordHunterPage() {
             console.error("Failed to save progress to localStorage", error);
         }
     }, [level, xp, xpToNextLevel]);
-    
-    const loadAndShufflePuzzles = useCallback(() => {
-        const difficulties: Difficulty[] = ['Easy'];
-        if (level >= 3) difficulties.push('Medium');
-        if (level >= 6) difficulties.push('Hard');
-        
-        const languagePuzzles = wordBank[language];
-        const filteredPuzzles = difficulties.flatMap(diff => languagePuzzles[diff] || []);
-        
-        const unsolvedPuzzles = filteredPuzzles.filter(p => !solvedWords.some(s => s.word === p.word));
-
-        setAvailablePuzzles(unsolvedPuzzles.sort(() => 0.5 - Math.random()));
-    }, [language, level, solvedWords]);
 
 
     const fetchPuzzle = useCallback(() => {
@@ -111,7 +98,7 @@ export default function WordHunterPage() {
                 setIsLoading(false);
                 return [];
             }
-            
+
             const newPuzzles = [...currentPuzzles];
             const nextPuzzle = newPuzzles.pop();
             if (nextPuzzle) {
@@ -123,26 +110,43 @@ export default function WordHunterPage() {
             setIsLoading(false);
             return newPuzzles;
         });
-       
+
     }, [toast]);
     
     useEffect(() => {
         if (gameState === 'playing') {
-            loadAndShufflePuzzles();
-        }
-    }, [gameState, loadAndShufflePuzzles]);
+            const difficulties: Difficulty[] = ['Easy'];
+            if (level >= 3) difficulties.push('Medium');
+            if (level >= 6) difficulties.push('Hard');
 
-    useEffect(() => {
-        if (gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
-            fetchPuzzle();
+            const languagePuzzles = wordBank[language];
+            const filteredPuzzles = difficulties.flatMap(diff => languagePuzzles[diff] || []);
+            const unsolvedPuzzles = filteredPuzzles.filter(p => !solvedWords.some(s => s.word === p.word));
+            const shuffled = unsolvedPuzzles.sort(() => 0.5 - Math.random());
+            setAvailablePuzzles(shuffled);
+            
+            if (shuffled.length > 0) {
+                const firstPuzzle = shuffled.pop()
+                setPuzzle(firstPuzzle!);
+                setAvailableLetters(firstPuzzle!.scrambled.split('').map((char, index) => ({ char, id: index, used: false })));
+                setAvailablePuzzles(shuffled);
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: 'Out of Words!',
+                    description: 'You\'ve solved all available words for your level. Level up or reset progress!',
+                });
+                setGameState('ended');
+            }
+             setIsLoading(false);
         }
-    }, [gameState, puzzle, availablePuzzles, fetchPuzzle]);
-    
-     const checkAnswer = useCallback(() => {
+    }, [gameState, language, level, solvedWords, toast]);
+
+    const checkAnswer = useCallback(() => {
         if (!puzzle || answerSlots.length !== puzzle.word.length) return;
 
         const guessedWord = answerSlots.map(s => s.char).join('');
-        
+
         if (guessedWord.toLowerCase() === puzzle.word.toLowerCase()) {
             let points = 10;
             let awardedXp = 10;
@@ -158,11 +162,11 @@ export default function WordHunterPage() {
                 points = Math.floor(points / 2);
                 awardedXp = Math.floor(awardedXp / 2);
             }
-            
+
             toast({ title: "Correct!", description: `+${points} points & +${awardedXp} XP`, className: 'bg-green-500' });
             setScore(prev => prev + points);
             setSolvedWords(prev => [...prev, puzzle]);
-            
+
             const newXp = xp + awardedXp;
             if (newXp >= xpToNextLevel) {
                 const nextLevel = level + 1;
@@ -173,7 +177,7 @@ export default function WordHunterPage() {
             } else {
                 setXp(newXp);
             }
-            
+
             setTimeout(() => {
                 fetchPuzzle();
             }, 500);
@@ -201,6 +205,7 @@ export default function WordHunterPage() {
         setSolvedWords([]);
         setPuzzle(null);
         setGameState('playing');
+        setIsLoading(true);
     };
 
     useEffect(() => {
@@ -238,7 +243,7 @@ export default function WordHunterPage() {
         setHintTaken(true);
         setScore(prev => prev - HINT_COST);
     };
-    
+
     const handleSkip = () => {
       if(isLoading) return;
       fetchPuzzle();
@@ -405,11 +410,11 @@ export default function WordHunterPage() {
                             <div className="p-4 rounded-lg bg-secondary min-h-[100px] flex items-center justify-center">
                                 <AnswerDisplay />
                             </div>
-                            
+
                              <div className="p-4 rounded-lg min-h-[140px] flex items-center justify-center">
                                 <LetterPool />
                             </div>
-                            
+
                             {showHint && (
                                 <Card className="bg-secondary/50">
                                     <CardContent className="p-4 flex items-center gap-2">

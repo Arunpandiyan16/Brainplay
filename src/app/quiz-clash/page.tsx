@@ -11,8 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { useCountry } from '@/hooks/use-country';
 import { quizQuestions, QuizQuestion } from '@/lib/quiz-data';
 
-const TOTAL_TIME = 90; 
-const SKIP_LIMIT = 2; 
+const TOTAL_TIME = 90;
+const SKIP_LIMIT = 2;
 
 type GameState = 'start' | 'playing' | 'ended';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
@@ -33,7 +33,7 @@ export default function QuizClashPage() {
     const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
     const [skipsUsed, setSkipsUsed] = useState(0);
     const [answeredQuestions, setAnsweredQuestions] = useState<any[]>([]);
-    
+
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
@@ -68,24 +68,11 @@ export default function QuizClashPage() {
         }
     }, [level, xp, xpToNextLevel]);
 
-    const loadAndShuffleQuestions = useCallback(() => {
-        const difficulties: Difficulty[] = ['Easy'];
-        if (level >= 3) difficulties.push('Medium');
-        if (level >= 6) difficulties.push('Hard');
-
-        const countryFiltered = quizQuestions.filter(q => 
-            (q.country === country || q.country === 'Global') &&
-            difficulties.includes(q.difficulty)
-        );
-        
-        setAvailableQuestions(countryFiltered.sort(() => 0.5 - Math.random()));
-    }, [country, level]);
-
     const fetchQuestion = useCallback(() => {
         setIsLoading(true);
         setSelectedAnswer(null);
         setIsCorrect(null);
-        
+
         setAvailableQuestions(currentQuestions => {
             if (currentQuestions.length === 0) {
                 toast({
@@ -97,7 +84,6 @@ export default function QuizClashPage() {
                 setIsLoading(false);
                 return [];
             }
-
             const newQuestions = [...currentQuestions];
             const nextQuestion = newQuestions.pop();
             setQuestion(nextQuestion!);
@@ -105,18 +91,35 @@ export default function QuizClashPage() {
             return newQuestions;
         });
     }, [toast]);
-    
-    useEffect(() => {
-        if (gameState === 'playing') {
-            loadAndShuffleQuestions();
-        }
-    }, [gameState, loadAndShuffleQuestions]);
 
     useEffect(() => {
-        if (gameState === 'playing' && availableQuestions.length > 0 && !question && !isLoading) {
-            fetchQuestion();
+        if (gameState === 'playing') {
+            const difficulties: Difficulty[] = ['Easy'];
+            if (level >= 3) difficulties.push('Medium');
+            if (level >= 6) difficulties.push('Hard');
+
+            const countryFiltered = quizQuestions.filter(q =>
+                (q.country === country || q.country === 'Global') &&
+                difficulties.includes(q.difficulty)
+            );
+            const shuffled = countryFiltered.sort(() => 0.5 - Math.random());
+            setAvailableQuestions(shuffled);
+            
+            if (shuffled.length > 0) {
+                const firstQuestion = shuffled.pop();
+                setQuestion(firstQuestion!);
+                setAvailableQuestions(shuffled);
+            } else {
+                 toast({
+                    variant: 'destructive',
+                    title: 'Out of Questions!',
+                    description: 'You have answered all available questions for this level and region. Try leveling up or changing regions!',
+                });
+                setGameState('ended');
+            }
         }
-    }, [gameState, availableQuestions, question, fetchQuestion, isLoading]);
+    }, [gameState, country, level, toast]);
+
 
     useEffect(() => {
         if (gameState !== 'playing' || isLoading) return;
@@ -132,10 +135,10 @@ export default function QuizClashPage() {
 
         return () => clearInterval(timer);
     }, [gameState, timeLeft, isLoading]);
-    
+
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null || !question) return;
-        
+
         setSelectedAnswer(index);
         const correct = index === question.answerIndex;
         setIsCorrect(correct);
@@ -195,6 +198,7 @@ export default function QuizClashPage() {
         setSelectedAnswer(null);
         setIsCorrect(null);
         setAnsweredQuestions([]);
+        setIsLoading(true);
     };
 
     const resetProgress = () => {
@@ -204,7 +208,7 @@ export default function QuizClashPage() {
         localStorage.removeItem(STORAGE_KEY);
         toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
     };
-    
+
     const getButtonClass = (index: number) => {
         if (selectedAnswer !== null && question) {
             if (index === question.answerIndex) {
@@ -219,7 +223,7 @@ export default function QuizClashPage() {
 
     const renderCategoryBreakdown = () => {
         const breakdown: { [key: string]: { correct: number; total: number } } = {};
-        
+
         answeredQuestions.forEach(q => {
              if (q.skipped) return;
             if (!breakdown[q.category]) {
@@ -309,7 +313,7 @@ export default function QuizClashPage() {
             </div>
         )
     }
-    
+
     const questionNumber = answeredQuestions.length + 1;
 
     if (isLoading || !question) {
@@ -332,7 +336,7 @@ export default function QuizClashPage() {
                     <CardTitle className="flex items-center justify-between text-2xl">
                         <div className="flex items-center gap-2">
                            <BrainCircuit className="text-primary"/>
-                           Quiz Clash 
+                           Quiz Clash
                         </div>
                         <div className="flex items-center gap-2 text-xl font-mono px-3 py-1 rounded-md bg-secondary">
                             <Clock className={`w-5 h-5 ${timeLeft <= 10 ? 'text-red-500' : ''}`}/>
@@ -355,16 +359,16 @@ export default function QuizClashPage() {
                         </div>
                         <Progress value={(xp / xpToNextLevel) * 100} className="w-full h-2" />
                     </div>
-                    
+
                     <div className="p-4 rounded-lg bg-secondary text-center min-h-[120px] flex items-center justify-center">
                         <p className="text-xl font-semibold">{question.question}</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {question.choices.map((choice, index) => (
-                            <Button 
-                                key={index} 
-                                size="lg" 
+                            <Button
+                                key={index}
+                                size="lg"
                                 className={`justify-start h-auto py-4 text-base text-left whitespace-normal ${getButtonClass(index)}`}
                                 onClick={() => handleAnswer(index)}
                                 disabled={selectedAnswer !== null}

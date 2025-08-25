@@ -21,7 +21,7 @@ type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
 export default function SpotFakeNewsPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
-    
+
     const [headline, setHeadline] = useState<NewsHeadline | null>(null);
     const [selection, setSelection] = useState<'real' | 'fake' | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -82,7 +82,7 @@ export default function SpotFakeNewsPage() {
                 setIsLoading(false);
                 return [];
             }
-    
+
             const newHeadlines = [...currentHeadlines];
             const nextHeadline = newHeadlines.pop();
             setHeadline(nextHeadline!);
@@ -91,7 +91,7 @@ export default function SpotFakeNewsPage() {
         });
 
     }, [toast]);
-    
+
     const startGame = () => {
         setScore(0);
         setTimeLeft(TOTAL_TIME);
@@ -99,36 +99,39 @@ export default function SpotFakeNewsPage() {
         setCorrectCount(0);
         setHeadline(null);
         setIsLoading(true);
-        
-        const difficulties: Difficulty[] = ['Easy'];
-        if (level >= 3) difficulties.push('Medium');
-        if (level >= 5) difficulties.push('Hard');
-
-        const filtered = fakeNewsData.filter(h => 
-            difficulties.includes(h.difficulty) && 
-            (h.country === country || h.country === 'Global')
-        );
-        
-        if(filtered.length === 0) {
-            toast({
-                variant: 'destructive',
-                title: 'No Headlines Available!',
-                description: 'There are no headlines for your current level and region.',
-            });
-            setGameState('settings');
-            setIsLoading(false);
-            return;
-        }
-
-        setAvailableHeadlines(filtered.sort(() => 0.5 - Math.random()));
         setGameState('playing');
     };
 
     useEffect(() => {
-        if(gameState === 'playing' && availableHeadlines.length > 0 && !headline){
-            fetchHeadline();
+        if (gameState === 'playing') {
+            const difficulties: Difficulty[] = ['Easy'];
+            if (level >= 3) difficulties.push('Medium');
+            if (level >= 5) difficulties.push('Hard');
+
+            const filtered = fakeNewsData.filter(h =>
+                difficulties.includes(h.difficulty) &&
+                (h.country === country || h.country === 'Global')
+            );
+
+            if(filtered.length === 0) {
+                toast({
+                    variant: 'destructive',
+                    title: 'No Headlines Available!',
+                    description: 'There are no headlines for your current level and region.',
+                });
+                setGameState('settings');
+                setIsLoading(false);
+                return;
+            }
+            const shuffled = filtered.sort(() => 0.5 - Math.random());
+            setAvailableHeadlines(shuffled);
+            
+            const firstHeadline = shuffled.pop();
+            setHeadline(firstHeadline!);
+            setAvailableHeadlines(shuffled);
+            setIsLoading(false);
         }
-    }, [gameState, headline, availableHeadlines, fetchHeadline]);
+    }, [gameState, country, level, toast]);
 
     useEffect(() => {
         if (gameState !== 'playing' || isLoading) return;
@@ -147,7 +150,7 @@ export default function SpotFakeNewsPage() {
 
     const handleAnswer = (choice: 'real' | 'fake') => {
         if (selection !== null || !headline) return;
-        
+
         setSelection(choice);
         const correct = (choice === 'real' && headline.isReal) || (choice === 'fake' && !headline.isReal);
         setIsCorrect(correct);
@@ -158,7 +161,7 @@ export default function SpotFakeNewsPage() {
             toast({ title: "Correct!", description: `+${points} points & +${XP_PER_CORRECT} XP`, className: 'bg-green-500' });
             setScore(prev => prev + points);
             setCorrectCount(prev => prev + 1);
-            
+
             const newXp = xp + XP_PER_CORRECT;
             if (newXp >= xpToNextLevel) {
                 const nextLevel = level + 1;
@@ -174,7 +177,7 @@ export default function SpotFakeNewsPage() {
             setScore(prev => prev - 10);
         }
     };
-    
+
     const nextHeadline = () => {
         if(timeLeft > 0) {
             fetchHeadline();
@@ -182,7 +185,7 @@ export default function SpotFakeNewsPage() {
             setGameState('ended');
         }
     }
-    
+
     const resetProgress = () => {
         setLevel(1);
         setXp(0);
@@ -244,7 +247,7 @@ export default function SpotFakeNewsPage() {
                                 <p className="font-bold">{accuracy.toFixed(0)}%</p>
                             </div>
                         </div>
-                        <Button size="lg" className="text-xl w-full" onClick={() => setGameState('settings')}>
+                        <Button size="lg" className="text-xl w-full" onClick={startGame}>
                            <Sparkles className="mr-2"/> Play Again
                         </Button>
                     </CardContent>
@@ -280,7 +283,7 @@ export default function SpotFakeNewsPage() {
                         </div>
                         <Progress value={(xp / xpToNextLevel) * 100} className="w-full h-2" />
                     </div>
-                    
+
                     {isLoading || !headline ? (
                         <div className="min-h-[300px] flex flex-col justify-center items-center text-center space-y-4">
                             <Loader2 className="h-16 w-16 animate-spin text-primary"/>
