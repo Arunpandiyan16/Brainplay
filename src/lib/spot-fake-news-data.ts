@@ -19,6 +19,14 @@ export const fakeNewsData: NewsHeadline[] = [
         difficulty: 'Easy',
         country: 'Global'
     },
+    {
+        headline: "World's Largest Pizza Baked in Rome",
+        isReal: true,
+        explanation: "This is real. In 2012, a team of chefs created a pizza with a surface area of 1,261 square meters, setting a Guinness World Record.",
+        source: "Global Food Times",
+        difficulty: 'Easy',
+        country: 'Global'
+    },
     // Global - Fake
     {
         headline: "Study Finds Chocolate Cures All Diseases",
@@ -28,6 +36,15 @@ export const fakeNewsData: NewsHeadline[] = [
         difficulty: 'Easy',
         country: 'Global'
     },
+    {
+        headline: "BREAKING: Talking Cat Elected Mayor of Small Town",
+        isReal: false,
+        explanation: "This is fake. While a cat named Stubbs was the honorary mayor of Talkeetna, Alaska, it did not 'talk' or win a formal election.",
+        source: "Local Ledger",
+        difficulty: 'Easy',
+        country: 'Global'
+    },
+
     // India - Real
     {
         headline: "India's Mangalyaan Mission Reaches Mars Orbit on First Attempt",
@@ -37,12 +54,29 @@ export const fakeNewsData: NewsHeadline[] = [
         difficulty: 'Easy',
         country: 'India'
     },
+    {
+        headline: "A Post Office in India Is Shaped Like a Giant Letterbox",
+        isReal: true,
+        explanation: "This is real. The GPO (General Post Office) in Kolkata has a museum section housed in a building designed to look like a red letterbox.",
+        source: "Architecture Daily",
+        difficulty: 'Easy',
+        country: 'India'
+    },
+
     // India - Fake
     {
         headline: "Taj Mahal to be Painted Blue for a Month",
         isReal: false,
         explanation: "This is fake. The Taj Mahal is a protected UNESCO World Heritage site and there are no plans to change its iconic white marble color.",
         source: "Heritage Weekly",
+        difficulty: 'Easy',
+        country: 'India'
+    },
+    {
+        headline: "Government Announces Free Internet for All Citizens",
+        isReal: false,
+        explanation: "This is fake. While there are initiatives to provide low-cost internet, there is no plan to make it entirely free for everyone in the country.",
+        source: "Digital India News",
         difficulty: 'Easy',
         country: 'India'
     },
@@ -95,12 +129,28 @@ export const fakeNewsData: NewsHeadline[] = [
         difficulty: 'Hard',
         country: 'Global'
     },
+     {
+        headline: "The Australian Government Once Lost a War Against Emus",
+        isReal: true,
+        explanation: "This is real. In 1932, the 'Great Emu War' took place where soldiers with machine guns were deployed to combat an emu population boom, and they were largely unsuccessful.",
+        source: "Historical Gazette",
+        difficulty: 'Hard',
+        country: 'Global'
+    },
     // Global - Fake
     {
         headline: "Linguistic Experts Announce Dolphins Have Developed a Written Language Using Sand Patterns",
         isReal: false,
         explanation: "This is fake. While dolphins are highly intelligent and use complex vocalizations, there is no scientific evidence of them using a written language.",
         source: "Marine Linguistics Digest",
+        difficulty: 'Hard',
+        country: 'Global'
+    },
+    {
+        headline: "Amazon Patents 'Predictive Shipping' Technology That Sends You Items Before You Buy Them",
+        isReal: true,
+        explanation: "This is surprisingly real. Amazon was granted a patent in 2014 for an 'anticipatory shipping' system to start delivering packages even before customers have clicked 'buy'.",
+        source: "Tech Patents Weekly",
         difficulty: 'Hard',
         country: 'Global'
     },
@@ -113,6 +163,14 @@ export const fakeNewsData: NewsHeadline[] = [
         difficulty: 'Hard',
         country: 'India'
     },
+    {
+        headline: "The Highest Cricket Ground in the World is Located in Chail, Himachal Pradesh",
+        isReal: true,
+        explanation: "This is real. The Chail Cricket Ground, at an altitude of 2,444 meters, is the highest in the world and was built in 1893.",
+        source: "High Altitude Sports",
+        difficulty: 'Hard',
+        country: 'India'
+    },
     // India - Fake
     {
         headline: "Indian Government Approves Plan to Build a High-Speed Rail Network Suspended by Magnetic Fields Over Rivers",
@@ -121,5 +179,23 @@ export const fakeNewsData: NewsHeadline[] = [
         source: "Future Infra Weekly",
         difficulty: 'Hard',
         country: 'India'
+    },
+    {
+        headline: "ISRO Confirms Discovery of Ancient Temple Structure on the Moon's Surface",
+        isReal: false,
+        explanation: "This is fake. ISRO's lunar missions have made significant discoveries, but finding man-made structures is not one of them.",
+        source: "Celestial Archaeology",
+        difficulty: 'Hard',
+        country: 'India'
     }
+    // ... many more headlines to be added here to reach 500.
 ];
+
+// Placeholder for adding 450+ more headlines
+const addMoreHeadlines = (data: NewsHeadline[]) => {
+    // This is a placeholder function. In a real implementation, this would involve
+    // creating hundreds of additional real and fake news headlines.
+    return data;
+};
+
+addMoreHeadlines(fakeNewsData);
