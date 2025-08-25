@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Brain, User, Sun, Moon, Globe, LogOut, ChevronDown, Gamepad2 } from 'lucide-react';
+import { Brain, User, Sun, Moon, Globe, LogOut, ChevronDown, Gamepad2, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import {
@@ -14,6 +14,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+} from '@/components/ui/sheet';
 import { useCountry } from '@/hooks/use-country';
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
@@ -49,14 +55,56 @@ export default function Header() {
     }
   };
 
+  const MobileNav = () => (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+        >
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Toggle Menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="pr-0">
+        <Link href="/" className="mr-6 flex items-center space-x-2">
+            <Brain className="h-6 w-6 text-primary" />
+            <span className="font-bold">BrainPlay</span>
+        </Link>
+        <div className="flex flex-col space-y-3 pt-6">
+            {games.map((game) => (
+                <SheetClose asChild key={game.href}>
+                    <Link href={game.href} className="text-lg">
+                        {game.label}
+                    </Link>
+                </SheetClose>
+            ))}
+            <SheetClose asChild>
+                <Link
+                    href="/leaderboard"
+                    className="text-lg"
+                >
+                    Leaderboard
+                </Link>
+            </SheetClose>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
-          <Brain className="h-6 w-6 text-primary" />
-          <span className="font-bold">BrainPlay</span>
-        </Link>
-        <nav className="flex items-center gap-6 text-sm">
+        <div className="flex items-center gap-2">
+           <MobileNav />
+            <Link href="/" className="hidden md:flex items-center space-x-2">
+                <Brain className="h-6 w-6 text-primary" />
+                <span className="font-bold">BrainPlay</span>
+            </Link>
+        </div>
+        
+        <nav className="hidden md:flex items-center gap-6 text-sm ml-6">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="link" className="text-muted-foreground transition-colors hover:text-foreground p-0">
