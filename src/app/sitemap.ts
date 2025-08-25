@@ -8,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/quiz-clash',
     '/word-hunter',
     '/math-rush',
+    '/logic-leap',
     '/memory-flip',
     '/spot-fake-news',
     '/daily-challenge',

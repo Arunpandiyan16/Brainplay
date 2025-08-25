@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, BrainCircuit, PencilRuler, Puzzle, Newspaper, Sparkles, Calculator } from 'lucide-react';
+import { Trophy, BrainCircuit, PencilRuler, Puzzle, Newspaper, Sparkles, Calculator, HelpCircle } from 'lucide-react';
 import GameCard from '@/components/dashboard/game-card';
 
 const games = [
@@ -27,6 +27,13 @@ const games = [
     icon: <Calculator className="w-8 h-8" />,
     href: '/math-rush',
     color: 'text-blue-400',
+  },
+   {
+    title: 'Logic Leap',
+    description: 'Solve diverse logical puzzles.',
+    icon: <HelpCircle className="w-8 h-8" />,
+    href: '/logic-leap',
+    color: 'text-orange-400',
   },
   {
     title: 'Memory Flip',
@@ -65,8 +72,7 @@ export default function Home() {
           {games.map((game) => (
             <GameCard key={game.title} {...game} />
           ))}
-           <div className="lg:col-span-1"></div>
-            <Card className="md:col-span-2 lg:col-span-1 border-primary glow-shadow">
+            <Card className="md:col-span-2 lg:col-span-3 border-primary glow-shadow">
                 <CardHeader className="flex flex-row items-center gap-4">
                     <Sparkles className="w-8 h-8 text-primary" />
                     <CardTitle className="text-2xl text-primary">Daily Challenge</CardTitle>

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Brain, User, Sun, Moon, Globe, LogOut, ChevronDown, Gamepad2, Menu } from 'lucide-react';
+import { Brain, User, Sun, Moon, Globe, LogOut, ChevronDown, Gamepad2, Menu, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import {
@@ -33,6 +33,7 @@ const games = [
   { href: '/quiz-clash', label: 'Quiz Clash' },
   { href: '/word-hunter', label: 'Word Hunter' },
   { href: '/math-rush', label: 'Math Rush' },
+  { href: '/logic-leap', label: 'Logic Leap' },
   { href: '/memory-flip', label: 'Memory Flip' },
   { href: '/spot-fake-news', label: 'Spot the Fake News' },
   { href: '/daily-challenge', label: 'Daily Challenge' },
