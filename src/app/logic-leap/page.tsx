@@ -63,13 +63,9 @@ export default function LogicLeapPage() {
         setIsLoading(true);
         setSelectedAnswer(null);
         setIsCorrect(null);
-        
+
         setAvailablePuzzles(currentPuzzles => {
             if (currentPuzzles.length === 0) {
-                toast({
-                    title: 'Out of Puzzles!',
-                    description: 'You\'ve solved all available puzzles for your level. Congrats!',
-                });
                 setGameState('ended');
                 setIsLoading(false);
                 return [];
@@ -81,7 +77,7 @@ export default function LogicLeapPage() {
             setIsLoading(false);
             return newPuzzles;
         });
-    }, [toast]);
+    }, []);
     
     const startGame = useCallback(() => {
         setScore(0);
@@ -94,24 +90,26 @@ export default function LogicLeapPage() {
         if (level >= 6) difficulties.push('Hard');
 
         const puzzlesForLevel = logicPuzzles.filter(p => difficulties.includes(p.difficulty));
-        setAvailablePuzzles(puzzlesForLevel.sort(() => 0.5 - Math.random()));
+        const shuffledPuzzles = puzzlesForLevel.sort(() => 0.5 - Math.random());
         
-        setGameState('playing');
-    }, [level]);
+        if (shuffledPuzzles.length === 0) {
+            toast({
+                title: 'Out of Puzzles!',
+                description: 'You\'ve solved all available puzzles for your level. Congrats!',
+            });
+            setGameState('settings');
+            setIsLoading(false);
+        } else {
+            setAvailablePuzzles(shuffledPuzzles);
+            setGameState('playing');
+        }
+    }, [level, toast]);
 
     useEffect(() => {
-        if(gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
+        if (gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
             fetchPuzzle();
-        } else if (gameState === 'playing' && availablePuzzles.length === 0 && !puzzle) {
-            // This handles the case where startGame is called but there are no puzzles.
-            const difficulties: Difficulty[] = ['Easy'];
-            if (level >= 3) difficulties.push('Medium');
-            if (level >= 6) difficulties.push('Hard');
-            const puzzlesForLevel = logicPuzzles.filter(p => difficulties.includes(p.difficulty));
-            setAvailablePuzzles(puzzlesForLevel.sort(() => 0.5 - Math.random()));
         }
-    }, [gameState, puzzle, fetchPuzzle, availablePuzzles, level]);
-
+    }, [gameState, puzzle, fetchPuzzle, availablePuzzles]);
 
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null || !puzzle) return;
@@ -318,3 +316,5 @@ export default function LogicLeapPage() {
         </div>
     );
 }
+
+    

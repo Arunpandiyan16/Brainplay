@@ -57,43 +57,40 @@ export default function DailyChallengePage() {
             return newQuestions;
         });
 
-    }, [answeredQuestions.length, toast]);
+    }, [answeredQuestions.length]);
 
     const startGame = () => {
         setScore(0);
-        setGameState('playing');
         setConsecutiveCorrect(0);
         setSkipsUsed(0);
         setSelectedAnswer(null);
         setIsCorrect(null);
         setAnsweredQuestions([]);
         setIsLoading(true);
+        setQuestion(null);
         
         const countryFiltered = quizQuestions.filter(q => q.country === country || q.country === 'Global');
         const shuffled = countryFiltered.sort(() => 0.5 - Math.random()).slice(0, TOTAL_QUESTIONS);
-        setAvailableQuestions(shuffled);
-
-        if (shuffled.length > 0) {
-            const firstQuestion = shuffled.pop();
-            setQuestion(firstQuestion!);
-            setAvailableQuestions(shuffled);
-        } else {
+        
+        if (shuffled.length === 0) {
              toast({
                 variant: 'destructive',
                 title: 'Out of Questions!',
                 description: 'No questions available for today\'s challenge in this region. Please try another region!',
             });
             setGameState('start');
+            setIsLoading(false);
+        } else {
+            setAvailableQuestions(shuffled);
+            setGameState('playing');
         }
-        setIsLoading(false);
     };
 
     useEffect(() => {
-        if (gameState === 'playing' && !question) {
-            startGame();
+        if (gameState === 'playing' && availableQuestions.length > 0 && !question) {
+            fetchQuestion();
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [gameState, country]);
+    }, [gameState, question, availableQuestions, fetchQuestion]);
 
 
     const handleAnswer = (index: number) => {
@@ -330,3 +327,5 @@ export default function DailyChallengePage() {
         </div>
     );
 }
+
+    

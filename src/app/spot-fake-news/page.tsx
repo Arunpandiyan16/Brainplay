@@ -68,14 +68,9 @@ export default function SpotFakeNewsPage() {
         setIsLoading(true);
         setSelection(null);
         setIsCorrect(null);
-        setHeadline(null);
 
         setAvailableHeadlines(currentHeadlines => {
             if (currentHeadlines.length === 0) {
-                 toast({
-                    title: 'Out of Headlines!',
-                    description: 'You have seen all headlines for this level. Congrats!',
-                });
                 setGameState('ended');
                 setIsLoading(false);
                 return [];
@@ -88,7 +83,7 @@ export default function SpotFakeNewsPage() {
             return newHeadlines;
         });
 
-    }, [toast]);
+    }, []);
 
     const startGame = () => {
         setScore(0);
@@ -96,43 +91,37 @@ export default function SpotFakeNewsPage() {
         setCorrectCount(0);
         setHeadline(null);
         setIsLoading(true);
+        
+        const difficulties: Difficulty[] = ['Easy'];
+        if (level >= 3) difficulties.push('Medium');
+        if (level >= 5) difficulties.push('Hard');
+
+        const filtered = fakeNewsData.filter(h =>
+            difficulties.includes(h.difficulty) &&
+            (h.country === country || h.country === 'Global')
+        );
+        
+        if(filtered.length === 0) {
+            toast({
+                variant: 'destructive',
+                title: 'No Headlines Available!',
+                description: 'There are no headlines for your current level and region.',
+            });
+            setGameState('settings');
+            setIsLoading(false);
+            return;
+        }
+        
+        const shuffled = filtered.sort(() => 0.5 - Math.random());
+        setAvailableHeadlines(shuffled);
         setGameState('playing');
     };
 
     useEffect(() => {
-       if (gameState === 'playing') {
-            const difficulties: Difficulty[] = ['Easy'];
-            if (level >= 3) difficulties.push('Medium');
-            if (level >= 5) difficulties.push('Hard');
-
-            const filtered = fakeNewsData.filter(h =>
-                difficulties.includes(h.difficulty) &&
-                (h.country === country || h.country === 'Global')
-            );
-            
-            if(filtered.length === 0) {
-                toast({
-                    variant: 'destructive',
-                    title: 'No Headlines Available!',
-                    description: 'There are no headlines for your current level and region.',
-                });
-                setGameState('settings');
-                setIsLoading(false);
-                return;
-            }
-            
-            const shuffled = filtered.sort(() => 0.5 - Math.random());
-            setAvailableHeadlines(shuffled);
-            
-            // This will be picked up by the next effect
-            if (!headline) {
-                 const firstHeadline = shuffled.pop();
-                 setHeadline(firstHeadline!);
-                 setAvailableHeadlines(shuffled);
-                 setIsLoading(false);
-            }
+       if (gameState === 'playing' && availableHeadlines.length > 0 && !headline) {
+            fetchHeadline();
         }
-    }, [gameState, country, level, toast, headline]);
+    }, [gameState, country, level, headline, availableHeadlines, fetchHeadline]);
 
     const handleAnswer = (choice: 'real' | 'fake') => {
         if (selection !== null || !headline) return;
@@ -168,6 +157,10 @@ export default function SpotFakeNewsPage() {
         if(availableHeadlines.length > 0) {
             fetchHeadline();
         } else {
+             toast({
+                title: 'Out of Headlines!',
+                description: 'You have seen all headlines for this level. Congrats!',
+            });
             setGameState('ended');
         }
     }
@@ -322,3 +315,5 @@ export default function SpotFakeNewsPage() {
         </div>
     );
 }
+
+    

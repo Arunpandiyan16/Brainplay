@@ -74,10 +74,6 @@ export default function QuizClashPage() {
 
         setAvailableQuestions(currentQuestions => {
             if (currentQuestions.length === 0) {
-                toast({
-                    title: 'Out of Questions!',
-                    description: 'You have answered all available questions for this level and region. Congrats!',
-                });
                 setGameState('ended');
                 setIsLoading(false);
                 return [];
@@ -88,32 +84,13 @@ export default function QuizClashPage() {
             setIsLoading(false);
             return newQuestions;
         });
-    }, [toast]);
+    }, []);
 
     useEffect(() => {
         if (gameState === 'playing' && availableQuestions.length > 0 && !question) {
             fetchQuestion();
-        } else if (gameState === 'playing' && availableQuestions.length === 0 && !question) {
-             const difficulties: Difficulty[] = ['Easy'];
-            if (level >= 3) difficulties.push('Medium');
-            if (level >= 6) difficulties.push('Hard');
-
-            const countryFiltered = quizQuestions.filter(q =>
-                (q.country === country || q.country === 'Global') &&
-                difficulties.includes(q.difficulty)
-            );
-            const shuffled = countryFiltered.sort(() => 0.5 - Math.random());
-            setAvailableQuestions(shuffled);
-             if (shuffled.length === 0) {
-                toast({
-                    variant: 'destructive',
-                    title: 'No Questions Available',
-                    description: 'There are no questions for your level in this region.',
-                });
-                setGameState('start');
-             }
         }
-    }, [gameState, country, level, toast, question, availableQuestions, fetchQuestion]);
+    }, [gameState, question, availableQuestions, fetchQuestion]);
 
 
     const handleAnswer = (index: number) => {
@@ -167,7 +144,6 @@ export default function QuizClashPage() {
     const startGame = () => {
         setQuestion(null);
         setScore(0);
-        setGameState('playing');
         setConsecutiveCorrect(0);
         setSkipsUsed(0);
         setSelectedAnswer(null);
@@ -175,7 +151,6 @@ export default function QuizClashPage() {
         setAnsweredQuestions([]);
         setIsLoading(true);
         
-        // Pre-load questions for the game session
         const difficulties: Difficulty[] = ['Easy'];
         if (level >= 3) difficulties.push('Medium');
         if (level >= 6) difficulties.push('Hard');
@@ -199,6 +174,7 @@ export default function QuizClashPage() {
         }
         
         setAvailableQuestions(shuffled);
+        setGameState('playing');
     };
 
     const resetProgress = () => {
@@ -424,3 +400,5 @@ export default function QuizClashPage() {
         </div>
     );
 }
+
+    

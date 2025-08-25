@@ -87,10 +87,6 @@ export default function WordHunterPage() {
 
         setAvailablePuzzles(currentPuzzles => {
              if (currentPuzzles.length === 0) {
-                 toast({
-                    title: 'Out of Words!',
-                    description: 'You\'ve solved all available words for your level. Congrats!',
-                });
                 setGameState('ended');
                 setIsLoading(false);
                 return [];
@@ -108,13 +104,12 @@ export default function WordHunterPage() {
             return newPuzzles;
         });
 
-    }, [toast]);
+    }, []);
     
     const startGame = useCallback(() => {
         setScore(0);
         setSolvedWords([]);
         setPuzzle(null);
-        setGameState('playing');
         setIsLoading(true);
 
         const difficulties: Difficulty[] = ['Easy'];
@@ -138,6 +133,7 @@ export default function WordHunterPage() {
         }
 
         setAvailablePuzzles(shuffled);
+        setGameState('playing');
     }, [level, language, solvedWords, toast]);
 
     useEffect(() => {
@@ -184,7 +180,15 @@ export default function WordHunterPage() {
             }
 
             setTimeout(() => {
-                fetchPuzzle();
+                if (availablePuzzles.length > 0) {
+                    fetchPuzzle();
+                } else {
+                    toast({
+                        title: 'Out of Words!',
+                        description: 'You\'ve solved all available words for your level. Congrats!',
+                    });
+                    setGameState('ended');
+                }
             }, 500);
 
         } else {
@@ -196,7 +200,7 @@ export default function WordHunterPage() {
                 setIsWrong(false);
             }, 800);
         }
-    }, [answerSlots, puzzle, hintTaken, xp, xpToNextLevel, level, fetchPuzzle, toast]);
+    }, [answerSlots, puzzle, hintTaken, xp, xpToNextLevel, level, fetchPuzzle, toast, availablePuzzles.length]);
 
     useEffect(() => {
         if (puzzle && answerSlots.length === puzzle.word.length) {
@@ -426,3 +430,5 @@ export default function WordHunterPage() {
         </div>
     );
 }
+
+    
