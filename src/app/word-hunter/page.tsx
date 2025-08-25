@@ -116,9 +116,13 @@ export default function WordHunterPage() {
             }
             
             const nextPuzzle = availablePuzzles.pop();
-            setPuzzle(nextPuzzle!);
-            setAvailableLetters(nextPuzzle!.scrambled.split('').map((char, index) => ({ char, id: index, used: false })));
-            setAvailablePuzzles([...availablePuzzles]);
+            if (nextPuzzle) {
+                setPuzzle(nextPuzzle);
+                setAvailableLetters(nextPuzzle.scrambled.split('').map((char, index) => ({ char, id: index, used: false })));
+                setAvailablePuzzles(prev => prev.filter(p => p.word !== nextPuzzle.word));
+            } else {
+                setGameState('ended');
+            }
             setIsLoading(false);
         }, 500)
        
@@ -128,7 +132,7 @@ export default function WordHunterPage() {
         if (gameState === 'playing') {
             loadAndShufflePuzzles();
         }
-    }, [gameState, loadAndShufflePuzzles]);
+    }, [gameState, language, level, solvedWords]);
 
     useEffect(() => {
         if (gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
@@ -136,13 +140,12 @@ export default function WordHunterPage() {
         }
     }, [gameState, puzzle, availablePuzzles, fetchPuzzle]);
     
-    const checkAnswer = useCallback(() => {
+     const checkAnswer = useCallback(() => {
         if (!puzzle || answerSlots.length !== puzzle.word.length) return;
 
         const guessedWord = answerSlots.map(s => s.char).join('');
         
         if (guessedWord.toLowerCase() === puzzle.word.toLowerCase()) {
-            // Correct Answer
             let points = 10;
             let awardedXp = 10;
             if (puzzle.difficulty === 'Medium') {
@@ -174,12 +177,10 @@ export default function WordHunterPage() {
             }
             
             setTimeout(() => {
-                loadAndShufflePuzzles();
                 fetchPuzzle();
             }, 500);
 
         } else {
-            // Incorrect Answer
             setIsWrong(true);
             toast({ title: "Not quite!", description: "Try again.", variant: 'destructive' });
             setTimeout(() => {
@@ -188,7 +189,7 @@ export default function WordHunterPage() {
                 setIsWrong(false);
             }, 800);
         }
-    }, [answerSlots, puzzle, hintTaken, xp, xpToNextLevel, level, loadAndShufflePuzzles, fetchPuzzle, toast]);
+    }, [answerSlots, puzzle, hintTaken, xp, xpToNextLevel, level, fetchPuzzle, toast]);
 
     useEffect(() => {
         if (puzzle && answerSlots.length === puzzle.word.length) {
@@ -200,8 +201,8 @@ export default function WordHunterPage() {
         setScore(0);
         setGameTimeLeft(TOTAL_TIME);
         setSolvedWords([]);
+        setPuzzle(null); // This will trigger the useEffect to fetch a new puzzle
         setGameState('playing');
-        setPuzzle(null);
     };
 
     useEffect(() => {
@@ -220,7 +221,7 @@ export default function WordHunterPage() {
     }, [gameState, gameTimeLeft]);
 
     const handleLetterSelect = (letter: Letter) => {
-        if (letter.used) return;
+        if (letter.used || (puzzle && answerSlots.length >= puzzle.word.length)) return;
         setAvailableLetters(prev => prev.map(l => l.id === letter.id ? { ...l, used: true } : l));
         setAnswerSlots(prev => [...prev, { id: letter.id, char: letter.char }]);
     };
@@ -242,7 +243,6 @@ export default function WordHunterPage() {
     
     const handleSkip = () => {
       if(isLoading) return;
-      loadAndShufflePuzzles();
       fetchPuzzle();
     }
 
@@ -426,6 +426,7 @@ export default function WordHunterPage() {
                                     <Lightbulb className="mr-2"/>
                                     Hint (-{HINT_COST} pts)
                                 </Button>
+
                                 <Button variant="outline" onClick={handleSkip} disabled={isLoading}>
                                     Skip Word
                                 </Button>
@@ -453,3 +454,5 @@ animation: {
 }
 }
 */
+
+    
