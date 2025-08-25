@@ -75,23 +75,26 @@ export default function SpotFakeNewsPage() {
         setIsCorrect(null);
         setHeadline(null);
 
-        if (availableHeadlines.length === 0) {
-             toast({
-                variant: 'destructive',
-                title: 'Out of Headlines!',
-                description: 'You have seen all headlines for this level. Try another region!',
-            });
-            setGameState('ended');
+        setAvailableHeadlines(currentHeadlines => {
+            if (currentHeadlines.length === 0) {
+                 toast({
+                    variant: 'destructive',
+                    title: 'Out of Headlines!',
+                    description: 'You have seen all headlines for this level. Try another region!',
+                });
+                setGameState('ended');
+                setIsLoading(false);
+                return [];
+            }
+    
+            const newHeadlines = [...currentHeadlines];
+            const nextHeadline = newHeadlines.pop();
+            setHeadline(nextHeadline!);
             setIsLoading(false);
-            return;
-        }
+            return newHeadlines;
+        });
 
-        const nextHeadline = availableHeadlines.pop();
-        setHeadline(nextHeadline!);
-        setAvailableHeadlines([...availableHeadlines]);
-        setIsLoading(false);
-
-    }, [availableHeadlines, toast]);
+    }, []);
     
     const startGame = () => {
         setScore(0);
@@ -332,3 +335,5 @@ export default function SpotFakeNewsPage() {
         </div>
     );
 }
+
+    

@@ -103,8 +103,8 @@ export default function WordHunterPage() {
         setShowHint(false);
         setAnswerSlots([]);
 
-        setTimeout(() => {
-             if (availablePuzzles.length === 0) {
+        setAvailablePuzzles(currentPuzzles => {
+             if (currentPuzzles.length === 0) {
                  toast({
                     variant: 'destructive',
                     title: 'Out of Words!',
@@ -112,27 +112,28 @@ export default function WordHunterPage() {
                 });
                 setGameState('ended');
                 setIsLoading(false);
-                return;
+                return [];
             }
             
-            const nextPuzzle = availablePuzzles.pop();
+            const newPuzzles = [...currentPuzzles];
+            const nextPuzzle = newPuzzles.pop();
             if (nextPuzzle) {
                 setPuzzle(nextPuzzle);
                 setAvailableLetters(nextPuzzle.scrambled.split('').map((char, index) => ({ char, id: index, used: false })));
-                setAvailablePuzzles(prev => prev.filter(p => p.word !== nextPuzzle.word));
             } else {
                 setGameState('ended');
             }
             setIsLoading(false);
-        }, 500)
+            return newPuzzles;
+        });
        
-    }, [availablePuzzles, toast]);
+    }, []);
     
     useEffect(() => {
         if (gameState === 'playing') {
             loadAndShufflePuzzles();
         }
-    }, [gameState, language, level, solvedWords, loadAndShufflePuzzles]);
+    }, [gameState, language, level, loadAndShufflePuzzles]);
 
     useEffect(() => {
         if (gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {

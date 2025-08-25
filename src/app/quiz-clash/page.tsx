@@ -92,28 +92,26 @@ export default function QuizClashPage() {
         setSelectedAnswer(null);
         setIsCorrect(null);
         
-        setTimeout(() => {
-            setAvailableQuestions(currentQuestions => {
-                if (currentQuestions.length === 0) {
-                    toast({
-                        variant: 'destructive',
-                        title: 'Out of Questions!',
-                        description: 'You have answered all available questions for this level and region. Try leveling up or changing regions!',
-                    });
-                    setGameState('ended');
-                    setIsLoading(false);
-                    return [];
-                }
-    
-                const newQuestions = [...currentQuestions];
-                const nextQuestion = newQuestions.pop();
-                setQuestion(nextQuestion!);
+        setAvailableQuestions(currentQuestions => {
+            if (currentQuestions.length === 0) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Out of Questions!',
+                    description: 'You have answered all available questions for this level and region. Try leveling up or changing regions!',
+                });
+                setGameState('ended');
                 setIsLoading(false);
-                return newQuestions;
-            });
-        }, 500);
+                return [];
+            }
 
-    }, [toast]);
+            const newQuestions = [...currentQuestions];
+            const nextQuestion = newQuestions.pop();
+            setQuestion(nextQuestion!);
+            setIsLoading(false);
+            return newQuestions;
+        });
+
+    }, []);
     
     useEffect(() => {
         if (gameState === 'playing') {
@@ -430,6 +428,5 @@ export default function QuizClashPage() {
         </div>
     );
 }
-
 
     

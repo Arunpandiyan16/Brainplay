@@ -45,28 +45,26 @@ export default function DailyChallengePage() {
         setSelectedAnswer(null);
         setIsCorrect(null);
 
-        setTimeout(() => {
-            setAvailableQuestions(currentQuestions => {
-                 if (currentQuestions.length === 0) {
-                     toast({
-                        variant: 'destructive',
-                        title: 'Out of Questions!',
-                        description: 'You have answered all available questions for this region. Please try another region or come back later!',
-                    });
-                    setGameState('ended');
-                    setIsLoading(false);
-                    return [];
-                }
-
-                const newQuestions = [...currentQuestions];
-                const nextQuestion = newQuestions.pop();
-                setQuestion(nextQuestion!);
+        setAvailableQuestions(currentQuestions => {
+             if (currentQuestions.length === 0) {
+                 toast({
+                    variant: 'destructive',
+                    title: 'Out of Questions!',
+                    description: 'You have answered all available questions for this region. Please try another region or come back later!',
+                });
+                setGameState('ended');
                 setIsLoading(false);
-                return newQuestions;
-            });
-        }, 500);
+                return [];
+            }
 
-    }, [toast]);
+            const newQuestions = [...currentQuestions];
+            const nextQuestion = newQuestions.pop();
+            setQuestion(nextQuestion!);
+            setIsLoading(false);
+            return newQuestions;
+        });
+
+    }, []);
     
     useEffect(() => {
         if (gameState === 'playing') {
@@ -351,6 +349,5 @@ export default function DailyChallengePage() {
         </div>
     );
 }
-
 
     
