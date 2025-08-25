@@ -6,14 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { Clock, Trophy, Sparkles, Zap, Calculator, Plus, Minus, X, Divide, Award, RotateCcw, Brain } from 'lucide-react';
+import { Trophy, Sparkles, Zap, Calculator, Plus, Minus, X, Divide, RotateCcw, Brain, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { problemBank, MathProblem } from '@/lib/math-rush-data';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
-const TOTAL_TIME = 60; // 60 seconds for the game
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 25;
 const STORAGE_KEY = 'mathRushProgress';
 
@@ -38,8 +38,8 @@ export default function MathRushPage() {
     const [problem, setProblem] = useState<Problem | null>(null);
     const [guess, setGuess] = useState('');
     const [score, setScore] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
     const [solvedCount, setSolvedCount] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Leveling state
     const [level, setLevel] = useState(1);
@@ -76,7 +76,8 @@ export default function MathRushPage() {
         }
     }, [level, xp, xpToNextLevel]);
 
-    const generateProblem = useCallback((): Problem => {
+    const generateProblem = useCallback(() => {
+        setIsLoading(true);
         // Advanced problems unlocked at higher levels
         let advancedChance = 0;
         if (level >= 11) advancedChance = 0.60; // 60% chance
@@ -88,7 +89,9 @@ export default function MathRushPage() {
 
         if (shouldShowAdvanced && problemBank.length > 0) {
             const advancedProblem = problemBank[Math.floor(Math.random() * problemBank.length)];
-            return advancedProblem;
+            setProblem(advancedProblem);
+            setIsLoading(false);
+            return;
         }
 
         // Otherwise, generate arithmetic problem
@@ -137,40 +140,26 @@ export default function MathRushPage() {
                 op = '+';
                 break;
         }
+        
+        setProblem({ text: `${num1} ${op} ${num2}`, answer, xp: xpPoints, type: 'Arithmetic' });
+        setIsLoading(false);
 
-        return { text: `${num1} ${op} ${num2}`, answer, xp: xpPoints, type: 'Arithmetic' };
     }, [difficulty, operation, level]);
 
     const startGame = useCallback(() => {
         setScore(0);
-        setTimeLeft(TOTAL_TIME);
         setSolvedCount(0);
         setGuess('');
         setProblem(null);
         setGameState('playing');
+        setIsLoading(true);
     }, []);
     
     useEffect(() => {
         if(gameState === 'playing' && !problem) {
-            setProblem(generateProblem());
+            generateProblem();
         }
     }, [gameState, problem, generateProblem]);
-
-    useEffect(() => {
-        if (gameState === 'playing') {
-            const timer = setInterval(() => {
-                setTimeLeft(prev => {
-                    if (prev <= 1) {
-                        clearInterval(timer);
-                        setGameState('ended');
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-            return () => clearInterval(timer);
-        }
-    }, [gameState]);
 
      useEffect(() => {
         if (gameState === 'playing' && problem) {
@@ -209,7 +198,7 @@ export default function MathRushPage() {
             setScore(prev => prev - 5);
         }
         setGuess('');
-        setProblem(generateProblem());
+        generateProblem();
     };
     
     const resetProgress = () => {
@@ -295,8 +284,9 @@ export default function MathRushPage() {
                     <CardHeader>
                         <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
                            <Trophy className="w-10 h-10 text-yellow-400"/>
-                           Time's Up!
+                           Game Over!
                         </CardTitle>
+                        <CardDescription>You decided to end the game.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="text-2xl">Your Final Score:</div>
@@ -308,9 +298,14 @@ export default function MathRushPage() {
                             </div>
                             <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
                         </div>
-                        <Button size="lg" className="text-xl w-full" onClick={() => setGameState('settings')}>
-                           <Sparkles className="mr-2"/> Play Again
-                        </Button>
+                        <div className="flex gap-4">
+                            <Button size="lg" className="text-xl w-full" onClick={() => setGameState('settings')}>
+                               <Sparkles className="mr-2"/> Play Again
+                            </Button>
+                             <Button size="lg" className="text-xl w-full" variant="outline" asChild>
+                               <Link href="/">Back to Home</Link>
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -341,10 +336,7 @@ export default function MathRushPage() {
                            <div className="text-primary">{getIconForOperation()}</div>
                            Math Rush
                         </div>
-                         <div className="flex items-center gap-2 text-xl font-mono px-3 py-1 rounded-md bg-secondary">
-                            <Clock className={`w-5 h-5 ${timeLeft <= 10 ? 'text-red-500' : ''}`}/>
-                            <span className={timeLeft <= 10 ? 'text-red-500' : ''}>{timeLeft}</span>
-                        </div>
+                        <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
                     </CardTitle>
                      <CardDescription className="flex justify-between items-center">
                         <div>
@@ -363,27 +355,35 @@ export default function MathRushPage() {
                         <Progress value={(xp / xpToNextLevel) * 100} className="w-full h-2" />
                     </div>
 
-                    <div className={cn(
-                        "p-4 rounded-lg bg-secondary min-h-[120px] flex items-center justify-center",
-                        problem?.type !== 'Arithmetic' && 'py-8'
-                    )}>
-                        <ProblemDisplay />
-                    </div>
+                    {isLoading || !problem ? (
+                         <div className="text-center space-y-4 min-h-[200px] flex flex-col justify-center">
+                            <Loader2 className="h-16 w-16 animate-spin mx-auto text-primary"/>
+                         </div>
+                    ) : (
+                        <>
+                         <div className={cn(
+                            "p-4 rounded-lg bg-secondary min-h-[120px] flex items-center justify-center",
+                            problem?.type !== 'Arithmetic' && 'py-8'
+                         )}>
+                            <ProblemDisplay />
+                         </div>
                     
-                    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
-                        <Input 
-                            ref={inputRef}
-                            value={guess}
-                            onChange={(e) => setGuess(e.target.value)}
-                            placeholder="Your answer..."
-                            className="text-lg h-14 text-center sm:text-2xl"
-                            type={getInputType()}
-                            autoComplete="off"
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                        />
-                        <Button type="submit" size="lg" className="h-14 text-lg">Submit</Button>
-                    </form>
+                         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
+                            <Input 
+                                ref={inputRef}
+                                value={guess}
+                                onChange={(e) => setGuess(e.target.value)}
+                                placeholder="Your answer..."
+                                className="text-lg h-14 text-center sm:text-2xl"
+                                type={getInputType()}
+                                autoComplete="off"
+                                autoCapitalize="none"
+                                autoCorrect="off"
+                            />
+                            <Button type="submit" size="lg" className="h-14 text-lg">Submit</Button>
+                         </form>
+                        </>
+                    )}
                 </CardContent>
             </Card>
         </div>

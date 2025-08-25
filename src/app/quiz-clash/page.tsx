@@ -5,13 +5,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward, RotateCcw } from 'lucide-react';
+import { X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { useCountry } from '@/hooks/use-country';
 import { quizQuestions, QuizQuestion } from '@/lib/quiz-data';
+import Link from 'next/link';
 
-const TOTAL_TIME = 90;
 const SKIP_LIMIT = 2;
 
 type GameState = 'start' | 'playing' | 'ended';
@@ -28,7 +28,6 @@ export default function QuizClashPage() {
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [score, setScore] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
     const [isLoading, setIsLoading] = useState(false);
     const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
     const [skipsUsed, setSkipsUsed] = useState(0);
@@ -76,9 +75,8 @@ export default function QuizClashPage() {
         setAvailableQuestions(currentQuestions => {
             if (currentQuestions.length === 0) {
                 toast({
-                    variant: 'destructive',
                     title: 'Out of Questions!',
-                    description: 'You have answered all available questions for this level and region. Try leveling up or changing regions!',
+                    description: 'You have answered all available questions for this level and region. Congrats!',
                 });
                 setGameState('ended');
                 setIsLoading(false);
@@ -93,8 +91,10 @@ export default function QuizClashPage() {
     }, [toast]);
 
     useEffect(() => {
-        if (gameState === 'playing') {
-            const difficulties: Difficulty[] = ['Easy'];
+        if (gameState === 'playing' && availableQuestions.length > 0 && !question) {
+            fetchQuestion();
+        } else if (gameState === 'playing' && availableQuestions.length === 0 && !question) {
+             const difficulties: Difficulty[] = ['Easy'];
             if (level >= 3) difficulties.push('Medium');
             if (level >= 6) difficulties.push('Hard');
 
@@ -104,37 +104,17 @@ export default function QuizClashPage() {
             );
             const shuffled = countryFiltered.sort(() => 0.5 - Math.random());
             setAvailableQuestions(shuffled);
-            
-            if (shuffled.length > 0) {
-                const firstQuestion = shuffled.pop();
-                setQuestion(firstQuestion!);
-                setAvailableQuestions(shuffled);
-            } else {
-                 toast({
+             if (shuffled.length === 0) {
+                toast({
                     variant: 'destructive',
-                    title: 'Out of Questions!',
-                    description: 'You have answered all available questions for this level and region. Try leveling up or changing regions!',
+                    title: 'No Questions Available',
+                    description: 'There are no questions for your level in this region.',
                 });
-                setGameState('ended');
-            }
+                setGameState('start');
+             }
         }
-    }, [gameState, country, level, toast]);
+    }, [gameState, country, level, toast, question, availableQuestions, fetchQuestion]);
 
-
-    useEffect(() => {
-        if (gameState !== 'playing' || isLoading) return;
-
-        if (timeLeft <= 0) {
-            setGameState('ended');
-            return;
-        }
-
-        const timer = setInterval(() => {
-            setTimeLeft(prev => Math.max(0, prev - 1));
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [gameState, timeLeft, isLoading]);
 
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null || !question) return;
@@ -174,10 +154,6 @@ export default function QuizClashPage() {
             setScore(prev => prev - 5);
             setConsecutiveCorrect(0);
         }
-
-        setTimeout(() => {
-            fetchQuestion();
-        }, 1500);
     };
 
     const handleSkip = () => {
@@ -191,7 +167,6 @@ export default function QuizClashPage() {
     const startGame = () => {
         setQuestion(null);
         setScore(0);
-        setTimeLeft(TOTAL_TIME);
         setGameState('playing');
         setConsecutiveCorrect(0);
         setSkipsUsed(0);
@@ -199,6 +174,31 @@ export default function QuizClashPage() {
         setIsCorrect(null);
         setAnsweredQuestions([]);
         setIsLoading(true);
+        
+        // Pre-load questions for the game session
+        const difficulties: Difficulty[] = ['Easy'];
+        if (level >= 3) difficulties.push('Medium');
+        if (level >= 6) difficulties.push('Hard');
+
+        const countryFiltered = quizQuestions.filter(q =>
+            (q.country === country || q.country === 'Global') &&
+            difficulties.includes(q.difficulty)
+        );
+        
+        const shuffled = countryFiltered.sort(() => 0.5 - Math.random());
+        
+        if (shuffled.length === 0) {
+            toast({
+                variant: 'destructive',
+                title: 'No Questions Available',
+                description: 'There are no questions for your level in this region. Please try another region or reset progress.',
+            });
+            setGameState('start');
+            setIsLoading(false);
+            return;
+        }
+        
+        setAvailableQuestions(shuffled);
     };
 
     const resetProgress = () => {
@@ -287,7 +287,7 @@ export default function QuizClashPage() {
                     <CardHeader>
                         <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
                            <Trophy className="w-10 h-10 text-yellow-400"/>
-                           Time's Up!
+                           Round Complete!
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -305,9 +305,14 @@ export default function QuizClashPage() {
                             </div>
                         </div>
                         {renderCategoryBreakdown()}
-                        <Button size="lg" className="text-xl w-full" onClick={startGame}>
-                           <Sparkles className="mr-2"/> Play Again
-                        </Button>
+                         <div className="flex gap-4">
+                            <Button size="lg" className="text-xl w-full" onClick={startGame}>
+                               <Sparkles className="mr-2"/> Play Again
+                            </Button>
+                             <Button size="lg" className="text-xl w-full" variant="outline" asChild>
+                               <Link href="/">Back to Home</Link>
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -322,7 +327,7 @@ export default function QuizClashPage() {
                 <Card className="w-full max-w-2xl border-primary/50 glow-shadow">
                     <CardContent className="p-8 text-center space-y-4">
                         <Loader2 className="h-16 w-16 animate-spin mx-auto text-primary"/>
-                        <p className="text-xl text-muted-foreground">Loading question {questionNumber}...</p>
+                        <p className="text-xl text-muted-foreground">Loading question...</p>
                     </CardContent>
                 </Card>
             </div>
@@ -338,10 +343,7 @@ export default function QuizClashPage() {
                            <BrainCircuit className="text-primary"/>
                            Quiz Clash
                         </div>
-                        <div className="flex items-center gap-2 text-xl font-mono px-3 py-1 rounded-md bg-secondary">
-                            <Clock className={`w-5 h-5 ${timeLeft <= 10 ? 'text-red-500' : ''}`}/>
-                            <span className={timeLeft <= 10 ? 'text-red-500' : ''}>{timeLeft}</span>
-                        </div>
+                         <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
                     </CardTitle>
                     <CardDescription className="flex justify-between items-center">
                         <span>Question {questionNumber}</span>
@@ -385,7 +387,7 @@ export default function QuizClashPage() {
                         ))}
                     </div>
 
-                     {isCorrect === null && (
+                     {selectedAnswer === null && (
                        <Button
                             variant="outline"
                             onClick={handleSkip}
@@ -399,12 +401,15 @@ export default function QuizClashPage() {
 
                     {isCorrect !== null && (
                          <Card className={isCorrect ? "bg-green-500/10" : "bg-red-500/10"}>
-                            <CardContent className="p-4">
+                            <CardContent className="p-4 space-y-3">
                                <div className="flex items-center gap-2">
                                 {isCorrect ? <Check className="text-green-500" /> : <X className="text-red-500" />}
                                <p className="font-semibold text-lg">{isCorrect ? 'Correct!' : 'Incorrect!'}</p>
                                </div>
                                <p className="text-muted-foreground mt-2">{question.explanation}</p>
+                               <Button onClick={fetchQuestion} className="w-full">
+                                   Next Question
+                               </Button>
                             </CardContent>
                         </Card>
                     )}
@@ -419,5 +424,3 @@ export default function QuizClashPage() {
         </div>
     );
 }
-
-    

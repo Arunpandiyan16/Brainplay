@@ -1,18 +1,17 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { Clock, Trophy, Sparkles, Zap, HelpCircle, Lightbulb, Check, X, RotateCcw } from 'lucide-react';
+import { Trophy, Sparkles, Zap, HelpCircle, Lightbulb, Check, X, RotateCcw, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { logicPuzzles, LogicPuzzle } from '@/lib/logic-leap-data';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
-const TOTAL_TIME = 180; // 3 minutes for the game
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 25;
 const STORAGE_KEY = 'logicLeapProgress';
 
@@ -22,21 +21,18 @@ type Difficulty = 'Easy' | 'Medium' | 'Hard';
 export default function LogicLeapPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
     const [puzzle, setPuzzle] = useState<LogicPuzzle | null>(null);
-    const [guess, setGuess] = useState('');
     const [score, setScore] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
     const [solvedCount, setSolvedCount] = useState(0);
+    const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-    const [showResult, setShowResult] = useState(false);
 
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
-
+    const [isLoading, setIsLoading] = useState(false);
     const [availablePuzzles, setAvailablePuzzles] = useState<LogicPuzzle[]>([]);
 
     const { toast } = useToast();
-    const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         try {
@@ -64,40 +60,34 @@ export default function LogicLeapPage() {
     }, [level, xp, xpToNextLevel]);
 
     const fetchPuzzle = useCallback(() => {
-        setShowResult(false);
+        setIsLoading(true);
+        setSelectedAnswer(null);
         setIsCorrect(null);
-        setGuess('');
         
         setAvailablePuzzles(currentPuzzles => {
             if (currentPuzzles.length === 0) {
                 toast({
-                    variant: 'destructive',
                     title: 'Out of Puzzles!',
                     description: 'You\'ve solved all available puzzles for your level. Congrats!',
                 });
                 setGameState('ended');
+                setIsLoading(false);
                 return [];
             }
             
             const newPuzzles = [...currentPuzzles];
             const nextPuzzle = newPuzzles.pop()
             setPuzzle(nextPuzzle!);
+            setIsLoading(false);
             return newPuzzles;
         });
     }, [toast]);
     
-    useEffect(() => {
-        if(gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
-            fetchPuzzle();
-        }
-    }, [gameState, puzzle, fetchPuzzle, availablePuzzles]);
-
     const startGame = useCallback(() => {
         setScore(0);
-        setTimeLeft(TOTAL_TIME);
         setSolvedCount(0);
-        setGuess('');
         setPuzzle(null);
+        setIsLoading(true);
 
         const difficulties: Difficulty[] = ['Easy'];
         if (level >= 3) difficulties.push('Medium');
@@ -108,36 +98,27 @@ export default function LogicLeapPage() {
         
         setGameState('playing');
     }, [level]);
-    
+
     useEffect(() => {
-        if (gameState === 'playing') {
-            const timer = setInterval(() => {
-                setTimeLeft(prev => {
-                    if (prev <= 1) {
-                        clearInterval(timer);
-                        setGameState('ended');
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
-            return () => clearInterval(timer);
+        if(gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
+            fetchPuzzle();
+        } else if (gameState === 'playing' && availablePuzzles.length === 0 && !puzzle) {
+            // This handles the case where startGame is called but there are no puzzles.
+            const difficulties: Difficulty[] = ['Easy'];
+            if (level >= 3) difficulties.push('Medium');
+            if (level >= 6) difficulties.push('Hard');
+            const puzzlesForLevel = logicPuzzles.filter(p => difficulties.includes(p.difficulty));
+            setAvailablePuzzles(puzzlesForLevel.sort(() => 0.5 - Math.random()));
         }
-    }, [gameState]);
+    }, [gameState, puzzle, fetchPuzzle, availablePuzzles, level]);
 
-     useEffect(() => {
-        if (gameState === 'playing' && puzzle) {
-            inputRef.current?.focus();
-        }
-    }, [puzzle, gameState]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!puzzle || guess === '' || showResult) return;
+    const handleAnswer = (index: number) => {
+        if (selectedAnswer !== null || !puzzle) return;
 
-        const correct = guess.toLowerCase() === puzzle.answer.toString().toLowerCase();
+        setSelectedAnswer(index);
+        const correct = index === puzzle.answerIndex;
         setIsCorrect(correct);
-        setShowResult(true);
 
         if (correct) {
             const awardedXp = puzzle.xp;
@@ -160,7 +141,7 @@ export default function LogicLeapPage() {
                 setXp(newXp);
             }
         } else {
-            toast({ title: "Incorrect!", description: `The correct answer was ${puzzle.answer}.`, variant: 'destructive' });
+            toast({ title: "Incorrect!", description: `The correct answer was "${puzzle.choices[puzzle.answerIndex]}".`, variant: 'destructive' });
             setScore(prev => prev - 5);
         }
     };
@@ -171,6 +152,18 @@ export default function LogicLeapPage() {
         setXpToNextLevel(getXpToNextLevel(1));
         localStorage.removeItem(STORAGE_KEY);
         toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
+    };
+
+    const getButtonClass = (index: number) => {
+        if (selectedAnswer !== null && puzzle) {
+            if (index === puzzle.answerIndex) {
+                return 'bg-green-500 hover:bg-green-600 text-white'; // Correct answer
+            }
+            if (index === selectedAnswer) {
+                return 'bg-red-500 hover:bg-red-600 text-white'; // Incorrectly selected answer
+            }
+        }
+        return 'bg-secondary hover:bg-accent text-secondary-foreground';
     };
 
     if (gameState === 'settings') {
@@ -208,7 +201,7 @@ export default function LogicLeapPage() {
                     <CardHeader>
                         <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
                            <Trophy className="w-10 h-10 text-yellow-400"/>
-                           Time's Up!
+                           Round Complete!
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -221,14 +214,33 @@ export default function LogicLeapPage() {
                             </div>
                              <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
                         </div>
-                        <Button size="lg" className="text-xl w-full" onClick={() => setGameState('settings')}>
-                           <Sparkles className="mr-2"/> Play Again
-                        </Button>
+                         <div className="flex gap-4">
+                            <Button size="lg" className="text-xl w-full" onClick={() => setGameState('settings')}>
+                               <Sparkles className="mr-2"/> New Game
+                            </Button>
+                            <Button size="lg" className="text-xl w-full" variant="outline" asChild>
+                               <Link href="/">Back to Home</Link>
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
         )
     }
+
+    if (isLoading || !puzzle) {
+        return (
+            <div className="flex justify-center items-center py-8">
+                <Card className="w-full max-w-2xl border-primary/50 glow-shadow">
+                    <CardContent className="p-8 text-center space-y-4">
+                        <Loader2 className="h-16 w-16 animate-spin mx-auto text-primary"/>
+                        <p className="text-xl text-muted-foreground">Loading puzzle...</p>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
 
     return (
         <div className="flex justify-center items-center py-8">
@@ -238,10 +250,6 @@ export default function LogicLeapPage() {
                         <div className="flex items-center gap-2">
                            <HelpCircle className="text-primary"/>
                            Logic Leap
-                        </div>
-                         <div className="flex items-center gap-2 text-xl font-mono px-3 py-1 rounded-md bg-secondary">
-                            <Clock className={`w-5 h-5 ${timeLeft <= 10 ? 'text-red-500' : ''}`}/>
-                            <span className={timeLeft <= 10 ? 'text-red-500' : ''}>{timeLeft}</span>
                         </div>
                     </CardTitle>
                      <CardDescription className="flex justify-between items-center">
@@ -267,22 +275,28 @@ export default function LogicLeapPage() {
                        <p className="text-xl md:text-2xl font-semibold leading-relaxed">{puzzle?.text}</p>
                     </div>
                     
-                    {!showResult ? (
-                        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
-                            <Input 
-                                ref={inputRef}
-                                value={guess}
-                                onChange={(e) => setGuess(e.target.value)}
-                                placeholder="Your answer..."
-                                className="text-lg h-14 text-center sm:text-2xl"
-                                type={puzzle?.answerType || 'text'}
-                                autoComplete="off"
-                                autoCapitalize="none"
-                                autoCorrect="off"
-                            />
-                            <Button type="submit" size="lg" className="h-14 text-lg">Submit</Button>
-                        </form>
-                    ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {puzzle.choices.map((choice, index) => (
+                            <Button
+                                key={index}
+                                size="lg"
+                                className={`justify-start h-auto py-4 text-base text-left whitespace-normal ${getButtonClass(index)}`}
+                                onClick={() => handleAnswer(index)}
+                                disabled={selectedAnswer !== null}
+                            >
+                                <div className="flex items-center">
+                                    <div className="w-6 mr-3">
+                                        {selectedAnswer !== null && (
+                                            index === puzzle.answerIndex ? <Check/> : (index === selectedAnswer ? <X/> : <span/>)
+                                        )}
+                                    </div>
+                                    <span>{choice}</span>
+                                </div>
+                            </Button>
+                        ))}
+                    </div>
+
+                    {selectedAnswer !== null && (
                          <Card className={cn(isCorrect ? 'bg-green-500/10 border-green-500' : 'bg-red-500/10 border-red-500')}>
                             <CardContent className="p-4 space-y-3">
                                <div className="flex items-center gap-2 text-lg font-semibold">

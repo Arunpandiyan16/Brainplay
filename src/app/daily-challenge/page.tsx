@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward } from 'lucide-react';
+import { X, Check, Loader2, Trophy, Zap, Sparkles, SkipForward } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -13,9 +13,8 @@ import { useCountry } from '@/hooks/use-country';
 import { quizQuestions, QuizQuestion } from '@/lib/quiz-data';
 
 
-const TOTAL_TIME = 20; // Daily Challenge: Time Attack!
-const CATEGORIES = ['General Knowledge', 'Movies', 'Cricket', 'Tech', 'Tamil Nadu GK'];
 const SKIP_LIMIT = 1;
+const TOTAL_QUESTIONS = 10; // Daily challenge has a fixed number of questions
 
 type GameState = 'start' | 'playing' | 'ended';
 
@@ -25,7 +24,6 @@ export default function DailyChallengePage() {
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [score, setScore] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
     const [isLoading, setIsLoading] = useState(false);
     const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
     const [skipsUsed, setSkipsUsed] = useState(0);
@@ -39,13 +37,14 @@ export default function DailyChallengePage() {
         setSelectedAnswer(null);
         setIsCorrect(null);
 
+        if (answeredQuestions.length >= TOTAL_QUESTIONS) {
+            setGameState('ended');
+            setIsLoading(false);
+            return;
+        }
+
         setAvailableQuestions(currentQuestions => {
              if (currentQuestions.length === 0) {
-                 toast({
-                    variant: 'destructive',
-                    title: 'Out of Questions!',
-                    description: 'You have answered all available questions for this region. Please try another region or come back later!',
-                });
                 setGameState('ended');
                 setIsLoading(false);
                 return [];
@@ -58,45 +57,44 @@ export default function DailyChallengePage() {
             return newQuestions;
         });
 
-    }, [toast]);
+    }, [answeredQuestions.length, toast]);
 
-    useEffect(() => {
-        if (gameState === 'playing') {
-            const countryFiltered = quizQuestions.filter(q => q.country === country || q.country === 'Global');
-            const shuffled = countryFiltered.sort(() => 0.5 - Math.random());
+    const startGame = () => {
+        setScore(0);
+        setGameState('playing');
+        setConsecutiveCorrect(0);
+        setSkipsUsed(0);
+        setSelectedAnswer(null);
+        setIsCorrect(null);
+        setAnsweredQuestions([]);
+        setIsLoading(true);
+        
+        const countryFiltered = quizQuestions.filter(q => q.country === country || q.country === 'Global');
+        const shuffled = countryFiltered.sort(() => 0.5 - Math.random()).slice(0, TOTAL_QUESTIONS);
+        setAvailableQuestions(shuffled);
+
+        if (shuffled.length > 0) {
+            const firstQuestion = shuffled.pop();
+            setQuestion(firstQuestion!);
             setAvailableQuestions(shuffled);
-            
-            if (shuffled.length > 0) {
-                const firstQuestion = shuffled.pop();
-                setQuestion(firstQuestion!);
-                setAvailableQuestions(shuffled);
-            } else {
-                 toast({
-                    variant: 'destructive',
-                    title: 'Out of Questions!',
-                    description: 'You have answered all available questions for this region. Please try another region or come back later!',
-                });
-                setGameState('ended');
-            }
-            setIsLoading(false);
+        } else {
+             toast({
+                variant: 'destructive',
+                title: 'Out of Questions!',
+                description: 'No questions available for today\'s challenge in this region. Please try another region!',
+            });
+            setGameState('start');
         }
-    }, [gameState, country, toast]);
-
+        setIsLoading(false);
+    };
 
     useEffect(() => {
-        if (gameState !== 'playing' || isLoading) return;
-
-        if (timeLeft <= 0) {
-            setGameState('ended');
-            return;
+        if (gameState === 'playing' && !question) {
+            startGame();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [gameState, country]);
 
-        const timer = setInterval(() => {
-            setTimeLeft(prev => Math.max(0, prev - 1));
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [gameState, timeLeft, isLoading]);
 
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null || !question) return;
@@ -120,10 +118,6 @@ export default function DailyChallengePage() {
             setScore(prev => prev - 5);
             setConsecutiveCorrect(0);
         }
-
-        setTimeout(() => {
-            fetchQuestion();
-        }, 1500);
     };
 
     const handleSkip = () => {
@@ -132,19 +126,6 @@ export default function DailyChallengePage() {
         setConsecutiveCorrect(0);
         setAnsweredQuestions(prev => [...prev, { ...question, answeredCorrectly: false, skipped: true }]);
         fetchQuestion();
-    };
-
-    const startGame = () => {
-        setQuestion(null);
-        setScore(0);
-        setTimeLeft(TOTAL_TIME);
-        setGameState('playing');
-        setConsecutiveCorrect(0);
-        setSkipsUsed(0);
-        setSelectedAnswer(null);
-        setIsCorrect(null);
-        setAnsweredQuestions([]);
-        setIsLoading(true);
     };
 
     const getButtonClass = (index: number) => {
@@ -198,9 +179,9 @@ export default function DailyChallengePage() {
                            Daily Challenge
                         </CardTitle>
                         <CardDescription className="text-lg mt-2">
-                           Today's challenge is <span className="font-bold text-primary">Quiz Clash: Time Attack!</span>
+                           Today's challenge is <span className="font-bold text-primary">Quiz Clash: {TOTAL_QUESTIONS} Questions!</span>
                            <br />
-                           You have {TOTAL_TIME} seconds to answer as many questions as possible. Correct answers are worth double points!
+                           Answer {TOTAL_QUESTIONS} questions. Correct answers are worth double points!
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -262,7 +243,7 @@ export default function DailyChallengePage() {
                 <Card className="w-full max-w-2xl border-primary/50 glow-shadow">
                     <CardContent className="p-8 text-center space-y-4">
                         <Loader2 className="h-16 w-16 animate-spin mx-auto text-primary"/>
-                        <p className="text-xl text-muted-foreground">Loading question {questionNumber}...</p>
+                        <p className="text-xl text-muted-foreground">Loading question...</p>
                     </CardContent>
                 </Card>
             </div>
@@ -278,18 +259,14 @@ export default function DailyChallengePage() {
                            <Sparkles className="text-primary"/>
                            Daily Challenge
                         </div>
-                        <div className="flex items-center gap-2 text-xl font-mono px-3 py-1 rounded-md bg-secondary">
-                            <Clock className={`w-5 h-5 ${timeLeft <= 5 ? 'text-red-500' : ''}`}/>
-                            <span className={timeLeft <= 5 ? 'text-red-500' : ''}>{timeLeft}</span>
-                        </div>
                     </CardTitle>
                     <CardDescription className="flex justify-between items-center">
-                        <span>Question {questionNumber}</span>
+                        <span>Question {questionNumber} of {TOTAL_QUESTIONS}</span>
                         <Badge variant="outline">{question.category}</Badge>
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <Progress value={(timeLeft / TOTAL_TIME) * 100} className="w-full h-2" />
+                    <Progress value={(questionNumber / TOTAL_QUESTIONS) * 100} className="w-full h-2" />
 
                     <div className="p-4 rounded-lg bg-secondary text-center min-h-[120px] flex items-center justify-center">
                         <p className="text-xl font-semibold">{question.question}</p>
@@ -310,7 +287,7 @@ export default function DailyChallengePage() {
                                             index === question.answerIndex ? <Check/> : (index === selectedAnswer ? <X/> : <span/>)
                                         )}
                                     </div>
-                                    <span className="text-primary-foreground">{choice}</span>
+                                    <span className="flex-1">{choice}</span>
                                 </div>
                             </Button>
                         ))}
@@ -330,12 +307,15 @@ export default function DailyChallengePage() {
 
                     {isCorrect !== null && (
                          <Card className={isCorrect ? "bg-green-500/10" : "bg-red-500/10"}>
-                            <CardContent className="p-4">
+                            <CardContent className="p-4 space-y-3">
                                <div className="flex items-center gap-2">
                                 {isCorrect ? <Check className="text-green-500" /> : <X className="text-red-500" />}
                                <p className="font-semibold text-lg">{isCorrect ? 'Correct!' : 'Incorrect!'}</p>
                                </div>
                                <p className="text-muted-foreground mt-2">{question.explanation}</p>
+                               <Button onClick={fetchQuestion} className="w-full">
+                                   Next Question
+                               </Button>
                             </CardContent>
                         </Card>
                     )}
@@ -350,5 +330,3 @@ export default function DailyChallengePage() {
         </div>
     );
 }
-
-    

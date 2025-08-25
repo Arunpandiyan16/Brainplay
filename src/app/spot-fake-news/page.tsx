@@ -5,13 +5,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Clock, X, Check, Newspaper, Loader2, Trophy, Zap, Sparkles, Lightbulb, RotateCcw } from 'lucide-react';
+import { X, Check, Newspaper, Loader2, Trophy, Zap, Sparkles, Lightbulb, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useCountry } from '@/hooks/use-country';
 import { fakeNewsData, NewsHeadline } from '@/lib/spot-fake-news-data';
+import Link from 'next/link';
 
-const TOTAL_TIME = 90;
 const XP_PER_CORRECT = 15;
 const getXpToNextLevel = (level: number) => 75 + (level - 1) * 25;
 const STORAGE_KEY = 'fakeNewsProgress';
@@ -26,7 +26,6 @@ export default function SpotFakeNewsPage() {
     const [selection, setSelection] = useState<'real' | 'fake' | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [score, setScore] = useState(0);
-    const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
     const [isLoading, setIsLoading] = useState(false);
     const [answeredCount, setAnsweredCount] = useState(0);
     const [correctCount, setCorrectCount] = useState(0);
@@ -74,9 +73,8 @@ export default function SpotFakeNewsPage() {
         setAvailableHeadlines(currentHeadlines => {
             if (currentHeadlines.length === 0) {
                  toast({
-                    variant: 'destructive',
                     title: 'Out of Headlines!',
-                    description: 'You have seen all headlines for this level. Try another region!',
+                    description: 'You have seen all headlines for this level. Congrats!',
                 });
                 setGameState('ended');
                 setIsLoading(false);
@@ -94,7 +92,6 @@ export default function SpotFakeNewsPage() {
 
     const startGame = () => {
         setScore(0);
-        setTimeLeft(TOTAL_TIME);
         setAnsweredCount(0);
         setCorrectCount(0);
         setHeadline(null);
@@ -103,7 +100,7 @@ export default function SpotFakeNewsPage() {
     };
 
     useEffect(() => {
-        if (gameState === 'playing') {
+       if (gameState === 'playing') {
             const difficulties: Difficulty[] = ['Easy'];
             if (level >= 3) difficulties.push('Medium');
             if (level >= 5) difficulties.push('Hard');
@@ -112,7 +109,7 @@ export default function SpotFakeNewsPage() {
                 difficulties.includes(h.difficulty) &&
                 (h.country === country || h.country === 'Global')
             );
-
+            
             if(filtered.length === 0) {
                 toast({
                     variant: 'destructive',
@@ -123,30 +120,19 @@ export default function SpotFakeNewsPage() {
                 setIsLoading(false);
                 return;
             }
+            
             const shuffled = filtered.sort(() => 0.5 - Math.random());
             setAvailableHeadlines(shuffled);
             
-            const firstHeadline = shuffled.pop();
-            setHeadline(firstHeadline!);
-            setAvailableHeadlines(shuffled);
-            setIsLoading(false);
+            // This will be picked up by the next effect
+            if (!headline) {
+                 const firstHeadline = shuffled.pop();
+                 setHeadline(firstHeadline!);
+                 setAvailableHeadlines(shuffled);
+                 setIsLoading(false);
+            }
         }
-    }, [gameState, country, level, toast]);
-
-    useEffect(() => {
-        if (gameState !== 'playing' || isLoading) return;
-
-        if (timeLeft <= 0) {
-            setGameState('ended');
-            return;
-        }
-
-        const timer = setInterval(() => {
-            setTimeLeft(prev => Math.max(0, prev - 1));
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [gameState, timeLeft, isLoading]);
+    }, [gameState, country, level, toast, headline]);
 
     const handleAnswer = (choice: 'real' | 'fake') => {
         if (selection !== null || !headline) return;
@@ -179,7 +165,7 @@ export default function SpotFakeNewsPage() {
     };
 
     const nextHeadline = () => {
-        if(timeLeft > 0) {
+        if(availableHeadlines.length > 0) {
             fetchHeadline();
         } else {
             setGameState('ended');
@@ -247,9 +233,14 @@ export default function SpotFakeNewsPage() {
                                 <p className="font-bold">{accuracy.toFixed(0)}%</p>
                             </div>
                         </div>
-                        <Button size="lg" className="text-xl w-full" onClick={startGame}>
-                           <Sparkles className="mr-2"/> Play Again
-                        </Button>
+                        <div className="flex gap-4">
+                            <Button size="lg" className="text-xl w-full" onClick={startGame}>
+                               <Sparkles className="mr-2"/> Play Again
+                            </Button>
+                             <Button size="lg" className="text-xl w-full" variant="outline" asChild>
+                               <Link href="/">Back to Home</Link>
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -265,10 +256,7 @@ export default function SpotFakeNewsPage() {
                            <Newspaper className="text-primary"/>
                            Spot the Fake News
                         </div>
-                        <div className="flex items-center gap-2 text-xl font-mono px-3 py-1 rounded-md bg-secondary">
-                            <Clock className={`w-5 h-5 ${timeLeft <= 10 ? 'text-red-500' : ''}`}/>
-                            <span className={timeLeft <= 10 ? 'text-red-500' : ''}>{timeLeft}</span>
-                        </div>
+                         <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
                     </CardTitle>
                     <CardDescription className="flex justify-between">
                         <span>Score: <span className="font-bold text-primary">{score}</span></span>
@@ -334,5 +322,3 @@ export default function SpotFakeNewsPage() {
         </div>
     );
 }
-
-    

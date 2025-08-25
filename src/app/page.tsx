@@ -1,43 +1,44 @@
+
 'use client';
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, BrainCircuit, PencilRuler, Puzzle, Newspaper, Sparkles, Calculator, HelpCircle } from 'lucide-react';
+import { BrainCircuit, PencilRuler, Puzzle, Newspaper, Sparkles, Calculator, HelpCircle, Trophy } from 'lucide-react';
 import GameCard from '@/components/dashboard/game-card';
 
 const games = [
   {
     title: 'Quiz Clash',
-    description: '30-second rapid fire quiz.',
+    description: 'Answer tough questions to level up.',
     icon: <BrainCircuit className="w-8 h-8" />,
     href: '/quiz-clash',
     color: 'text-purple-400',
   },
   {
     title: 'Word Hunter',
-    description: 'Unscramble words against the clock.',
+    description: 'Unscramble words and expand your vocabulary.',
     icon: <PencilRuler className="w-8 h-8" />,
     href: '/word-hunter',
     color: 'text-green-400',
   },
   {
     title: 'Math Rush',
-    description: 'Quick mental math challenges.',
+    description: 'Solve arithmetic and aptitude problems.',
     icon: <Calculator className="w-8 h-8" />,
     href: '/math-rush',
     color: 'text-blue-400',
   },
    {
     title: 'Logic Leap',
-    description: 'Solve diverse logical puzzles.',
+    description: 'Solve diverse logical puzzles to level up.',
     icon: <HelpCircle className="w-8 h-8" />,
     href: '/logic-leap',
     color: 'text-orange-400',
   },
   {
     title: 'Memory Flip',
-    description: 'Match pairs and learn trivia.',
+    description: 'Match pairs, learn trivia, and level up.',
     icon: <Trophy className="w-8 h-8" />,
     href: '/memory-flip',
     color: 'text-yellow-400',
@@ -79,8 +80,8 @@ export default function Home() {
                 </CardHeader>
                 <CardContent>
                     <p className="text-muted-foreground mb-4">A new game with a unique twist, every single day. Today's challenge:</p>
-                    <h3 className="text-xl font-semibold mb-2">Quiz Clash: Time Attack!</h3>
-                    <p>Timer is reduced to 20 seconds. Correct answers are worth double points!</p>
+                    <h3 className="text-xl font-semibold mb-2">Quiz Clash: 10 Question Showdown!</h3>
+                    <p>Answer 10 questions. Correct answers are worth double points!</p>
                     <Button className="w-full mt-4" variant="default" asChild>
                       <Link href="/daily-challenge">Play Daily Challenge</Link>
                     </Button>

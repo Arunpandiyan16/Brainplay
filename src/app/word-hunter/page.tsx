@@ -1,17 +1,17 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Clock, Zap, Brain, Lightbulb, Trophy, Sparkles, Loader2, Award, Languages, RotateCcw } from 'lucide-react';
+import { Zap, Brain, Lightbulb, Trophy, Sparkles, Loader2, Award, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { wordBank, WordPuzzle } from '@/lib/word-hunter-data';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
-const TOTAL_TIME = 120; // 2 minutes
 const HINT_COST = 15;
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 25;
 const STORAGE_KEY = 'wordHunterProgress';
@@ -41,8 +41,6 @@ export default function WordHunterPage() {
     const [isWrong, setIsWrong] = useState(false);
 
     const [score, setScore] = useState(0);
-    const [gameTimeLeft, setGameTimeLeft] = useState(TOTAL_TIME);
-
     const [isLoading, setIsLoading] = useState(false);
     const [hintTaken, setHintTaken] = useState(false);
     const [showHint, setShowHint] = useState(false);
@@ -90,9 +88,8 @@ export default function WordHunterPage() {
         setAvailablePuzzles(currentPuzzles => {
              if (currentPuzzles.length === 0) {
                  toast({
-                    variant: 'destructive',
                     title: 'Out of Words!',
-                    description: 'You\'ve solved all available words for your level. Level up or reset progress!',
+                    description: 'You\'ve solved all available words for your level. Congrats!',
                 });
                 setGameState('ended');
                 setIsLoading(false);
@@ -113,34 +110,42 @@ export default function WordHunterPage() {
 
     }, [toast]);
     
-    useEffect(() => {
-        if (gameState === 'playing') {
-            const difficulties: Difficulty[] = ['Easy'];
-            if (level >= 3) difficulties.push('Medium');
-            if (level >= 6) difficulties.push('Hard');
+    const startGame = useCallback(() => {
+        setScore(0);
+        setSolvedWords([]);
+        setPuzzle(null);
+        setGameState('playing');
+        setIsLoading(true);
 
-            const languagePuzzles = wordBank[language];
-            const filteredPuzzles = difficulties.flatMap(diff => languagePuzzles[diff] || []);
-            const unsolvedPuzzles = filteredPuzzles.filter(p => !solvedWords.some(s => s.word === p.word));
-            const shuffled = unsolvedPuzzles.sort(() => 0.5 - Math.random());
-            setAvailablePuzzles(shuffled);
-            
-            if (shuffled.length > 0) {
-                const firstPuzzle = shuffled.pop()
-                setPuzzle(firstPuzzle!);
-                setAvailableLetters(firstPuzzle!.scrambled.split('').map((char, index) => ({ char, id: index, used: false })));
-                setAvailablePuzzles(shuffled);
-            } else {
-                toast({
-                    variant: 'destructive',
-                    title: 'Out of Words!',
-                    description: 'You\'ve solved all available words for your level. Level up or reset progress!',
-                });
-                setGameState('ended');
-            }
-             setIsLoading(false);
+        const difficulties: Difficulty[] = ['Easy'];
+        if (level >= 3) difficulties.push('Medium');
+        if (level >= 6) difficulties.push('Hard');
+
+        const languagePuzzles = wordBank[language];
+        const filteredPuzzles = difficulties.flatMap(diff => languagePuzzles[diff] || []);
+        const unsolvedPuzzles = filteredPuzzles.filter(p => !solvedWords.some(s => s.word === p.word));
+        const shuffled = unsolvedPuzzles.sort(() => 0.5 - Math.random());
+        
+        if (shuffled.length === 0) {
+            toast({
+                variant: 'destructive',
+                title: 'Out of Words!',
+                description: 'You\'ve solved all available words for your level. Please reset progress or try another language.',
+            });
+            setGameState('settings');
+            setIsLoading(false);
+            return;
         }
-    }, [gameState, language, level, solvedWords, toast]);
+
+        setAvailablePuzzles(shuffled);
+    }, [level, language, solvedWords, toast]);
+
+    useEffect(() => {
+        if(gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
+            fetchPuzzle();
+        }
+    }, [gameState, puzzle, availablePuzzles, fetchPuzzle]);
+
 
     const checkAnswer = useCallback(() => {
         if (!puzzle || answerSlots.length !== puzzle.word.length) return;
@@ -198,30 +203,6 @@ export default function WordHunterPage() {
             checkAnswer();
         }
     }, [answerSlots, puzzle, checkAnswer]);
-
-    const startGame = () => {
-        setScore(0);
-        setGameTimeLeft(TOTAL_TIME);
-        setSolvedWords([]);
-        setPuzzle(null);
-        setGameState('playing');
-        setIsLoading(true);
-    };
-
-    useEffect(() => {
-        if (gameState !== 'playing') return;
-
-        if (gameTimeLeft <= 0) {
-            setGameState('ended');
-            return;
-        }
-
-        const gameTimer = setInterval(() => {
-            setGameTimeLeft(prev => Math.max(0, prev - 1));
-        }, 1000);
-
-        return () => clearInterval(gameTimer);
-    }, [gameState, gameTimeLeft]);
 
     const handleLetterSelect = (letter: Letter) => {
         if (letter.used || (puzzle && answerSlots.length >= puzzle.word.length)) return;
@@ -309,11 +290,13 @@ export default function WordHunterPage() {
                     <CardContent className="space-y-6">
                         <div className="text-2xl">Your Final Score:</div>
                         <div className="text-7xl font-bold text-primary">{score}</div>
-                        <div className="text-lg">
-                            <p className="text-muted-foreground">Words Solved</p>
-                            <p className="font-bold">{solvedWords.length}</p>
+                        <div className="flex justify-around w-full">
+                            <div className="text-lg">
+                                <p className="text-muted-foreground">Words Solved</p>
+                                <p className="font-bold">{solvedWords.length}</p>
+                            </div>
+                            <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
                         </div>
-                         <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
                         {solvedWords.length > 0 &&
                         <Card>
                             <CardHeader><CardTitle>Solved Words</CardTitle></CardHeader>
@@ -324,9 +307,14 @@ export default function WordHunterPage() {
                             </CardContent>
                         </Card>
                         }
-                        <Button size="lg" className="text-xl w-full" onClick={startGame}>
-                           <Sparkles className="mr-2"/> Play Again
-                        </Button>
+                        <div className="flex gap-4">
+                            <Button size="lg" className="text-xl w-full" onClick={startGame}>
+                               <Sparkles className="mr-2"/> Play Again
+                            </Button>
+                             <Button size="lg" className="text-xl w-full" variant="outline" asChild>
+                               <Link href="/">Back to Home</Link>
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -380,10 +368,7 @@ export default function WordHunterPage() {
                                 <Award />
                                 <span>{score}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-xl font-mono px-3 py-1 rounded-md bg-secondary">
-                                <Clock className={`w-5 h-5 ${gameTimeLeft <= 10 ? 'text-red-500' : ''}`}/>
-                                <span>{gameTimeLeft}</span>
-                            </div>
+                            <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
                         </div>
                     </CardTitle>
                      <CardDescription className="flex justify-between">
@@ -441,5 +426,3 @@ export default function WordHunterPage() {
         </div>
     );
 }
-
-    

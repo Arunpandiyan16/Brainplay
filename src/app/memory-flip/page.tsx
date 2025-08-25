@@ -5,15 +5,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Brain, Clock, Trophy, Sparkles, Zap, Loader2, Lightbulb, Repeat, RotateCcw } from 'lucide-react';
+import { Brain, Trophy, Sparkles, Zap, Loader2, Lightbulb, Repeat, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -25,9 +18,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { triviaData } from '@/lib/trivia-data';
+import Link from 'next/link';
+
 
 type GameState = 'settings' | 'playing' | 'ended';
-type GridSize = '4x4' | '5x4' | '6x5';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
 interface CardData {
@@ -49,9 +43,9 @@ const EMOJI_PAIRS: { [key: string]: string } = {
 };
 
 const GRID_CONFIG = {
-  'Easy': { pairs: 8, cols: 4, time: 80 },
-  'Medium': { pairs: 10, cols: 5, time: 100 },
-  'Hard': { pairs: 15, cols: 6, time: 150 },
+  'Easy': { pairs: 8, cols: 4 },
+  'Medium': { pairs: 10, cols: 5 },
+  'Hard': { pairs: 15, cols: 6 },
 };
 
 const XP_PER_MATCH = 5;
@@ -69,8 +63,6 @@ export default function MemoryFlipPage() {
   const [cards, setCards] = useState<CardData[]>([]);
   const [flippedIndices, setFlippedIndices] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [totalTime, setTotalTime] = useState(0);
   const [isChecking, setIsChecking] = useState(false);
   const [trivia, setTrivia] = useState<TriviaFact | null>(null);
   const [isTriviaLoading, setIsTriviaLoading] = useState(false);
@@ -81,7 +73,6 @@ export default function MemoryFlipPage() {
   const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
 
   const { toast } = useToast();
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Load progress from localStorage on initial render
     useEffect(() => {
@@ -119,7 +110,7 @@ export default function MemoryFlipPage() {
 
   const setupGame = useCallback(() => {
     const difficulty = getDifficulty();
-    const { pairs, time } = GRID_CONFIG[difficulty];
+    const { pairs } = GRID_CONFIG[difficulty];
     const availableIcons = Object.keys(EMOJI_PAIRS);
     const selectedIcons = availableIcons.sort(() => 0.5 - Math.random()).slice(0, pairs);
     const gameCards = [...selectedIcons, ...selectedIcons]
@@ -127,8 +118,6 @@ export default function MemoryFlipPage() {
       .map((type, id) => ({ id, type, isFlipped: false, isMatched: false }));
     
     setCards(gameCards);
-    setTotalTime(time);
-    setTimeLeft(time);
 
   }, [getDifficulty]);
 
@@ -149,26 +138,7 @@ export default function MemoryFlipPage() {
     };
 
   useEffect(() => {
-    if (gameState === 'playing') {
-      timerRef.current = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current!);
-            setGameState('ended');
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [gameState]);
-
-  useEffect(() => {
     if (cards.length > 0 && cards.every(c => c.isMatched)) {
-       if (timerRef.current) clearInterval(timerRef.current);
        setTimeout(() => setGameState('ended'), 1000);
     }
   }, [cards]);
@@ -279,25 +249,29 @@ export default function MemoryFlipPage() {
                     <CardHeader>
                         <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
                            <Trophy className="w-10 h-10 text-yellow-400"/>
-                           {allMatched ? "Congratulations!" : "Game Over!"}
+                           {allMatched ? "Congratulations!" : "Game Over"}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <div className="text-2xl">{allMatched ? "You matched all the pairs!" : "Time's up!"}</div>
+                        <div className="text-2xl">{allMatched ? "You matched all the pairs!" : "You decided to end the game."}</div>
                         <div className="flex justify-around text-lg w-full bg-secondary/50 p-4 rounded-lg">
                              <div>
                                 <p className="text-muted-foreground">Moves</p>
                                 <p className="font-bold text-2xl text-primary">{moves}</p>
                             </div>
-                            <div>
-                                <p className="text-muted-foreground">Time Left</p>
-                                <p className="font-bold text-2xl text-primary">{timeLeft}</p>
+                            <div className="text-lg">
+                                <p className="text-muted-foreground">Final Level</p>
+                                <p className="font-bold text-2xl text-primary">{level}</p>
                             </div>
                         </div>
-                        <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
-                        <Button size="lg" className="text-xl w-full" onClick={() => setGameState('settings')}>
-                           <Sparkles className="mr-2"/> Play Again
-                        </Button>
+                         <div className="flex gap-4">
+                            <Button size="lg" className="text-xl w-full" onClick={() => setGameState('settings')}>
+                               <Sparkles className="mr-2"/> Play Again
+                            </Button>
+                            <Button size="lg" className="text-xl w-full" variant="outline" asChild>
+                               <Link href="/">Back to Home</Link>
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -320,10 +294,7 @@ export default function MemoryFlipPage() {
                         <div className="flex items-center gap-2 text-lg font-mono px-3 py-1 rounded-md bg-secondary">
                            Moves: <span className="font-bold">{moves}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-xl font-mono px-3 py-1 rounded-md bg-secondary">
-                            <Clock className={`w-5 h-5 ${timeLeft <= 10 ? 'text-red-500' : ''}`}/>
-                            <span className={timeLeft <= 10 ? 'text-red-500' : ''}>{timeLeft}</span>
-                        </div>
+                        <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
                     </div>
                 </CardTitle>
                 <CardDescription className="flex justify-between">
@@ -401,5 +372,3 @@ export default function MemoryFlipPage() {
   }
 }
 */
-
-    
