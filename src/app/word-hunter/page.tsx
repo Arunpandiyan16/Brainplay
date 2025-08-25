@@ -118,7 +118,7 @@ export default function WordHunterPage() {
             const nextPuzzle = availablePuzzles.pop();
             setPuzzle(nextPuzzle!);
             setAvailableLetters(nextPuzzle!.scrambled.split('').map((char, index) => ({ char, id: index, used: false })));
-            setAvailablePuzzles(availablePuzzles);
+            setAvailablePuzzles([...availablePuzzles]);
             setIsLoading(false);
         }, 500)
        
@@ -137,7 +137,7 @@ export default function WordHunterPage() {
     }, [gameState, puzzle, availablePuzzles, fetchPuzzle]);
     
     const checkAnswer = useCallback(() => {
-        if (!puzzle) return;
+        if (!puzzle || answerSlots.length !== puzzle.word.length) return;
 
         const guessedWord = answerSlots.map(s => s.char).join('');
         
@@ -162,7 +162,6 @@ export default function WordHunterPage() {
             setScore(prev => prev + points);
             setSolvedWords(prev => [...prev, puzzle]);
             
-            // Handle XP and leveling up
             const newXp = xp + awardedXp;
             if (newXp >= xpToNextLevel) {
                 const nextLevel = level + 1;
@@ -170,12 +169,14 @@ export default function WordHunterPage() {
                 setXp(newXp - xpToNextLevel);
                 setXpToNextLevel(getXpToNextLevel(nextLevel));
                 toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! Harder words unlocked.`, className: 'bg-primary text-primary-foreground' });
-                loadAndShufflePuzzles();
             } else {
                 setXp(newXp);
             }
             
-            setTimeout(() => fetchPuzzle(), 500);
+            setTimeout(() => {
+                loadAndShufflePuzzles();
+                fetchPuzzle();
+            }, 500);
 
         } else {
             // Incorrect Answer
@@ -238,6 +239,12 @@ export default function WordHunterPage() {
         setHintTaken(true);
         setScore(prev => prev - HINT_COST);
     };
+    
+    const handleSkip = () => {
+      if(isLoading) return;
+      loadAndShufflePuzzles();
+      fetchPuzzle();
+    }
 
     const resetProgress = () => {
         setLevel(1);
@@ -419,7 +426,7 @@ export default function WordHunterPage() {
                                     <Lightbulb className="mr-2"/>
                                     Hint (-{HINT_COST} pts)
                                 </Button>
-                                <Button variant="outline" onClick={() => fetchPuzzle()} disabled={isLoading}>
+                                <Button variant="outline" onClick={handleSkip} disabled={isLoading}>
                                     Skip Word
                                 </Button>
                             </div>
@@ -443,5 +450,6 @@ keyframes: {
 },
 animation: {
     'shake': 'shake 0.82s cubic-bezier(.36,.07,.19,.97) both',
+}
 }
 */
