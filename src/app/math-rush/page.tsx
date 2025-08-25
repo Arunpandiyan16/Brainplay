@@ -304,7 +304,7 @@ export default function MathRushPage() {
         if (problem.type === 'Aptitude') {
             return <p className="text-xl md:text-2xl font-semibold leading-relaxed text-center">{problem.text}</p>;
         }
-        return <p className="text-5xl font-bold tracking-widest text-center">{problem.text} = ?</p>;
+        return <p className="text-3xl md:text-5xl font-bold tracking-widest text-center">{problem.text} = ?</p>;
     }
 
     return (
@@ -355,5 +355,3 @@ export default function MathRushPage() {
         </div>
     );
 }
-
-    
