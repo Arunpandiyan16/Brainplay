@@ -11,11 +11,10 @@ import { cn } from '@/lib/utils';
 import { useCountry } from '@/hooks/use-country';
 import { fakeNewsData, NewsHeadline } from '@/lib/spot-fake-news-data';
 
-const TOTAL_TIME = 90; // 90 seconds for the game
+const TOTAL_TIME = 90;
 const XP_PER_CORRECT = 15;
 const getXpToNextLevel = (level: number) => 75 + (level - 1) * 25;
 const STORAGE_KEY = 'fakeNewsProgress';
-
 
 type GameState = 'settings' | 'playing' | 'ended';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
@@ -33,7 +32,6 @@ export default function SpotFakeNewsPage() {
     const [correctCount, setCorrectCount] = useState(0);
     const [availableHeadlines, setAvailableHeadlines] = useState<NewsHeadline[]>([]);
 
-    // Leveling state
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
@@ -41,7 +39,6 @@ export default function SpotFakeNewsPage() {
     const { toast } = useToast();
     const { country } = useCountry();
 
-    // Load progress from localStorage
     useEffect(() => {
         try {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
@@ -58,7 +55,6 @@ export default function SpotFakeNewsPage() {
         }
     }, []);
 
-    // Save progress to localStorage
     useEffect(() => {
         try {
             const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel });
@@ -94,12 +90,11 @@ export default function SpotFakeNewsPage() {
             return newHeadlines;
         });
 
-    }, []);
+    }, [toast]);
     
     const startGame = () => {
         setScore(0);
         setTimeLeft(TOTAL_TIME);
-        setGameState('playing');
         setAnsweredCount(0);
         setCorrectCount(0);
         setHeadline(null);
@@ -126,6 +121,7 @@ export default function SpotFakeNewsPage() {
         }
 
         setAvailableHeadlines(filtered.sort(() => 0.5 - Math.random()));
+        setGameState('playing');
     };
 
     useEffect(() => {

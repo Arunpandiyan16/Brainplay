@@ -22,12 +22,12 @@ type Language = 'English' | 'Tamil';
 
 interface Letter {
     char: string;
-    id: number; // Unique ID for this specific letter instance
+    id: number;
     used: boolean;
 }
 
 interface AnswerSlot {
-    id: number; // Corresponds to the letter's id
+    id: number;
     char: string;
 }
 
@@ -48,7 +48,6 @@ export default function WordHunterPage() {
     const [showHint, setShowHint] = useState(false);
     const [solvedWords, setSolvedWords] = useState<WordPuzzle[]>([]);
 
-    // Leveling state
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
@@ -56,7 +55,6 @@ export default function WordHunterPage() {
     
     const { toast } = useToast();
     
-    // Load progress from localStorage on initial render
     useEffect(() => {
         try {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
@@ -73,7 +71,6 @@ export default function WordHunterPage() {
         }
     }, []);
 
-    // Save progress to localStorage whenever it changes
     useEffect(() => {
         try {
             const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel });
@@ -121,19 +118,19 @@ export default function WordHunterPage() {
                 setPuzzle(nextPuzzle);
                 setAvailableLetters(nextPuzzle.scrambled.split('').map((char, index) => ({ char, id: index, used: false })));
             } else {
-                setGameState('ended');
+                 setGameState('ended');
             }
             setIsLoading(false);
             return newPuzzles;
         });
        
-    }, []);
+    }, [toast]);
     
     useEffect(() => {
         if (gameState === 'playing') {
             loadAndShufflePuzzles();
         }
-    }, [gameState, language, level, loadAndShufflePuzzles]);
+    }, [gameState, loadAndShufflePuzzles]);
 
     useEffect(() => {
         if (gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
@@ -202,7 +199,7 @@ export default function WordHunterPage() {
         setScore(0);
         setGameTimeLeft(TOTAL_TIME);
         setSolvedWords([]);
-        setPuzzle(null); // This will trigger the useEffect to fetch a new puzzle
+        setPuzzle(null);
         setGameState('playing');
     };
 
@@ -322,7 +319,7 @@ export default function WordHunterPage() {
                             </CardContent>
                         </Card>
                         }
-                        <Button size="lg" className="text-xl w-full" onClick={() => setGameState('settings')}>
+                        <Button size="lg" className="text-xl w-full" onClick={startGame}>
                            <Sparkles className="mr-2"/> Play Again
                         </Button>
                     </CardContent>

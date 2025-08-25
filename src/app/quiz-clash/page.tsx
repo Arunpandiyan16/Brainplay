@@ -34,7 +34,6 @@ export default function QuizClashPage() {
     const [skipsUsed, setSkipsUsed] = useState(0);
     const [answeredQuestions, setAnsweredQuestions] = useState<any[]>([]);
     
-    // Leveling state
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
@@ -44,7 +43,6 @@ export default function QuizClashPage() {
     const { toast } = useToast();
     const { country } = useCountry();
 
-    // Load progress from localStorage on initial render
     useEffect(() => {
         try {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
@@ -61,7 +59,6 @@ export default function QuizClashPage() {
         }
     }, []);
 
-    // Save progress to localStorage whenever it changes
     useEffect(() => {
         try {
             const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel });
@@ -72,12 +69,10 @@ export default function QuizClashPage() {
     }, [level, xp, xpToNextLevel]);
 
     const loadAndShuffleQuestions = useCallback(() => {
-        // Determine available difficulties based on level
         const difficulties: Difficulty[] = ['Easy'];
         if (level >= 3) difficulties.push('Medium');
         if (level >= 6) difficulties.push('Hard');
 
-        // Filter questions by country and available difficulties
         const countryFiltered = quizQuestions.filter(q => 
             (q.country === country || q.country === 'Global') &&
             difficulties.includes(q.difficulty)
@@ -85,7 +80,6 @@ export default function QuizClashPage() {
         
         setAvailableQuestions(countryFiltered.sort(() => 0.5 - Math.random()));
     }, [country, level]);
-
 
     const fetchQuestion = useCallback(() => {
         setIsLoading(true);
@@ -110,8 +104,7 @@ export default function QuizClashPage() {
             setIsLoading(false);
             return newQuestions;
         });
-
-    }, []);
+    }, [toast]);
     
     useEffect(() => {
         if (gameState === 'playing') {
@@ -124,7 +117,6 @@ export default function QuizClashPage() {
             fetchQuestion();
         }
     }, [gameState, availableQuestions, question, fetchQuestion, isLoading]);
-
 
     useEffect(() => {
         if (gameState !== 'playing' || isLoading) return;
@@ -162,12 +154,11 @@ export default function QuizClashPage() {
             setConsecutiveCorrect(newConsecutiveCorrect);
 
             if (newConsecutiveCorrect > 0 && newConsecutiveCorrect % 3 === 0) {
-                points += 5; // Streak bonus
+                points += 5;
                 toast({ title: "Streak Bonus!", description: "+5 extra points!" });
             }
             setScore(prev => prev + points);
 
-            // Handle XP and leveling up
             const newXp = xp + XP_PER_CORRECT;
             if (newXp >= xpToNextLevel) {
                 const nextLevel = level + 1;
@@ -221,10 +212,10 @@ export default function QuizClashPage() {
     const getButtonClass = (index: number) => {
         if (selectedAnswer !== null && question) {
             if (index === question.answerIndex) {
-                return 'bg-green-500 hover:bg-green-600 text-white'; // Correct answer
+                return 'bg-green-500 hover:bg-green-600 text-white';
             }
             if (index === selectedAnswer) {
-                return 'bg-red-500 hover:bg-red-600 text-white'; // Incorrectly selected answer
+                return 'bg-red-500 hover:bg-red-600 text-white';
             }
         }
         return 'bg-secondary hover:bg-accent text-secondary-foreground';

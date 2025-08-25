@@ -64,7 +64,7 @@ export default function DailyChallengePage() {
             return newQuestions;
         });
 
-    }, []);
+    }, [toast]);
     
     useEffect(() => {
         if (gameState === 'playing') {
