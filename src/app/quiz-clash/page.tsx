@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
-import { useCountry } from '@/hooks/use-country.tsx';
+import { useCountry } from '@/hooks/use-country';
 import { quizQuestions, QuizQuestion } from '@/lib/quiz-data';
 
 const TOTAL_TIME = 90; 
@@ -87,28 +87,30 @@ export default function QuizClashPage() {
     }, [country, level]);
 
 
-    const fetchQuestion = useCallback((currentQuestions: QuizQuestion[]) => {
+    const fetchQuestion = useCallback(() => {
         setIsLoading(true);
         setSelectedAnswer(null);
         setIsCorrect(null);
         
         setTimeout(() => {
-            if (currentQuestions.length === 0) {
-                 toast({
-                    variant: 'destructive',
-                    title: 'Out of Questions!',
-                    description: 'You have answered all available questions for this level and region. Try leveling up or changing regions!',
-                });
-                setGameState('ended');
+            setAvailableQuestions(currentQuestions => {
+                if (currentQuestions.length === 0) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Out of Questions!',
+                        description: 'You have answered all available questions for this level and region. Try leveling up or changing regions!',
+                    });
+                    setGameState('ended');
+                    setIsLoading(false);
+                    return [];
+                }
+    
+                const newQuestions = [...currentQuestions];
+                const nextQuestion = newQuestions.pop();
+                setQuestion(nextQuestion!);
                 setIsLoading(false);
-                return;
-            }
-            
-            const nextQuestion = currentQuestions.pop();
-            setQuestion(nextQuestion!);
-            setAvailableQuestions(currentQuestions);
-            setIsLoading(false);
-
+                return newQuestions;
+            });
         }, 500);
 
     }, [toast]);
@@ -120,10 +122,10 @@ export default function QuizClashPage() {
     }, [gameState, loadAndShuffleQuestions]);
 
     useEffect(() => {
-        if (gameState === 'playing' && availableQuestions.length > 0 && !question) {
-            fetchQuestion(availableQuestions);
+        if (gameState === 'playing' && availableQuestions.length > 0 && !question && !isLoading) {
+            fetchQuestion();
         }
-    }, [gameState, availableQuestions, question, fetchQuestion]);
+    }, [gameState, availableQuestions, question, fetchQuestion, isLoading]);
 
 
     useEffect(() => {
@@ -142,8 +144,8 @@ export default function QuizClashPage() {
     }, [gameState, timeLeft, isLoading]);
 
     const proceedToNextQuestion = useCallback(() => {
-        fetchQuestion(availableQuestions);
-    }, [fetchQuestion, availableQuestions]);
+        fetchQuestion();
+    }, [fetchQuestion]);
     
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null || !question) return;
@@ -428,5 +430,6 @@ export default function QuizClashPage() {
         </div>
     );
 }
+
 
     

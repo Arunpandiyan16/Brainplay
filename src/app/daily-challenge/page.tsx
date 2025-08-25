@@ -9,7 +9,7 @@ import { Clock, X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForw
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { useCountry } from '@/hooks/use-country.tsx';
+import { useCountry } from '@/hooks/use-country';
 import { quizQuestions, QuizQuestion } from '@/lib/quiz-data';
 
 
@@ -40,27 +40,30 @@ export default function DailyChallengePage() {
     }, [country]);
 
 
-    const fetchQuestion = useCallback((currentQuestions: QuizQuestion[]) => {
+    const fetchQuestion = useCallback(() => {
         setIsLoading(true);
         setSelectedAnswer(null);
         setIsCorrect(null);
 
         setTimeout(() => {
-            if (currentQuestions.length === 0) {
-                 toast({
-                    variant: 'destructive',
-                    title: 'Out of Questions!',
-                    description: 'You have answered all available questions for this region. Please try another region or come back later!',
-                });
-                setGameState('ended');
-                setIsLoading(false);
-                return;
-            }
+            setAvailableQuestions(currentQuestions => {
+                 if (currentQuestions.length === 0) {
+                     toast({
+                        variant: 'destructive',
+                        title: 'Out of Questions!',
+                        description: 'You have answered all available questions for this region. Please try another region or come back later!',
+                    });
+                    setGameState('ended');
+                    setIsLoading(false);
+                    return [];
+                }
 
-            const nextQuestion = currentQuestions.pop();
-            setQuestion(nextQuestion!);
-            setAvailableQuestions(currentQuestions);
-            setIsLoading(false);
+                const newQuestions = [...currentQuestions];
+                const nextQuestion = newQuestions.pop();
+                setQuestion(nextQuestion!);
+                setIsLoading(false);
+                return newQuestions;
+            });
         }, 500);
 
     }, [toast]);
@@ -72,10 +75,10 @@ export default function DailyChallengePage() {
     }, [gameState, loadAndShuffleQuestions]);
 
     useEffect(() => {
-        if (gameState === 'playing' && availableQuestions.length > 0 && !question) {
-            fetchQuestion(availableQuestions);
+        if (gameState === 'playing' && availableQuestions.length > 0 && !question && !isLoading) {
+            fetchQuestion();
         }
-    }, [gameState, question, fetchQuestion, availableQuestions]);
+    }, [gameState, question, fetchQuestion, availableQuestions, isLoading]);
 
 
     useEffect(() => {
@@ -94,8 +97,8 @@ export default function DailyChallengePage() {
     }, [gameState, timeLeft, isLoading]);
 
     const proceedToNextQuestion = useCallback(() => {
-        fetchQuestion(availableQuestions);
-    }, [fetchQuestion, availableQuestions]);
+        fetchQuestion();
+    }, [fetchQuestion]);
     
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null || !question) return;
@@ -348,5 +351,6 @@ export default function DailyChallengePage() {
         </div>
     );
 }
+
 
     
