@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { Clock, Trophy, Sparkles, Zap, Calculator, Plus, Minus, X, Divide, Award, RotateCcw } from 'lucide-react';
+import { Clock, Trophy, Sparkles, Zap, Calculator, Plus, Minus, X, Divide, Award, RotateCcw, Brain } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { aptitudeQuestions, AptitudeQuestion } from '@/lib/math-rush-data';
+import { problemBank, MathProblem } from '@/lib/math-rush-data';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const TOTAL_TIME = 60; // 60 seconds for the game
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 25;
@@ -19,12 +21,14 @@ type GameState = 'settings' | 'playing' | 'ended';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
 type Operation = 'Addition' | 'Subtraction' | 'Multiplication' | 'Division' | 'Mixed';
 
-interface Problem {
+interface ArithmeticProblem {
   text: string;
   answer: number;
   xp: number;
-  type: 'Arithmetic' | 'Aptitude';
+  type: 'Arithmetic';
 }
+
+type Problem = ArithmeticProblem | MathProblem;
 
 export default function MathRushPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
@@ -73,21 +77,18 @@ export default function MathRushPage() {
     }, [level, xp, xpToNextLevel]);
 
     const generateProblem = useCallback((): Problem => {
-        // Aptitude questions unlocked at level 5
-        let aptitudeChance = 0;
-        if (level >= 11) {
-            aptitudeChance = 0.50; // 50% chance
-        } else if (level >= 8) {
-            aptitudeChance = 0.40; // 40% chance
-        } else if (level >= 5) {
-            aptitudeChance = 0.25; // 25% chance
-        }
+        // Advanced problems unlocked at higher levels
+        let advancedChance = 0;
+        if (level >= 11) advancedChance = 0.60; // 60% chance
+        else if (level >= 8) advancedChance = 0.50; // 50% chance
+        else if (level >= 5) advancedChance = 0.35; // 35% chance
+        else if (level >= 2) advancedChance = 0.20; // 20% chance
         
-        const shouldShowAptitude = Math.random() < aptitudeChance;
+        const shouldShowAdvanced = Math.random() < advancedChance;
 
-        if (shouldShowAptitude && aptitudeQuestions.length > 0) {
-            const aptitudeProblem = aptitudeQuestions[Math.floor(Math.random() * aptitudeQuestions.length)];
-            return { ...aptitudeProblem, type: 'Aptitude' };
+        if (shouldShowAdvanced && problemBank.length > 0) {
+            const advancedProblem = problemBank[Math.floor(Math.random() * problemBank.length)];
+            return advancedProblem;
         }
 
         // Otherwise, generate arithmetic problem
@@ -140,14 +141,14 @@ export default function MathRushPage() {
         return { text: `${num1} ${op} ${num2}`, answer, xp: xpPoints, type: 'Arithmetic' };
     }, [difficulty, operation, level]);
 
-    const startGame = () => {
+    const startGame = useCallback(() => {
         setScore(0);
         setTimeLeft(TOTAL_TIME);
         setSolvedCount(0);
         setGuess('');
-        setProblem(null); // Force loading state
+        setProblem(null);
         setGameState('playing');
-    };
+    }, []);
     
     useEffect(() => {
         if(gameState === 'playing' && !problem) {
@@ -181,7 +182,11 @@ export default function MathRushPage() {
         e.preventDefault();
         if (!problem || guess === '') return;
 
-        if (parseInt(guess, 10) === problem.answer) {
+        const isCorrect = typeof problem.answer === 'string' 
+            ? guess.toLowerCase() === problem.answer.toLowerCase()
+            : parseInt(guess, 10) === problem.answer;
+
+        if (isCorrect) {
             const awardedXp = problem.xp;
             toast({ title: "Correct!", description: `+10 points & +${awardedXp} XP`, className: 'bg-green-500' });
             setScore(prev => prev + 10);
@@ -194,7 +199,7 @@ export default function MathRushPage() {
                 setLevel(nextLevel);
                 setXp(newXp - xpToNextLevel);
                 setXpToNextLevel(getXpToNextLevel(nextLevel));
-                toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! New challenges unlocked.`, className: 'bg-primary text-primary-foreground' });
+                toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! Harder problems unlocked.`, className: 'bg-primary text-primary-foreground' });
             } else {
                 setXp(newXp);
             }
@@ -216,6 +221,9 @@ export default function MathRushPage() {
     };
 
     const getIconForOperation = () => {
+        if (problem?.type === 'Aptitude' || problem?.type === 'Logical Reasoning') {
+            return <Brain />;
+        }
         switch(operation) {
             case 'Addition': return <Plus />;
             case 'Subtraction': return <Minus />;
@@ -236,12 +244,12 @@ export default function MathRushPage() {
                         </CardTitle>
                         <CardDescription className="text-lg">
                            Your current level is <span className="font-bold text-primary">{level}</span>.
-                           Solve problems to earn XP and unlock harder challenges!
+                           Solve problems to earn XP and unlock aptitude & logical reasoning questions!
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2 text-left">
-                            <label className="text-sm font-medium">Operation (Arithmetic Only)</label>
+                            <label className="text-sm font-medium">Arithmetic Operation</label>
                             <Select onValueChange={(v: Operation) => setOperation(v)} defaultValue={operation}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select operation" />
@@ -256,7 +264,7 @@ export default function MathRushPage() {
                             </Select>
                         </div>
                          <div className="space-y-2 text-left">
-                             <label className="text-sm font-medium">Difficulty (Arithmetic Only)</label>
+                             <label className="text-sm font-medium">Arithmetic Difficulty</label>
                             <Select onValueChange={(v: Difficulty) => setDifficulty(v)} defaultValue={difficulty}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select difficulty" />
@@ -311,10 +319,17 @@ export default function MathRushPage() {
 
     const ProblemDisplay = () => {
         if (!problem) return null;
-        if (problem.type === 'Aptitude') {
-            return <p className="text-xl md:text-2xl font-semibold leading-relaxed text-center">{problem.text}</p>;
+        if (problem.type === 'Arithmetic') {
+            return <p className="text-3xl md:text-5xl font-bold tracking-widest text-center">{problem.text} = ?</p>;
         }
-        return <p className="text-3xl md:text-5xl font-bold tracking-widest text-center">{problem.text} = ?</p>;
+        return <p className="text-xl md:text-2xl font-semibold leading-relaxed text-center">{problem.text}</p>;
+    }
+
+    const getInputType = () => {
+        if (problem && problem.type !== 'Arithmetic' && typeof problem.answer === 'string') {
+            return 'text';
+        }
+        return 'number';
     }
 
     return (
@@ -331,21 +346,27 @@ export default function MathRushPage() {
                             <span className={timeLeft <= 10 ? 'text-red-500' : ''}>{timeLeft}</span>
                         </div>
                     </CardTitle>
-                     <CardDescription className="flex justify-between">
-                        <span>Score: <span className="font-bold text-primary">{score}</span></span>
-                        <span>Level: <span className="font-bold text-primary">{level}</span></span>
+                     <CardDescription className="flex justify-between items-center">
+                        <div>
+                            <span>Score: <span className="font-bold text-primary">{score}</span></span>
+                            <span className="ml-4">Level: <span className="font-bold text-primary">{level}</span></span>
+                        </div>
+                        {problem?.type !== 'Arithmetic' && <Badge variant="secondary">{problem?.type}</Badge>}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm font-medium text-muted-foreground">
-                            <span>Level {level}</span>
-                            <span>{xp} / {xpToNextLevel} XP</span>
+                            <span>Level {level} XP</span>
+                            <span>{xp} / {xpToNextLevel}</span>
                         </div>
                         <Progress value={(xp / xpToNextLevel) * 100} className="w-full h-2" />
                     </div>
 
-                    <div className="p-4 rounded-lg bg-secondary min-h-[120px] flex items-center justify-center">
+                    <div className={cn(
+                        "p-4 rounded-lg bg-secondary min-h-[120px] flex items-center justify-center",
+                        problem?.type !== 'Arithmetic' && 'py-8'
+                    )}>
                         <ProblemDisplay />
                     </div>
                     
@@ -355,8 +376,11 @@ export default function MathRushPage() {
                             value={guess}
                             onChange={(e) => setGuess(e.target.value)}
                             placeholder="Your answer..."
-                            className="text-lg h-14 text-center text-2xl"
-                            type="number"
+                            className="text-lg h-14 text-center sm:text-2xl"
+                            type={getInputType()}
+                            autoComplete="off"
+                            autoCapitalize="none"
+                            autoCorrect="off"
                         />
                         <Button type="submit" size="lg" className="h-14 text-lg">Submit</Button>
                     </form>
@@ -365,5 +389,3 @@ export default function MathRushPage() {
         </div>
     );
 }
-
-    
