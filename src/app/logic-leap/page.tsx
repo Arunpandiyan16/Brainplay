@@ -111,7 +111,7 @@ export default function LogicLeapPage() {
         if (gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
             fetchPuzzle();
         }
-    }, [gameState, puzzle, fetchPuzzle, availablePuzzles]);
+    }, [gameState, puzzle, availablePuzzles.length, fetchPuzzle]);
 
     const handleAnswer = (index: number) => {
         if (selectedAnswer !== null || !puzzle) return;

@@ -127,7 +127,7 @@ export default function QuizClashPage() {
         if (gameState === 'playing' && availableQuestions.length > 0 && !question) {
             fetchQuestion();
         }
-    }, [gameState, question, availableQuestions, fetchQuestion]);
+    }, [gameState, question, availableQuestions.length, fetchQuestion]);
 
 
     const handleAnswer = (index: number) => {

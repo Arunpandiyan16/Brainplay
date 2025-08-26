@@ -148,7 +148,7 @@ export default function WordHunterPage() {
         if(gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
             fetchPuzzle();
         }
-    }, [gameState, puzzle, availablePuzzles, fetchPuzzle]);
+    }, [gameState, puzzle, availablePuzzles.length, fetchPuzzle]);
 
 
     const checkAnswer = useCallback(() => {

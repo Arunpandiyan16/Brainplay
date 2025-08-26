@@ -131,7 +131,7 @@ export default function SpotFakeNewsPage() {
        if (gameState === 'playing' && availableHeadlines.length > 0 && !headline) {
             fetchHeadline();
         }
-    }, [gameState, country, level, headline, availableHeadlines, fetchHeadline]);
+    }, [gameState, headline, availableHeadlines.length, fetchHeadline]);
 
     const handleAnswer = (choice: 'real' | 'fake') => {
         if (selection !== null || !headline) return;
