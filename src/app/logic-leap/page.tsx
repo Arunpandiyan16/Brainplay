@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Sparkles, Zap, HelpCircle, Lightbulb, Check, X, RotateCcw, Loader2 } from 'lucide-react';
+import { Trophy, Sparkles, Zap, HelpCircle, Lightbulb, Check, X, RotateCcw, Loader2, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { logicPuzzles, LogicPuzzle } from '@/lib/logic-leap-data';
@@ -25,6 +25,7 @@ export default function LogicLeapPage() {
     const [solvedCount, setSolvedCount] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+    const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
 
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
@@ -84,6 +85,7 @@ export default function LogicLeapPage() {
         setSolvedCount(0);
         setPuzzle(null);
         setIsLoading(true);
+        setConsecutiveCorrect(0);
 
         const difficulties: Difficulty[] = ['Easy'];
         if (level >= 3) difficulties.push('Medium');
@@ -124,7 +126,14 @@ export default function LogicLeapPage() {
             if (puzzle.difficulty === 'Medium') points = 25;
             if (puzzle.difficulty === 'Hard') points = 40;
 
-            toast({ title: "Correct!", description: `+${points} points & +${awardedXp} XP`, className: 'bg-green-500' });
+            const newConsecutiveCorrect = consecutiveCorrect + 1;
+            setConsecutiveCorrect(newConsecutiveCorrect);
+
+            if (newConsecutiveCorrect > 0 && newConsecutiveCorrect % 3 === 0) {
+                points += 10;
+                 toast({ title: "Streak Bonus!", description: "+10 extra points for a 3-in-a-row streak!", className: "bg-yellow-500/20" });
+            }
+
             setScore(prev => prev + points);
             setSolvedCount(prev => prev + 1);
 
@@ -134,13 +143,14 @@ export default function LogicLeapPage() {
                 setLevel(nextLevel);
                 setXp(newXp - xpToNextLevel);
                 setXpToNextLevel(getXpToNextLevel(nextLevel));
-                toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! Harder puzzles unlocked.`, className: 'bg-primary text-primary-foreground' });
+                toast({ title: `Level Up to ${nextLevel}!`, description: `You've unlocked harder puzzles. Well done!`, className: 'bg-primary text-primary-foreground' });
             } else {
                 setXp(newXp);
             }
         } else {
             toast({ title: "Incorrect!", description: `The correct answer was "${puzzle.choices[puzzle.answerIndex]}".`, variant: 'destructive' });
             setScore(prev => prev - 5);
+            setConsecutiveCorrect(0);
         }
     };
     
@@ -249,6 +259,7 @@ export default function LogicLeapPage() {
                            <HelpCircle className="text-primary"/>
                            Logic Leap
                         </div>
+                        <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
                     </CardTitle>
                      <CardDescription className="flex justify-between items-center">
                         <div>
@@ -311,10 +322,9 @@ export default function LogicLeapPage() {
                             </CardContent>
                         </Card>
                     )}
+                    {consecutiveCorrect > 0 && <div className="text-sm text-yellow-400 animate-pulse flex items-center gap-1 justify-center"><Award className="w-4 h-4"/> Streak: {consecutiveCorrect}x</div>}
                 </CardContent>
             </Card>
         </div>
     );
 }
-
-    

@@ -1,3 +1,4 @@
+
 import { MetadataRoute } from 'next';
 
 const URL = 'https://brainplay-x7d62.web.app';
@@ -12,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/memory-flip',
     '/spot-fake-news',
     '/daily-challenge',
+    '/leaderboard',
     '/login',
     '/signup',
   ];

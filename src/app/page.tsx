@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BrainCircuit, PencilRuler, Puzzle, Newspaper, Sparkles, Calculator, HelpCircle, Trophy } from 'lucide-react';
+import { BrainCircuit, PencilRuler, Puzzle, Newspaper, Sparkles, Calculator, HelpCircle, Trophy, Award } from 'lucide-react';
 import GameCard from '@/components/dashboard/game-card';
 
 const games = [
@@ -62,9 +62,14 @@ export default function Home() {
         <p className="max-w-2xl mx-auto mt-4 text-lg text-muted-foreground">
           Welcome to BrainPlay, the ultimate hub for fun and knowledge games. Challenge yourself and climb the leaderboards!
         </p>
-        <Button size="lg" className="mt-8 text-lg glow-shadow" asChild>
-          <Link href="/quiz-clash">Play Now</Link>
-        </Button>
+         <div className="flex justify-center gap-4 mt-8">
+            <Button size="lg" className="text-lg glow-shadow" asChild>
+                <Link href="/quiz-clash">Play Now</Link>
+            </Button>
+            <Button size="lg" variant="outline" className="text-lg" asChild>
+                <Link href="/leaderboard"><Award className="mr-2"/> View Leaderboard</Link>
+            </Button>
+        </div>
       </section>
 
       <section>

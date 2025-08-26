@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Brain, User, Sun, Moon, Globe, LogOut, ChevronDown, Gamepad2, Menu, HelpCircle } from 'lucide-react';
+import { Brain, User, Sun, Moon, Globe, LogOut, ChevronDown, Gamepad2, Menu, HelpCircle, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import {
@@ -18,9 +18,9 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
   SheetTrigger,
   SheetClose,
 } from '@/components/ui/sheet';
@@ -133,9 +133,9 @@ export default function Header() {
 
           <Link
             href="/leaderboard"
-            className="text-muted-foreground transition-colors hover:text-foreground"
+            className="text-muted-foreground transition-colors hover:text-foreground flex items-center gap-1"
           >
-            Leaderboard
+            <Award className="w-4 h-4" /> Leaderboard
           </Link>
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-2">
