@@ -40,7 +40,6 @@ export default function WordHunterPage() {
 
     const [score, setScore] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
-    const [hintTaken, setHintTaken] = useState(false);
     const [showHint, setShowHint] = useState(false);
     const [solvedWords, setSolvedWords] = useState<WordPuzzle[]>([]);
 
@@ -91,11 +90,9 @@ export default function WordHunterPage() {
 
     const setupNewPuzzle = useCallback((newPuzzle: WordPuzzle) => {
         setPuzzle(newPuzzle);
-        // Shuffle the scrambled letters to make it different each time
         const scrambled = newPuzzle.scrambled.split('').sort(() => Math.random() - 0.5);
         setAvailableLetters(scrambled.map((char, index) => ({ char, id: index })));
         setAnswerSlots([]);
-        setHintTaken(false);
         setShowHint(false);
         setIsLoading(false);
     }, []);
@@ -150,10 +147,28 @@ export default function WordHunterPage() {
     }, [level, language, solvedWords, toast]);
 
     useEffect(() => {
-        if(gameState === 'playing' && !puzzle) {
+        if(gameState === 'playing' && !puzzle && availablePuzzles.length > 0) {
             fetchPuzzle();
         }
-    }, [gameState, puzzle, fetchPuzzle]);
+    }, [gameState, puzzle, availablePuzzles, fetchPuzzle]);
+
+    const handleLetterSelect = useCallback((letter: Letter) => {
+        if (!puzzle || answerSlots.length >= puzzle.word.length) return;
+        setAnswerSlots(prev => [...prev, letter]);
+    }, [puzzle, answerSlots.length]);
+
+    const handleLetterDeselect = useCallback((slot: AnswerSlot) => {
+        setAnswerSlots(prev => prev.filter(s => s.id !== slot.id));
+    }, []);
+
+    const handleHint = () => {
+        if (showHint || score < HINT_COST) {
+             toast({ title: "Can't take hint", description: showHint ? "You've already used it for this word." : "Not enough points.", variant: 'destructive' });
+            return;
+        }
+        setShowHint(true);
+        setScore(prev => prev - HINT_COST);
+    };
 
     const checkAnswer = useCallback(() => {
         if (!puzzle) return;
@@ -169,7 +184,7 @@ export default function WordHunterPage() {
                 points = 20;
                 awardedXp = 20;
             }
-            if (hintTaken) {
+            if (showHint) {
                 points = Math.floor(points / 2);
                 awardedXp = Math.floor(awardedXp / 2);
             }
@@ -199,36 +214,17 @@ export default function WordHunterPage() {
                 setIsWrong(false);
             }, 800);
         }
-    }, [answerSlots, puzzle, hintTaken, xp, xpToNextLevel, level, fetchPuzzle, toast]);
+    }, [answerSlots, puzzle, showHint, xp, xpToNextLevel, level, fetchPuzzle, toast]);
 
     useEffect(() => {
         if (puzzle && answerSlots.length === puzzle.word.length) {
             checkAnswer();
         }
     }, [answerSlots, puzzle, checkAnswer]);
-
-    const handleLetterSelect = useCallback((letter: Letter) => {
-        if (!puzzle || answerSlots.length >= puzzle.word.length) return;
-        setAnswerSlots(prev => [...prev, letter]);
-    }, [puzzle, answerSlots.length]);
-
-    const handleLetterDeselect = useCallback((slot: AnswerSlot) => {
-        setAnswerSlots(prev => prev.filter(s => s.id !== slot.id));
-    }, []);
     
     const letterIsUsed = (letterId: number) => {
         return answerSlots.some(slot => slot.id === letterId);
     }
-
-    const handleHint = () => {
-        if (hintTaken || score < HINT_COST) {
-             toast({ title: "Can't take hint", description: hintTaken ? "You've already used it for this word." : "Not enough points.", variant: 'destructive' });
-            return;
-        }
-        setShowHint(true);
-        setHintTaken(true);
-        setScore(prev => prev - HINT_COST);
-    };
 
     const resetProgress = () => {
         setLevel(1);
@@ -414,7 +410,7 @@ export default function WordHunterPage() {
                             )}
 
                              <div className="flex justify-between items-center">
-                                <Button variant="outline" onClick={handleHint} disabled={hintTaken || isLoading || score < HINT_COST}>
+                                <Button variant="outline" onClick={handleHint} disabled={showHint || isLoading || score < HINT_COST}>
                                     <Lightbulb className="mr-2"/>
                                     Hint (-{HINT_COST} pts)
                                 </Button>
@@ -431,4 +427,3 @@ export default function WordHunterPage() {
     );
 }
 
-    
