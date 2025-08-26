@@ -74,9 +74,13 @@ export default function Header() {
       </SheetTrigger>
        <SheetContent side="left" className="pr-0">
           <SheetHeader className="p-4 text-left">
-             <SheetTitle className="text-2xl flex items-center gap-2">
-                <Brain className="h-6 w-6 text-primary" />
-                <span className="font-bold">BrainPlay</span>
+             <SheetTitle className="text-2xl">
+                <SheetClose asChild>
+                    <Link href="/" className="flex items-center gap-2">
+                      <Brain className="h-6 w-6 text-primary" />
+                      <span className="font-bold">BrainPlay</span>
+                    </Link>
+                </SheetClose>
              </SheetTitle>
             <SheetDescription className="sr-only">
               Navigate between the different games and pages.

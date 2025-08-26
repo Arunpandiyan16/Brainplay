@@ -55,11 +55,11 @@ const games = [
 export default function Home() {
   return (
     <div className="space-y-12">
-      <section className="text-center py-16">
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
+      <section className="text-center py-8 md:py-16">
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
           Play. Learn. Compete.
         </h1>
-        <p className="max-w-2xl mx-auto mt-4 text-lg text-muted-foreground">
+        <p className="max-w-2xl mx-auto mt-4 text-base sm:text-lg text-muted-foreground">
           Welcome to BrainPlay, the ultimate hub for fun and knowledge games. Challenge yourself and climb the leaderboards!
         </p>
          <div className="flex justify-center gap-4 mt-8">
@@ -73,7 +73,7 @@ export default function Home() {
       </section>
 
       <section>
-        <h2 className="text-3xl font-bold text-center mb-8">Choose Your Challenge</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">Choose Your Challenge</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {games.map((game) => (
             <GameCard key={game.title} {...game} />
