@@ -112,15 +112,13 @@ export default function WordHunterPage() {
                 description: 'Could not generate a new word. Please try again later.',
             });
             setGameState('settings');
-        } finally {
-            setIsLoading(false);
         }
     }, [getDifficulty, language, setupNewPuzzle, toast]);
 
     const startGame = useCallback(() => {
         setScore(0);
         setSolvedCount(0);
-        setPuzzle(null);
+        setPuzzle(null); // This will trigger the fetchPuzzle effect
         setGameState('playing');
     }, []);
 
@@ -151,11 +149,10 @@ export default function WordHunterPage() {
     };
 
     const checkAnswer = useCallback(() => {
-        if (!puzzle) return;
+        if (!puzzle || answerSlots.length !== puzzle.word.length) return;
+        
         const guessedWord = answerSlots.map(s => s.char).join('');
         
-        if (guessedWord.length !== puzzle.word.length) return;
-
         if (guessedWord.toLowerCase() === puzzle.word.toLowerCase()) {
             const difficulty = getDifficulty();
             let points = 10;
@@ -396,5 +393,6 @@ export default function WordHunterPage() {
         </div>
     );
 }
+
 
     
