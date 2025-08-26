@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -17,6 +18,9 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
   SheetClose,
 } from '@/components/ui/sheet';
@@ -69,11 +73,17 @@ export default function Header() {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="pr-0">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
+          <SheetHeader className="p-4 text-left">
+            <SheetTitle className="sr-only">Menu</SheetTitle>
+            <SheetDescription className="sr-only">
+              Navigate between the different games and pages.
+            </SheetDescription>
+          </SheetHeader>
+        <Link href="/" className="mr-6 flex items-center space-x-2 px-4">
             <Brain className="h-6 w-6 text-primary" />
             <span className="font-bold">BrainPlay</span>
         </Link>
-        <div className="flex flex-col space-y-3 pt-6">
+        <div className="flex flex-col space-y-3 pt-6 px-4">
             {games.map((game) => (
                 <SheetClose asChild key={game.href}>
                     <Link href={game.href} className="text-lg">
