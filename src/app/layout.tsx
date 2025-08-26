@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { CountryProvider } from '@/hooks/use-country';
 import { AuthProvider } from '@/hooks/use-auth';
 import { Analytics } from "@vercel/analytics/react"
+import Footer from '@/components/layout/footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -57,7 +58,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -67,9 +68,10 @@ export default function RootLayout({
           <AuthProvider>
             <CountryProvider>
               <Header />
-              <main className="container mx-auto px-4 py-8">
+              <main className="container mx-auto px-4 py-8 flex-grow">
                 {children}
               </main>
+              <Footer />
               <Toaster />
             </CountryProvider>
           </AuthProvider>

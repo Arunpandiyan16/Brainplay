@@ -74,15 +74,14 @@ export default function Header() {
       </SheetTrigger>
       <SheetContent side="left" className="pr-0">
           <SheetHeader className="p-4 text-left">
-            <SheetTitle className="sr-only">Menu</SheetTitle>
+             <SheetTitle className="text-2xl flex items-center gap-2">
+                <Brain className="h-6 w-6 text-primary" />
+                <span className="font-bold">BrainPlay</span>
+             </SheetTitle>
             <SheetDescription className="sr-only">
               Navigate between the different games and pages.
             </SheetDescription>
           </SheetHeader>
-        <Link href="/" className="mr-6 flex items-center space-x-2 px-4">
-            <Brain className="h-6 w-6 text-primary" />
-            <span className="font-bold">BrainPlay</span>
-        </Link>
         <div className="flex flex-col space-y-3 pt-6 px-4">
             {games.map((game) => (
                 <SheetClose asChild key={game.href}>
@@ -189,7 +188,12 @@ export default function Header() {
               <DropdownMenuContent align="end">
                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
                  <DropdownMenuSeparator />
-                 <DropdownMenuItem disabled>{user.email}</DropdownMenuItem>
+                 <DropdownMenuItem asChild>
+                   <Link href="/profile">
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                   </Link>
+                 </DropdownMenuItem>
                  <DropdownMenuSeparator />
                  <DropdownMenuItem onClick={handleLogout} className="text-red-500">
                     <LogOut className="mr-2 h-4 w-4" />
