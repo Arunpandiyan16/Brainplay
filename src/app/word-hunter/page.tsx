@@ -104,6 +104,9 @@ export default function WordHunterPage() {
             const nextPuzzle = newPuzzles.pop();
             if (nextPuzzle) {
                 setupNewPuzzle(nextPuzzle);
+            } else {
+                 setGameState('ended');
+                 setIsLoading(false);
             }
             return newPuzzles;
         });
@@ -130,27 +133,28 @@ export default function WordHunterPage() {
         setSolvedCount(0);
         setPuzzle(null);
         setGameState('playing');
+        setIsLoading(true);
     }, [getDifficulty, language, toast]);
 
     useEffect(() => {
-        if (gameState === 'playing' && !puzzle) {
+        if (gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
             fetchPuzzle();
         }
-    }, [gameState, puzzle, fetchPuzzle]);
+    }, [gameState, puzzle, availablePuzzles, fetchPuzzle]);
 
-    const handleLetterSelect = useCallback((letter: Letter) => {
+    const handleLetterSelect = (letter: Letter) => {
         if (!puzzle || answerSlots.length >= puzzle.word.length) return;
         setAnswerSlots(prev => [...prev, letter]);
         setAvailableLetters(prev => prev.filter(l => l.id !== letter.id));
-    }, [answerSlots.length, puzzle]);
+    };
 
-    const handleLetterDeselect = useCallback((slot: AnswerSlot) => {
+    const handleLetterDeselect = (slot: AnswerSlot) => {
         setAnswerSlots(prev => prev.filter(s => s.id !== slot.id));
         setAvailableLetters(prev => [...prev, slot].sort((a, b) => a.id - b.id));
-    }, []);
-    
+    };
+
     const checkAnswer = useCallback(() => {
-        if (!puzzle || answerSlots.length !== puzzle.word.length) return;
+        if (!puzzle) return;
 
         const guessedWord = answerSlots.map(s => s.char).join('');
 
@@ -383,3 +387,5 @@ export default function WordHunterPage() {
         </div>
     );
 }
+
+    
