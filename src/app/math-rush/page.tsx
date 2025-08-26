@@ -4,9 +4,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Sparkles, Zap, Calculator, Plus, Minus, X, Divide, RotateCcw, Brain, Loader2 } from 'lucide-react';
+import { Trophy, Sparkles, Zap, Calculator, Plus, Minus, X as MultiplyIcon, Divide, RotateCcw, Brain, Loader2, Check, X as WrongIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { problemBank, MathProblem } from '@/lib/math-rush-data';
@@ -26,9 +25,12 @@ interface ArithmeticProblem {
   answer: number;
   xp: number;
   type: 'Arithmetic';
+  choices: (string | number)[];
+  answerIndex: number;
 }
 
-type Problem = ArithmeticProblem | MathProblem;
+type Problem = ArithmeticProblem | (MathProblem & { choices: (string|number)[], answerIndex: number});
+
 
 export default function MathRushPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
@@ -36,10 +38,11 @@ export default function MathRushPage() {
     const [operation, setOperation] = useState<Operation>('Mixed');
     
     const [problem, setProblem] = useState<Problem | null>(null);
-    const [guess, setGuess] = useState('');
     const [score, setScore] = useState(0);
     const [solvedCount, setSolvedCount] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+    const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
     // Leveling state
     const [level, setLevel] = useState(1);
@@ -47,18 +50,18 @@ export default function MathRushPage() {
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
 
     const { toast } = useToast();
-    const inputRef = useRef<HTMLInputElement>(null);
 
     // Load progress from localStorage
     useEffect(() => {
         try {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
             if (savedProgress) {
-                const { savedLevel, savedXp, savedXpToNextLevel } = JSON.parse(savedProgress);
+                const { savedLevel, savedXp, savedXpToNextLevel, savedScore } = JSON.parse(savedProgress);
                 if (savedLevel && typeof savedLevel === 'number') {
                     setLevel(savedLevel);
                     setXp(savedXp || 0);
                     setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
+                    setScore(savedScore || 0);
                 }
             }
         } catch (error) {
@@ -69,15 +72,48 @@ export default function MathRushPage() {
     // Save progress to localStorage
     useEffect(() => {
         try {
-            const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel });
+            const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel, savedScore: score });
             localStorage.setItem(STORAGE_KEY, progress);
-        } catch (error) {
+        } catch (error)
+        {
             console.error("Failed to save progress to localStorage", error);
         }
-    }, [level, xp, xpToNextLevel]);
+    }, [level, xp, xpToNextLevel, score]);
+    
+    const generateChoices = (correctAnswer: number | string): { choices: (string|number)[], answerIndex: number} => {
+        let choices: (string | number)[] = [correctAnswer];
+        const correctAnswerNum = typeof correctAnswer === 'string' ? parseFloat(correctAnswer) : correctAnswer;
+        
+        if (typeof correctAnswer === 'number') {
+             while (choices.length < 4) {
+                const offset = (Math.random() < 0.5 ? -1 : 1) * (Math.floor(Math.random() * 5) + 1);
+                let wrongAnswer = correctAnswerNum + offset;
+                if(correctAnswerNum > 100) {
+                     wrongAnswer = correctAnswerNum + (Math.random() < 0.5 ? -1 : 1) * (Math.floor(Math.random() * 10) + 5);
+                }
+                wrongAnswer = parseFloat(wrongAnswer.toFixed(1));
+                if (!choices.includes(wrongAnswer) && wrongAnswer > 0) {
+                    choices.push(wrongAnswer);
+                }
+            }
+        } else {
+             // For string answers (logical reasoning)
+             const otherOptions = problemBank.filter(p => p.type === 'Logical Reasoning' && p.answer !== correctAnswer).map(p => p.answer);
+             const shuffledOptions = otherOptions.sort(() => 0.5 - Math.random());
+             choices = [...choices, ...shuffledOptions.slice(0, 3)];
+        }
+
+
+        const shuffledChoices = choices.sort(() => Math.random() - 0.5);
+        const answerIndex = shuffledChoices.indexOf(correctAnswer);
+        return { choices: shuffledChoices, answerIndex };
+    }
 
     const generateProblem = useCallback(() => {
         setIsLoading(true);
+        setSelectedAnswer(null);
+        setIsCorrect(null);
+
         // Advanced problems unlocked at higher levels
         let advancedChance = 0;
         if (level >= 11) advancedChance = 0.60; // 60% chance
@@ -89,7 +125,8 @@ export default function MathRushPage() {
 
         if (shouldShowAdvanced && problemBank.length > 0) {
             const advancedProblem = problemBank[Math.floor(Math.random() * problemBank.length)];
-            setProblem(advancedProblem);
+            const { choices, answerIndex } = generateChoices(advancedProblem.answer);
+            setProblem({...advancedProblem, choices, answerIndex});
             setIsLoading(false);
             return;
         }
@@ -141,7 +178,8 @@ export default function MathRushPage() {
                 break;
         }
         
-        setProblem({ text: `${num1} ${op} ${num2}`, answer, xp: xpPoints, type: 'Arithmetic' });
+        const { choices, answerIndex } = generateChoices(answer);
+        setProblem({ text: `${num1} ${op} ${num2}`, answer, xp: xpPoints, type: 'Arithmetic', choices, answerIndex });
         setIsLoading(false);
 
     }, [difficulty, operation, level]);
@@ -149,7 +187,6 @@ export default function MathRushPage() {
     const startGame = useCallback(() => {
         setScore(0);
         setSolvedCount(0);
-        setGuess('');
         setProblem(null);
         setGameState('playing');
         setIsLoading(true);
@@ -161,24 +198,19 @@ export default function MathRushPage() {
         }
     }, [gameState, problem, generateProblem]);
 
-     useEffect(() => {
-        if (gameState === 'playing' && problem) {
-            inputRef.current?.focus();
-        }
-    }, [problem, gameState]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!problem || guess === '') return;
+    const handleAnswer = (index: number) => {
+        if (selectedAnswer !== null || !problem) return;
 
-        const isCorrect = typeof problem.answer === 'string' 
-            ? guess.toLowerCase() === problem.answer.toLowerCase()
-            : parseInt(guess, 10) === problem.answer;
+        setSelectedAnswer(index);
+        const correct = index === problem.answerIndex;
+        setIsCorrect(correct);
 
-        if (isCorrect) {
+        if (correct) {
             const awardedXp = problem.xp;
-            toast({ title: "Correct!", description: `+10 points & +${awardedXp} XP`, className: 'bg-green-500' });
-            setScore(prev => prev + 10);
+            const points = problem.type === 'Arithmetic' ? 10 : 15;
+            toast({ title: "Correct!", description: `+${points} points & +${awardedXp} XP`, className: 'bg-green-500' });
+            setScore(prev => prev + points);
             setSolvedCount(prev => prev + 1);
 
             // Handle XP and leveling up
@@ -194,16 +226,15 @@ export default function MathRushPage() {
             }
 
         } else {
-            toast({ title: "Incorrect!", description: `The answer was ${problem.answer}. -5 points.`, variant: 'destructive' });
+            toast({ title: "Incorrect!", description: `-5 points. The correct answer was ${problem.choices[problem.answerIndex]}.`, variant: 'destructive' });
             setScore(prev => prev - 5);
         }
-        setGuess('');
-        generateProblem();
     };
     
     const resetProgress = () => {
         setLevel(1);
         setXp(0);
+        setScore(0);
         setXpToNextLevel(getXpToNextLevel(1));
         localStorage.removeItem(STORAGE_KEY);
         toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
@@ -216,11 +247,24 @@ export default function MathRushPage() {
         switch(operation) {
             case 'Addition': return <Plus />;
             case 'Subtraction': return <Minus />;
-            case 'Multiplication': return <X />;
+            case 'Multiplication': return <MultiplyIcon />;
             case 'Division': return <Divide />;
             default: return <Calculator />;
         }
     }
+    
+    const getButtonClass = (index: number) => {
+        if (selectedAnswer !== null && problem) {
+            if (index === problem.answerIndex) {
+                return 'bg-green-500 hover:bg-green-600 text-white';
+            }
+            if (index === selectedAnswer) {
+                return 'bg-red-500 hover:bg-red-600 text-white';
+            }
+        }
+        return 'bg-secondary hover:bg-accent text-secondary-foreground';
+    };
+
 
     if (gameState === 'settings') {
         return (
@@ -320,16 +364,10 @@ export default function MathRushPage() {
         return <p className="text-xl md:text-2xl font-semibold leading-relaxed text-center">{problem.text}</p>;
     }
 
-    const getInputType = () => {
-        if (problem && problem.type !== 'Arithmetic' && typeof problem.answer === 'string') {
-            return 'text';
-        }
-        return 'number';
-    }
 
     return (
         <div className="flex justify-center items-center py-8">
-            <Card className="w-full max-w-2xl border-primary glow-shadow">
+            <Card className="w-full max-w-3xl border-primary glow-shadow">
                 <CardHeader>
                     <CardTitle className="flex items-center justify-between text-2xl">
                         <div className="flex items-center gap-2">
@@ -356,7 +394,7 @@ export default function MathRushPage() {
                     </div>
 
                     {isLoading || !problem ? (
-                         <div className="text-center space-y-4 min-h-[200px] flex flex-col justify-center">
+                         <div className="text-center space-y-4 min-h-[300px] flex flex-col justify-center">
                             <Loader2 className="h-16 w-16 animate-spin mx-auto text-primary"/>
                          </div>
                     ) : (
@@ -368,20 +406,41 @@ export default function MathRushPage() {
                             <ProblemDisplay />
                          </div>
                     
-                         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
-                            <Input 
-                                ref={inputRef}
-                                value={guess}
-                                onChange={(e) => setGuess(e.target.value)}
-                                placeholder="Your answer..."
-                                className="text-lg h-14 text-center sm:text-2xl"
-                                type={getInputType()}
-                                autoComplete="off"
-                                autoCapitalize="none"
-                                autoCorrect="off"
-                            />
-                            <Button type="submit" size="lg" className="h-14 text-lg">Submit</Button>
-                         </form>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {problem.choices.map((choice, index) => (
+                                <Button
+                                    key={index}
+                                    size="lg"
+                                    className={`justify-start h-auto py-4 text-base text-left whitespace-normal ${getButtonClass(index)}`}
+                                    onClick={() => handleAnswer(index)}
+                                    disabled={selectedAnswer !== null}
+                                >
+                                    <div className="flex items-center">
+                                        <div className="w-6 mr-3">
+                                            {selectedAnswer !== null && (
+                                                index === problem.answerIndex ? <Check/> : (index === selectedAnswer ? <WrongIcon/> : <span/>)
+                                            )}
+                                        </div>
+                                        <span className="flex-1">{choice}</span>
+                                    </div>
+                                </Button>
+                            ))}
+                        </div>
+
+                        {isCorrect !== null && (
+                             <Card className={isCorrect ? "bg-green-500/10" : "bg-red-500/10"}>
+                                <CardContent className="p-4 space-y-3">
+                                   <div className="flex items-center gap-2">
+                                    {isCorrect ? <Check className="text-green-500" /> : <WrongIcon className="text-red-500" />}
+                                   <p className="font-semibold text-lg">{isCorrect ? 'Correct!' : 'Incorrect!'}</p>
+                                   </div>
+                                   {!isCorrect && <p className="text-muted-foreground">The correct answer was: {problem.choices[problem.answerIndex]}</p>}
+                                   <Button onClick={generateProblem} className="w-full">
+                                       Next Problem
+                                   </Button>
+                                </CardContent>
+                            </Card>
+                        )}
                         </>
                     )}
                 </CardContent>
@@ -389,3 +448,5 @@ export default function MathRushPage() {
         </div>
     );
 }
+
+    

@@ -57,11 +57,13 @@ export default function WordHunterPage() {
         try {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
             if (savedProgress) {
-                const { savedLevel, savedXp, savedXpToNextLevel } = JSON.parse(savedProgress);
+                const { savedLevel, savedXp, savedXpToNextLevel, savedScore, savedSolvedWords } = JSON.parse(savedProgress);
                 if (savedLevel && typeof savedLevel === 'number') {
                     setLevel(savedLevel);
                     setXp(savedXp || 0);
                     setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
+                    setScore(savedScore || 0);
+                    setSolvedWords(savedSolvedWords || []);
                 }
             }
         } catch (error) {
@@ -71,12 +73,18 @@ export default function WordHunterPage() {
 
     useEffect(() => {
         try {
-            const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel });
+            const progress = JSON.stringify({ 
+                savedLevel: level, 
+                savedXp: xp, 
+                savedXpToNextLevel: xpToNextLevel,
+                savedScore: score,
+                savedSolvedWords: solvedWords
+            });
             localStorage.setItem(STORAGE_KEY, progress);
         } catch (error) {
             console.error("Failed to save progress to localStorage", error);
         }
-    }, [level, xp, xpToNextLevel]);
+    }, [level, xp, xpToNextLevel, score, solvedWords]);
 
 
     const fetchPuzzle = useCallback(() => {
@@ -237,6 +245,8 @@ export default function WordHunterPage() {
     const resetProgress = () => {
         setLevel(1);
         setXp(0);
+        setScore(0);
+        setSolvedWords([]);
         setXpToNextLevel(getXpToNextLevel(1));
         localStorage.removeItem(STORAGE_KEY);
         toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });

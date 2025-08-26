@@ -42,11 +42,14 @@ export default function SpotFakeNewsPage() {
         try {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
             if (savedProgress) {
-                const { savedLevel, savedXp, savedXpToNextLevel } = JSON.parse(savedProgress);
+                const { savedLevel, savedXp, savedXpToNextLevel, savedScore, savedAnsweredCount, savedCorrectCount } = JSON.parse(savedProgress);
                 if (savedLevel && typeof savedLevel === 'number') {
                     setLevel(savedLevel);
                     setXp(savedXp || 0);
                     setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
+                    setScore(savedScore || 0);
+                    setAnsweredCount(savedAnsweredCount || 0);
+                    setCorrectCount(savedCorrectCount || 0);
                 }
             }
         } catch (error) {
@@ -56,12 +59,19 @@ export default function SpotFakeNewsPage() {
 
     useEffect(() => {
         try {
-            const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel });
+            const progress = JSON.stringify({ 
+                savedLevel: level, 
+                savedXp: xp, 
+                savedXpToNextLevel: xpToNextLevel,
+                savedScore: score,
+                savedAnsweredCount: answeredCount,
+                savedCorrectCount: correctCount
+            });
             localStorage.setItem(STORAGE_KEY, progress);
         } catch (error) {
             console.error("Failed to save progress to localStorage", error);
         }
-    }, [level, xp, xpToNextLevel]);
+    }, [level, xp, xpToNextLevel, score, answeredCount, correctCount]);
 
 
     const fetchHeadline = useCallback(() => {
@@ -168,6 +178,9 @@ export default function SpotFakeNewsPage() {
     const resetProgress = () => {
         setLevel(1);
         setXp(0);
+        setScore(0);
+        setAnsweredCount(0);
+        setCorrectCount(0);
         setXpToNextLevel(getXpToNextLevel(1));
         localStorage.removeItem(STORAGE_KEY);
         toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
@@ -215,7 +228,7 @@ export default function SpotFakeNewsPage() {
                     <CardContent className="space-y-6">
                         <div className="text-2xl">Your Final Score:</div>
                         <div className="text-7xl font-bold text-primary">{score}</div>
-                         <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
+                         <div className="text-2xl">Final Level: <span className="font-bold text-primary">{level}</span></div>
                         <div className="flex justify-around text-lg w-full bg-secondary/50 p-4 rounded-lg">
                             <div>
                                 <p className="text-muted-foreground">Answered</p>
@@ -259,8 +272,8 @@ export default function SpotFakeNewsPage() {
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm font-medium text-muted-foreground">
-                            <span>Level {level}</span>
-                            <span>{xp} / {xpToNextLevel} XP</span>
+                            <span>Level {level} XP</span>
+                            <span>{xp} / {xpToNextLevel}</span>
                         </div>
                         <Progress value={(xp / xpToNextLevel) * 100} className="w-full h-2" />
                     </div>
