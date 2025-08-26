@@ -122,13 +122,13 @@ export default function MemoryFlipPage() {
 
   }, [getDifficulty]);
 
-  const startGame = () => {
+  const startGame = useCallback(() => {
     setGameState('playing');
     setMoves(0);
     setFlippedIndices([]);
     setTrivia(null);
     setupGame();
-  };
+  }, [setupGame]);
   
     const resetProgress = () => {
         setLevel(1);
@@ -374,5 +374,3 @@ export default function MemoryFlipPage() {
   }
 }
 */
-
-    
