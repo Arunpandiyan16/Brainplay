@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Zap, Brain, Lightbulb, Trophy, Sparkles, Loader2, Award, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { wordBank, WordPuzzle } from '@/lib/word-hunter-data';
+import { generateWord, WordHunterOutput, WordHunterInput } from '@/ai/flows/word-hunter-flow';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -33,17 +33,16 @@ interface AnswerSlot {
 export default function WordHunterPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
     const [language, setLanguage] = useState<Language>('English');
-    const [puzzle, setPuzzle] = useState<WordPuzzle | null>(null);
+    const [puzzle, setPuzzle] = useState<WordHunterOutput | null>(null);
     const [availableLetters, setAvailableLetters] = useState<Letter[]>([]);
     const [answerSlots, setAnswerSlots] = useState<AnswerSlot[]>([]);
     const [score, setScore] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [showHint, setShowHint] = useState(false);
-    const [solvedWords, setSolvedWords] = useState<WordPuzzle[]>([]);
+    const [solvedCount, setSolvedCount] = useState(0);
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
-    const [availablePuzzles, setAvailablePuzzles] = useState<WordPuzzle[]>([]);
     const [isWrong, setIsWrong] = useState(false);
     const { toast } = useToast();
 
@@ -51,13 +50,13 @@ export default function WordHunterPage() {
         try {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
             if (savedProgress) {
-                const { savedLevel, savedXp, savedXpToNextLevel, savedScore, savedSolvedWords } = JSON.parse(savedProgress);
+                const { savedLevel, savedXp, savedXpToNextLevel, savedScore, savedSolvedCount } = JSON.parse(savedProgress);
                 if (savedLevel && typeof savedLevel === 'number') {
                     setLevel(savedLevel);
                     setXp(savedXp || 0);
                     setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
                     setScore(savedScore || 0);
-                    setSolvedWords(savedSolvedWords || []);
+                    setSolvedCount(savedSolvedCount || 0);
                 }
             }
         } catch (error) {
@@ -72,15 +71,21 @@ export default function WordHunterPage() {
                 savedXp: xp, 
                 savedXpToNextLevel: xpToNextLevel,
                 savedScore: score,
-                savedSolvedWords: solvedWords
+                savedSolvedCount: solvedCount
             });
             localStorage.setItem(STORAGE_KEY, progress);
         } catch (error) {
             console.error("Failed to save progress to localStorage", error);
         }
-    }, [level, xp, xpToNextLevel, score, solvedWords]);
+    }, [level, xp, xpToNextLevel, score, solvedCount]);
 
-    const setupNewPuzzle = useCallback((newPuzzle: WordPuzzle) => {
+    const getDifficulty = useCallback((): Difficulty => {
+        if (level >= 6) return 'Hard';
+        if (level >= 3) return 'Medium';
+        return 'Easy';
+    }, [level]);
+
+    const setupNewPuzzle = useCallback((newPuzzle: WordHunterOutput) => {
         setPuzzle(newPuzzle);
         const scrambled = newPuzzle.scrambled.split('').map((char, index) => ({ char, id: index }));
         setAvailableLetters(scrambled);
@@ -89,71 +94,52 @@ export default function WordHunterPage() {
         setIsLoading(false);
     }, []);
 
-    const fetchPuzzle = useCallback(() => {
+    const fetchPuzzle = useCallback(async () => {
         setIsLoading(true);
-        setAvailablePuzzles(currentPuzzles => {
-            if (currentPuzzles.length === 0) {
-                setGameState('ended');
-                setIsLoading(false);
-                return [];
-            }
-            const newPuzzles = [...currentPuzzles];
-            const nextPuzzle = newPuzzles.pop();
-            if (nextPuzzle) {
-                setupNewPuzzle(nextPuzzle);
+        try {
+            const difficulty = getDifficulty();
+            const newPuzzle = await generateWord({ language, difficulty });
+            if (newPuzzle && newPuzzle.word) {
+                setupNewPuzzle(newPuzzle);
             } else {
-                setGameState('ended');
+                throw new Error("Generated puzzle is invalid.");
             }
-            return newPuzzles;
-        });
-    }, [setupNewPuzzle]);
+        } catch (error) {
+            console.error("Failed to fetch word:", error);
+            toast({
+                variant: 'destructive',
+                title: 'Error Generating Word',
+                description: 'Could not generate a new word. Please try again later.',
+            });
+            setGameState('settings');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [getDifficulty, language, setupNewPuzzle, toast]);
 
     const startGame = useCallback(() => {
         setScore(0);
-        setSolvedWords([]);
+        setSolvedCount(0);
         setPuzzle(null);
-        setIsLoading(true);
-
-        const difficulties: Difficulty[] = ['Easy'];
-        if (level >= 3) difficulties.push('Medium');
-        if (level >= 6) difficulties.push('Hard');
-
-        const languagePuzzles = wordBank[language];
-        const filteredPuzzles = difficulties.flatMap(diff => languagePuzzles[diff] || []);
-        const unsolvedPuzzles = filteredPuzzles.filter(p => !solvedWords.some(s => s.word === p.word));
-        const shuffled = unsolvedPuzzles.sort(() => 0.5 - Math.random());
-        
-        if (shuffled.length === 0) {
-            toast({
-                variant: 'destructive',
-                title: 'Out of Words!',
-                description: 'You\'ve solved all available words for your level. Please reset progress or try another language.',
-            });
-            setGameState('settings');
-            setIsLoading(false);
-            return;
-        }
-
-        setAvailablePuzzles(shuffled);
         setGameState('playing');
-    }, [level, language, solvedWords, toast]);
+    }, []);
 
     useEffect(() => {
-        if (gameState === 'playing' && !puzzle && availablePuzzles.length > 0) {
+        if (gameState === 'playing' && !puzzle) {
             fetchPuzzle();
         }
-    }, [gameState, puzzle, availablePuzzles.length, fetchPuzzle]);
+    }, [gameState, puzzle, fetchPuzzle]);
 
-    const handleLetterSelect = (letter: Letter) => {
+    const handleLetterSelect = useCallback((letter: Letter) => {
         if (!puzzle || answerSlots.length >= puzzle.word.length) return;
         setAnswerSlots(prev => [...prev, letter]);
         setAvailableLetters(prev => prev.filter(l => l.id !== letter.id));
-    };
+    }, [puzzle, answerSlots.length]);
 
-    const handleLetterDeselect = (slot: AnswerSlot) => {
+    const handleLetterDeselect = useCallback((slot: AnswerSlot) => {
         setAnswerSlots(prev => prev.filter(s => s.id !== slot.id));
         setAvailableLetters(prev => [...prev, slot].sort((a,b) => a.id - b.id));
-    };
+    }, []);
 
     const handleHint = () => {
         if (showHint || score < HINT_COST) {
@@ -167,14 +153,18 @@ export default function WordHunterPage() {
     const checkAnswer = useCallback(() => {
         if (!puzzle) return;
         const guessedWord = answerSlots.map(s => s.char).join('');
+        
+        if (guessedWord.length !== puzzle.word.length) return;
+
         if (guessedWord.toLowerCase() === puzzle.word.toLowerCase()) {
+            const difficulty = getDifficulty();
             let points = 10;
             let awardedXp = 10;
-            if (puzzle.difficulty === 'Medium') {
+            if (difficulty === 'Medium') {
                 points = 15;
                 awardedXp = 15;
             }
-            if (puzzle.difficulty === 'Hard') {
+            if (difficulty === 'Hard') {
                 points = 20;
                 awardedXp = 20;
             }
@@ -185,7 +175,7 @@ export default function WordHunterPage() {
 
             toast({ title: "Correct!", description: `+${points} points & +${awardedXp} XP`, className: 'bg-green-500' });
             setScore(prev => prev + points);
-            setSolvedWords(prev => [...prev, puzzle]);
+            setSolvedCount(prev => prev + 1);
 
             const newXp = xp + awardedXp;
             if (newXp >= xpToNextLevel) {
@@ -197,7 +187,7 @@ export default function WordHunterPage() {
             } else {
                 setXp(newXp);
             }
-            setTimeout(fetchPuzzle, 500);
+            setTimeout(() => fetchPuzzle(), 500);
         } else {
             setIsWrong(true);
             toast({ title: "Not quite!", description: "Try again.", variant: 'destructive' });
@@ -207,7 +197,7 @@ export default function WordHunterPage() {
                 setIsWrong(false);
             }, 800);
         }
-    }, [answerSlots, puzzle, showHint, xp, xpToNextLevel, level, fetchPuzzle, toast]);
+    }, [answerSlots, puzzle, showHint, xp, xpToNextLevel, level, fetchPuzzle, toast, getDifficulty]);
 
     useEffect(() => {
         if (puzzle && answerSlots.length === puzzle.word.length) {
@@ -219,7 +209,7 @@ export default function WordHunterPage() {
         setLevel(1);
         setXp(0);
         setScore(0);
-        setSolvedWords([]);
+        setSolvedCount(0);
         setXpToNextLevel(getXpToNextLevel(1));
         localStorage.removeItem(STORAGE_KEY);
         toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
@@ -236,7 +226,7 @@ export default function WordHunterPage() {
                         </CardTitle>
                         <CardDescription className="text-lg">
                            Your current level is <span className="font-bold text-primary">{level}</span>.
-                           Unscramble words to earn XP and level up!
+                           Unscramble AI-generated words to earn XP and level up!
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -280,20 +270,10 @@ export default function WordHunterPage() {
                         <div className="flex justify-around w-full">
                             <div className="text-lg">
                                 <p className="text-muted-foreground">Words Solved</p>
-                                <p className="font-bold">{solvedWords.length}</p>
+                                <p className="font-bold">{solvedCount}</p>
                             </div>
                             <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
                         </div>
-                        {solvedWords.length > 0 &&
-                        <Card>
-                            <CardHeader><CardTitle>Solved Words</CardTitle></CardHeader>
-                            <CardContent>
-                                <ul className="space-y-1 text-left max-h-40 overflow-y-auto">
-                                    {solvedWords.map(w => <li key={w.word}>{w.word} <span className="text-muted-foreground text-sm">({w.difficulty})</span></li>)}
-                                </ul>
-                            </CardContent>
-                        </Card>
-                        }
                         <div className="flex gap-4">
                             <Button size="lg" className="text-xl w-full" onClick={startGame}>
                                <Sparkles className="mr-2"/> Play Again
@@ -341,6 +321,8 @@ export default function WordHunterPage() {
             ))}
         </div>
     );
+    
+    const difficulty = getDifficulty();
 
     return (
         <div className="flex justify-center items-center py-8">
@@ -360,8 +342,8 @@ export default function WordHunterPage() {
                         </div>
                     </CardTitle>
                      <CardDescription className="flex justify-between">
-                        <span>{language} - Words Solved: {solvedWords.length}</span>
-                        <span className="font-semibold">{puzzle?.difficulty}</span>
+                        <span>{language} - Words Solved: {solvedCount}</span>
+                        <span className="font-semibold">{difficulty}</span>
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8">
@@ -376,7 +358,7 @@ export default function WordHunterPage() {
                     {isLoading || !puzzle ? (
                         <div className="text-center space-y-4 min-h-[300px] flex flex-col justify-center">
                             <Loader2 className="h-16 w-16 animate-spin mx-auto text-primary"/>
-                            <p className="text-xl text-muted-foreground">Loading new word...</p>
+                            <p className="text-xl text-muted-foreground">Generating new word...</p>
                         </div>
                     ) : (
                         <div className="space-y-6">
@@ -415,3 +397,4 @@ export default function WordHunterPage() {
     );
 }
 
+    
