@@ -95,7 +95,7 @@ export default function SpotFakeNewsPage() {
 
     }, []);
 
-    const startGame = () => {
+    const startGame = useCallback(() => {
         setScore(0);
         setAnsweredCount(0);
         setCorrectCount(0);
@@ -125,7 +125,7 @@ export default function SpotFakeNewsPage() {
         const shuffled = filtered.sort(() => 0.5 - Math.random());
         setAvailableHeadlines(shuffled);
         setGameState('playing');
-    };
+    }, [level, country, toast]);
 
     useEffect(() => {
        if (gameState === 'playing' && availableHeadlines.length > 0 && !headline) {

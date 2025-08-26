@@ -22,37 +22,31 @@ type Language = 'English' | 'Tamil';
 
 interface Letter {
     char: string;
-    id: number; // unique id for the letter in the scrambled word
+    id: number;
 }
 
 interface AnswerSlot {
-    id: number; // Corresponds to the id from the Letter
+    id: number;
     char: string;
 }
 
 export default function WordHunterPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
     const [language, setLanguage] = useState<Language>('English');
-
     const [puzzle, setPuzzle] = useState<WordPuzzle | null>(null);
     const [availableLetters, setAvailableLetters] = useState<Letter[]>([]);
     const [answerSlots, setAnswerSlots] = useState<AnswerSlot[]>([]);
-
     const [score, setScore] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [showHint, setShowHint] = useState(false);
     const [solvedWords, setSolvedWords] = useState<WordPuzzle[]>([]);
-
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
     const [availablePuzzles, setAvailablePuzzles] = useState<WordPuzzle[]>([]);
-
     const [isWrong, setIsWrong] = useState(false);
-
     const { toast } = useToast();
 
-    // Load progress
     useEffect(() => {
         try {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
@@ -71,7 +65,6 @@ export default function WordHunterPage() {
         }
     }, []);
 
-    // Save progress
     useEffect(() => {
         try {
             const progress = JSON.stringify({ 
@@ -87,11 +80,10 @@ export default function WordHunterPage() {
         }
     }, [level, xp, xpToNextLevel, score, solvedWords]);
 
-
     const setupNewPuzzle = useCallback((newPuzzle: WordPuzzle) => {
         setPuzzle(newPuzzle);
-        const scrambled = newPuzzle.scrambled.split('').sort(() => Math.random() - 0.5);
-        setAvailableLetters(scrambled.map((char, index) => ({ char, id: index })));
+        const scrambled = newPuzzle.scrambled.split('').map((char, index) => ({ char, id: index }));
+        setAvailableLetters(scrambled);
         setAnswerSlots([]);
         setShowHint(false);
         setIsLoading(false);
@@ -100,7 +92,7 @@ export default function WordHunterPage() {
     const fetchPuzzle = useCallback(() => {
         setIsLoading(true);
         setAvailablePuzzles(currentPuzzles => {
-             if (currentPuzzles.length === 0) {
+            if (currentPuzzles.length === 0) {
                 setGameState('ended');
                 setIsLoading(false);
                 return [];
@@ -110,12 +102,12 @@ export default function WordHunterPage() {
             if (nextPuzzle) {
                 setupNewPuzzle(nextPuzzle);
             } else {
-                 setGameState('ended');
+                setGameState('ended');
             }
             return newPuzzles;
         });
     }, [setupNewPuzzle]);
-    
+
     const startGame = useCallback(() => {
         setScore(0);
         setSolvedWords([]);
@@ -147,23 +139,25 @@ export default function WordHunterPage() {
     }, [level, language, solvedWords, toast]);
 
     useEffect(() => {
-        if(gameState === 'playing' && !puzzle && availablePuzzles.length > 0) {
+        if (gameState === 'playing' && !puzzle && availablePuzzles.length > 0) {
             fetchPuzzle();
         }
-    }, [gameState, puzzle, availablePuzzles, fetchPuzzle]);
+    }, [gameState, puzzle, availablePuzzles.length, fetchPuzzle]);
 
-    const handleLetterSelect = useCallback((letter: Letter) => {
+    const handleLetterSelect = (letter: Letter) => {
         if (!puzzle || answerSlots.length >= puzzle.word.length) return;
         setAnswerSlots(prev => [...prev, letter]);
-    }, [puzzle, answerSlots.length]);
+        setAvailableLetters(prev => prev.filter(l => l.id !== letter.id));
+    };
 
-    const handleLetterDeselect = useCallback((slot: AnswerSlot) => {
+    const handleLetterDeselect = (slot: AnswerSlot) => {
         setAnswerSlots(prev => prev.filter(s => s.id !== slot.id));
-    }, []);
+        setAvailableLetters(prev => [...prev, slot].sort((a,b) => a.id - b.id));
+    };
 
     const handleHint = () => {
         if (showHint || score < HINT_COST) {
-             toast({ title: "Can't take hint", description: showHint ? "You've already used it for this word." : "Not enough points.", variant: 'destructive' });
+            toast({ title: "Can't take hint", description: showHint ? "You've already used it for this word." : "Not enough points.", variant: 'destructive' });
             return;
         }
         setShowHint(true);
@@ -203,13 +197,12 @@ export default function WordHunterPage() {
             } else {
                 setXp(newXp);
             }
-
             setTimeout(fetchPuzzle, 500);
-
         } else {
             setIsWrong(true);
             toast({ title: "Not quite!", description: "Try again.", variant: 'destructive' });
             setTimeout(() => {
+                setAvailableLetters(prev => [...prev, ...answerSlots].sort((a,b) => a.id - b.id));
                 setAnswerSlots([]);
                 setIsWrong(false);
             }, 800);
@@ -222,10 +215,6 @@ export default function WordHunterPage() {
         }
     }, [answerSlots, puzzle, checkAnswer]);
     
-    const letterIsUsed = (letterId: number) => {
-        return answerSlots.some(slot => slot.id === letterId);
-    }
-
     const resetProgress = () => {
         setLevel(1);
         setXp(0);
@@ -328,8 +317,8 @@ export default function WordHunterPage() {
                         key={index}
                         variant="secondary"
                         onClick={() => slot && handleLetterDeselect(slot)}
-                        className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 text-2xl md:text-4xl font-bold rounded-lg shadow-inner uppercase cursor-pointer disabled:cursor-not-allowed"
-                        disabled={!slot}
+                        className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 text-2xl md:text-4xl font-bold rounded-lg shadow-inner uppercase cursor-pointer"
+                        style={{ minWidth: '3rem' }}
                     >
                         {slot?.char}
                     </Button>
@@ -345,8 +334,7 @@ export default function WordHunterPage() {
                     key={letter.id}
                     variant="outline"
                     onClick={() => handleLetterSelect(letter)}
-                    disabled={letterIsUsed(letter.id)}
-                    className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 text-2xl md:text-4xl font-bold rounded-lg shadow-md uppercase transition-all hover:bg-primary hover:text-primary-foreground disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:bg-secondary"
+                    className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 text-2xl md:text-4xl font-bold rounded-lg shadow-md uppercase transition-all hover:bg-primary hover:text-primary-foreground"
                 >
                     {letter.char}
                 </Button>

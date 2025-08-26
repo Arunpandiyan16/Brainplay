@@ -76,7 +76,7 @@ export default function LogicLeapPage() {
             const nextPuzzle = newPuzzles.pop()
             setPuzzle(nextPuzzle!);
             setIsLoading(false);
-            return newPuzzles;
+            return newPzzles;
         });
     }, []);
     

@@ -59,7 +59,7 @@ export default function DailyChallengePage() {
 
     }, [answeredQuestions.length]);
 
-    const startGame = () => {
+    const startGame = useCallback(() => {
         setScore(0);
         setConsecutiveCorrect(0);
         setSkipsUsed(0);
@@ -84,7 +84,7 @@ export default function DailyChallengePage() {
             setAvailableQuestions(shuffled);
             setGameState('playing');
         }
-    };
+    }, [country, toast]);
 
     useEffect(() => {
         if (gameState === 'playing' && availableQuestions.length > 0 && !question) {
