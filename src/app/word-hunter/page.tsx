@@ -65,9 +65,9 @@ export default function WordHunterPage() {
 
     useEffect(() => {
         try {
-            const progress = JSON.stringify({ 
-                savedLevel: level, 
-                savedXp: xp, 
+            const progress = JSON.stringify({
+                savedLevel: level,
+                savedXp: xp,
                 savedXpToNextLevel: xpToNextLevel,
                 savedScore: score,
                 savedSolvedCount: solvedCount
@@ -128,7 +128,7 @@ export default function WordHunterPage() {
         setAvailablePuzzles(shuffledPuzzles);
         setScore(0);
         setSolvedCount(0);
-        setPuzzle(null); 
+        setPuzzle(null);
         setGameState('playing');
     }, [getDifficulty, language, toast]);
 
@@ -138,22 +138,22 @@ export default function WordHunterPage() {
         }
     }, [gameState, puzzle, fetchPuzzle]);
 
-    const handleLetterSelect = (letter: Letter) => {
+    const handleLetterSelect = useCallback((letter: Letter) => {
         if (!puzzle || answerSlots.length >= puzzle.word.length) return;
         setAnswerSlots(prev => [...prev, letter]);
         setAvailableLetters(prev => prev.filter(l => l.id !== letter.id));
-    };
+    }, [answerSlots.length, puzzle]);
 
-    const handleLetterDeselect = (slot: AnswerSlot) => {
+    const handleLetterDeselect = useCallback((slot: AnswerSlot) => {
         setAnswerSlots(prev => prev.filter(s => s.id !== slot.id));
-        setAvailableLetters(prev => [...prev, slot].sort((a,b) => a.id - b.id));
-    };
-
+        setAvailableLetters(prev => [...prev, slot].sort((a, b) => a.id - b.id));
+    }, []);
+    
     const checkAnswer = useCallback(() => {
         if (!puzzle || answerSlots.length !== puzzle.word.length) return;
-        
+
         const guessedWord = answerSlots.map(s => s.char).join('');
-        
+
         if (guessedWord.toLowerCase() === puzzle.word.toLowerCase()) {
             const difficulty = getDifficulty();
             let points = 10;
@@ -166,7 +166,7 @@ export default function WordHunterPage() {
                 points = 20;
                 awardedXp = 20;
             }
-            
+
             toast({ title: "Correct!", description: `+${points} points & +${awardedXp} XP`, className: 'bg-green-500' });
             setScore(prev => prev + points);
             setSolvedCount(prev => prev + 1);
@@ -186,20 +186,20 @@ export default function WordHunterPage() {
             setIsWrong(true);
             toast({ title: "Not quite!", description: "Try again.", variant: 'destructive' });
             setTimeout(() => {
-                setAvailableLetters(prev => [...prev, ...answerSlots].sort((a,b) => a.id - b.id));
+                setAvailableLetters(prev => [...prev, ...answerSlots].sort((a, b) => a.id - b.id));
                 setAnswerSlots([]);
                 setIsWrong(false);
             }, 800);
         }
-    }, [answerSlots, puzzle, xp, xpToNextLevel, level, fetchPuzzle, toast, getDifficulty]);
+    }, [answerSlots, puzzle, getDifficulty, toast, xp, xpToNextLevel, level, fetchPuzzle]);
 
     useEffect(() => {
         if (puzzle && answerSlots.length === puzzle.word.length) {
             checkAnswer();
         }
     }, [answerSlots, puzzle, checkAnswer]);
-    
-    const resetProgress = () => {
+
+    const resetProgress = useCallback(() => {
         setLevel(1);
         setXp(0);
         setScore(0);
@@ -207,8 +207,8 @@ export default function WordHunterPage() {
         setXpToNextLevel(getXpToNextLevel(1));
         localStorage.removeItem(STORAGE_KEY);
         toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
-    };
-
+    }, [toast]);
+    
     if (gameState === 'settings') {
         return (
             <div className="flex justify-center items-center py-8">
@@ -315,7 +315,7 @@ export default function WordHunterPage() {
             ))}
         </div>
     );
-    
+
     const difficulty = getDifficulty();
 
     return (
@@ -362,7 +362,7 @@ export default function WordHunterPage() {
                                     <p className="text-muted-foreground font-medium">{puzzle.hint}</p>
                                 </CardContent>
                             </Card>
-                            
+
                             <div className="p-4 rounded-lg bg-secondary min-h-[100px] flex items-center justify-center">
                                 <AnswerDisplay />
                             </div>
@@ -370,7 +370,7 @@ export default function WordHunterPage() {
                              <div className="p-4 rounded-lg min-h-[140px] flex items-center justify-center">
                                 <LetterPool />
                             </div>
-                            
+
                             <div className="flex justify-center items-center">
                                 <Button variant="outline" onClick={fetchPuzzle} disabled={isLoading}>
                                     Skip Word
@@ -383,3 +383,5 @@ export default function WordHunterPage() {
         </div>
     );
 }
+
+    
