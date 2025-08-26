@@ -190,6 +190,14 @@ export default function QuizClashPage() {
         return 'bg-secondary hover:bg-accent text-secondary-foreground';
     };
 
+    const resetProgress = () => {
+        setLevel(1);
+        setXp(0);
+        setXpToNextLevel(getXpToNextLevel(1));
+        localStorage.removeItem(STORAGE_KEY);
+        toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
+    };
+
     const renderCategoryBreakdown = () => {
         const breakdown: { [key: string]: { correct: number; total: number } } = {};
 
