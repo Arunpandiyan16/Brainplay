@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Brain, User, Sun, Moon, Globe, LogOut, ChevronDown, Gamepad2, Menu, HelpCircle, Award } from 'lucide-react';
+import { Brain, User, Sun, Moon, Globe, LogOut, ChevronDown, Gamepad2, Menu, HelpCircle, Award, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import {
@@ -72,7 +72,7 @@ export default function Header() {
           <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="pr-0">
+       <SheetContent side="left" className="pr-0">
           <SheetHeader className="p-4 text-left">
              <SheetTitle className="text-2xl flex items-center gap-2">
                 <Brain className="h-6 w-6 text-primary" />
@@ -90,6 +90,11 @@ export default function Header() {
                     </Link>
                 </SheetClose>
             ))}
+             <SheetClose asChild>
+                <Link href="/blog" className="text-lg">
+                  Blog
+                </Link>
+              </SheetClose>
             <SheetClose asChild>
                 <Link
                     href="/leaderboard"
@@ -129,6 +134,13 @@ export default function Header() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+           <Link
+            href="/blog"
+            className="text-muted-foreground transition-colors hover:text-foreground flex items-center gap-1"
+          >
+            <BookOpen className="w-4 h-4" /> Blog
+          </Link>
 
           <Link
             href="/leaderboard"
