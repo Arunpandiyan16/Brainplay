@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Zap, Brain, Lightbulb, Trophy, Sparkles, Loader2, Award, RotateCcw } from 'lucide-react';
+import { Zap, Brain, Lightbulb, Trophy, Sparkles, Loader2, Award, RotateCcw, Check, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { wordHunterPuzzles, WordPuzzle } from '@/lib/word-hunter-data';
@@ -32,37 +32,43 @@ interface AnswerSlot {
 export default function WordHunterPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
     const [language, setLanguage] = useState<Language>('English');
+    
     const [puzzle, setPuzzle] = useState<WordPuzzle | null>(null);
     const [availableLetters, setAvailableLetters] = useState<Letter[]>([]);
     const [answerSlots, setAnswerSlots] = useState<AnswerSlot[]>([]);
+    
     const [score, setScore] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [solvedCount, setSolvedCount] = useState(0);
+    
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
+    
     const [isWrong, setIsWrong] = useState(false);
+    const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [availablePuzzles, setAvailablePuzzles] = useState<WordPuzzle[]>([]);
+    
     const { toast } = useToast();
 
+    // Load progress
     useEffect(() => {
         try {
             const savedProgress = localStorage.getItem(STORAGE_KEY);
             if (savedProgress) {
-                const { savedLevel, savedXp, savedXpToNextLevel, savedScore, savedSolvedCount } = JSON.parse(savedProgress);
-                if (savedLevel && typeof savedLevel === 'number') {
-                    setLevel(savedLevel);
-                    setXp(savedXp || 0);
-                    setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
-                    setScore(savedScore || 0);
-                    setSolvedCount(savedSolvedCount || 0);
-                }
+                const data = JSON.parse(savedProgress);
+                setLevel(data.savedLevel || 1);
+                setXp(data.savedXp || 0);
+                setXpToNextLevel(data.savedXpToNextLevel || getXpToNextLevel(data.savedLevel || 1));
+                setScore(data.savedScore || 0);
+                setSolvedCount(data.savedSolvedCount || 0);
             }
         } catch (error) {
             console.error("Failed to load progress from localStorage", error);
         }
     }, []);
 
+    // Save progress
     useEffect(() => {
         try {
             const progress = JSON.stringify({
@@ -84,35 +90,35 @@ export default function WordHunterPage() {
         return 'Easy';
     }, [level]);
 
-    const setupNewPuzzle = useCallback((newPuzzle: WordPuzzle) => {
+    const setupNewPuzzle = (newPuzzle: WordPuzzle) => {
         setPuzzle(newPuzzle);
         const scrambled = newPuzzle.scrambled.split('').map((char, index) => ({ char, id: index }));
         setAvailableLetters(scrambled);
         setAnswerSlots([]);
+        setIsCorrect(null);
         setIsLoading(false);
-    }, []);
+    };
 
-    const fetchPuzzle = useCallback(() => {
+    const fetchPuzzle = () => {
         setIsLoading(true);
-        setAvailablePuzzles(currentPuzzles => {
-            if (currentPuzzles.length === 0) {
-                setGameState('ended');
-                setIsLoading(false);
-                return [];
-            }
-            const newPuzzles = [...currentPuzzles];
-            const nextPuzzle = newPuzzles.pop();
-            if (nextPuzzle) {
-                setupNewPuzzle(nextPuzzle);
-            } else {
-                 setGameState('ended');
-                 setIsLoading(false);
-            }
-            return newPuzzles;
-        });
-    }, [setupNewPuzzle]);
+        if (availablePuzzles.length === 0) {
+            setGameState('ended');
+            setIsLoading(false);
+            return;
+        }
+        const newPuzzles = [...availablePuzzles];
+        const nextPuzzle = newPuzzles.pop();
+        setAvailablePuzzles(newPuzzles);
 
-    const startGame = useCallback(() => {
+        if (nextPuzzle) {
+            setTimeout(() => setupNewPuzzle(nextPuzzle), 300);
+        } else {
+             setGameState('ended');
+             setIsLoading(false);
+        }
+    };
+
+    const startGame = () => {
         const difficulty = getDifficulty();
         const puzzlesForLevel = wordHunterPuzzles.filter(p =>
             p.language === language && p.difficulty === difficulty
@@ -131,77 +137,77 @@ export default function WordHunterPage() {
         setAvailablePuzzles(shuffledPuzzles);
         setScore(0);
         setSolvedCount(0);
-        setPuzzle(null);
         setGameState('playing');
         setIsLoading(true);
-    }, [getDifficulty, language, toast]);
 
-    useEffect(() => {
-        if (gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
-            fetchPuzzle();
+        // Fetch first puzzle
+        const firstPuzzle = shuffledPuzzles.pop();
+        if(firstPuzzle) {
+            setAvailablePuzzles(shuffledPuzzles);
+            setTimeout(() => setupNewPuzzle(firstPuzzle), 300);
+        } else {
+            setGameState('ended');
         }
-    }, [gameState, puzzle, availablePuzzles, fetchPuzzle]);
+    };
 
     const handleLetterSelect = (letter: Letter) => {
-        if (!puzzle || answerSlots.length >= puzzle.word.length) return;
+        if (!puzzle || answerSlots.length >= puzzle.word.length || isCorrect !== null) return;
         setAnswerSlots(prev => [...prev, letter]);
         setAvailableLetters(prev => prev.filter(l => l.id !== letter.id));
     };
 
     const handleLetterDeselect = (slot: AnswerSlot) => {
+        if(isCorrect !== null) return;
         setAnswerSlots(prev => prev.filter(s => s.id !== slot.id));
         setAvailableLetters(prev => [...prev, slot].sort((a, b) => a.id - b.id));
     };
-
-    const checkAnswer = useCallback(() => {
-        if (!puzzle) return;
-
-        const guessedWord = answerSlots.map(s => s.char).join('');
-
-        if (guessedWord.toLowerCase() === puzzle.word.toLowerCase()) {
-            const difficulty = getDifficulty();
-            let points = 10;
-            let awardedXp = 10;
-            if (difficulty === 'Medium') {
-                points = 15;
-                awardedXp = 15;
-            }
-            if (difficulty === 'Hard') {
-                points = 20;
-                awardedXp = 20;
-            }
-
-            toast({ title: "Correct!", description: `+${points} points & +${awardedXp} XP`, className: 'bg-green-500' });
-            setScore(prev => prev + points);
-            setSolvedCount(prev => prev + 1);
-
-            const newXp = xp + awardedXp;
-            if (newXp >= xpToNextLevel) {
-                const nextLevel = level + 1;
-                setLevel(nextLevel);
-                setXp(newXp - xpToNextLevel);
-                setXpToNextLevel(getXpToNextLevel(nextLevel));
-                toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! Harder words unlocked.`, className: 'bg-primary text-primary-foreground' });
-            } else {
-                setXp(newXp);
-            }
-            setTimeout(() => fetchPuzzle(), 500);
-        } else {
-            setIsWrong(true);
-            toast({ title: "Not quite!", description: "Try again.", variant: 'destructive' });
-            setTimeout(() => {
-                setAvailableLetters(prev => [...prev, ...answerSlots].sort((a, b) => a.id - b.id));
-                setAnswerSlots([]);
-                setIsWrong(false);
-            }, 800);
-        }
-    }, [answerSlots, puzzle, getDifficulty, toast, xp, xpToNextLevel, level, fetchPuzzle]);
-
+    
     useEffect(() => {
-        if (puzzle && answerSlots.length === puzzle.word.length) {
-            checkAnswer();
+        if (puzzle && answerSlots.length === puzzle.word.length && isCorrect === null) {
+            const guessedWord = answerSlots.map(s => s.char).join('');
+            if (guessedWord.toLowerCase() === puzzle.word.toLowerCase()) {
+                setIsCorrect(true);
+                const difficulty = getDifficulty();
+                let points = 10;
+                let awardedXp = 10;
+                if (difficulty === 'Medium') {
+                    points = 15;
+                    awardedXp = 15;
+                }
+                if (difficulty === 'Hard') {
+                    points = 20;
+                    awardedXp = 20;
+                }
+    
+                toast({ title: "Correct!", description: `+${points} points & +${awardedXp} XP`, className: 'bg-green-500' });
+                setScore(prev => prev + points);
+                setSolvedCount(prev => prev + 1);
+    
+                const newXp = xp + awardedXp;
+                if (newXp >= xpToNextLevel) {
+                    const nextLevel = level + 1;
+                    setLevel(nextLevel);
+                    setXp(newXp - xpToNextLevel);
+                    setXpToNextLevel(getXpToNextLevel(nextLevel));
+                    toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! Harder words unlocked.`, className: 'bg-primary text-primary-foreground' });
+                } else {
+                    setXp(newXp);
+                }
+
+            } else {
+                setIsCorrect(false);
+                setIsWrong(true);
+                toast({ title: "Not quite!", description: "Try again.", variant: 'destructive' });
+                setTimeout(() => {
+                    setAvailableLetters(prev => [...prev, ...answerSlots].sort((a, b) => a.id - b.id));
+                    setAnswerSlots([]);
+                    setIsWrong(false);
+                    setIsCorrect(null);
+                }, 1000);
+            }
         }
-    }, [answerSlots, puzzle, checkAnswer]);
+    }, [answerSlots, puzzle, isCorrect, getDifficulty, toast, xp, xpToNextLevel, level]);
+
 
     const resetProgress = useCallback(() => {
         setLevel(1);
@@ -259,7 +265,7 @@ export default function WordHunterPage() {
                     <CardHeader>
                         <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
                            <Trophy className="w-10 h-10 text-yellow-400"/>
-                           Game Over!
+                           Round Over!
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -290,16 +296,19 @@ export default function WordHunterPage() {
         <div className={cn("flex justify-center gap-2 md:gap-3 flex-wrap min-h-[72px] items-center", isWrong && "animate-shake")}>
             {puzzle?.word.split('').map((_, index) => {
                 const slot = answerSlots[index];
+                const displayChar = slot ? slot.char : '';
                 return (
-                    <Button
+                    <div
                         key={index}
-                        variant="secondary"
                         onClick={() => slot && handleLetterDeselect(slot)}
-                        className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 text-2xl md:text-4xl font-bold rounded-lg shadow-inner uppercase cursor-pointer"
+                        className={cn("flex items-center justify-center w-12 h-12 md:w-16 md:h-16 text-2xl md:text-4xl font-bold rounded-lg shadow-inner uppercase", 
+                            slot ? "bg-secondary cursor-pointer" : "bg-muted",
+                            isCorrect === true && "border-2 border-green-500",
+                        )}
                         style={{ minWidth: '3rem' }}
                     >
-                        {slot?.char}
-                    </Button>
+                        {displayChar}
+                    </div>
                 );
             })}
         </div>
@@ -312,7 +321,8 @@ export default function WordHunterPage() {
                     key={letter.id}
                     variant="outline"
                     onClick={() => handleLetterSelect(letter)}
-                    className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 text-2xl md:text-4xl font-bold rounded-lg shadow-md uppercase transition-all hover:bg-primary hover:text-primary-foreground"
+                    className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 text-2xl md:text-4xl font-bold rounded-lg shadow-md uppercase transition-all hover:bg-primary hover:text-primary-foreground disabled:opacity-50"
+                    disabled={isCorrect !== null}
                 >
                     {letter.char}
                 </Button>
@@ -374,12 +384,14 @@ export default function WordHunterPage() {
                              <div className="p-4 rounded-lg min-h-[140px] flex items-center justify-center">
                                 <LetterPool />
                             </div>
-
-                            <div className="flex justify-center items-center">
-                                <Button variant="outline" onClick={fetchPuzzle} disabled={isLoading}>
-                                    Skip Word
+                            
+                            {isCorrect === true && (
+                                <div className="text-center">
+                                <Button onClick={fetchPuzzle} className="glow-shadow">
+                                    Next Word
                                 </Button>
-                            </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </CardContent>
@@ -387,5 +399,3 @@ export default function WordHunterPage() {
         </div>
     );
 }
-
-    
