@@ -8,11 +8,10 @@ import { Progress } from '@/components/ui/progress';
 import { Zap, Brain, Lightbulb, Trophy, Sparkles, Loader2, Award, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { generateWord, WordHunterOutput, WordHunterInput } from '@/ai/flows/word-hunter-flow';
+import { wordHunterPuzzles, WordPuzzle } from '@/lib/word-hunter-data';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
-const HINT_COST = 15;
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 25;
 const STORAGE_KEY = 'wordHunterProgress';
 
@@ -33,17 +32,17 @@ interface AnswerSlot {
 export default function WordHunterPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
     const [language, setLanguage] = useState<Language>('English');
-    const [puzzle, setPuzzle] = useState<WordHunterOutput | null>(null);
+    const [puzzle, setPuzzle] = useState<WordPuzzle | null>(null);
     const [availableLetters, setAvailableLetters] = useState<Letter[]>([]);
     const [answerSlots, setAnswerSlots] = useState<AnswerSlot[]>([]);
     const [score, setScore] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
-    const [showHint, setShowHint] = useState(false);
     const [solvedCount, setSolvedCount] = useState(0);
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
     const [isWrong, setIsWrong] = useState(false);
+    const [availablePuzzles, setAvailablePuzzles] = useState<WordPuzzle[]>([]);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -85,42 +84,53 @@ export default function WordHunterPage() {
         return 'Easy';
     }, [level]);
 
-    const setupNewPuzzle = useCallback((newPuzzle: WordHunterOutput) => {
+    const setupNewPuzzle = useCallback((newPuzzle: WordPuzzle) => {
         setPuzzle(newPuzzle);
         const scrambled = newPuzzle.scrambled.split('').map((char, index) => ({ char, id: index }));
         setAvailableLetters(scrambled);
         setAnswerSlots([]);
-        setShowHint(false);
         setIsLoading(false);
     }, []);
 
-    const fetchPuzzle = useCallback(async () => {
+    const fetchPuzzle = useCallback(() => {
         setIsLoading(true);
-        try {
-            const difficulty = getDifficulty();
-            const newPuzzle = await generateWord({ language, difficulty });
-            if (newPuzzle && newPuzzle.word) {
-                setupNewPuzzle(newPuzzle);
-            } else {
-                throw new Error("Generated puzzle is invalid.");
+        setAvailablePuzzles(currentPuzzles => {
+            if (currentPuzzles.length === 0) {
+                setGameState('ended');
+                setIsLoading(false);
+                return [];
             }
-        } catch (error) {
-            console.error("Failed to fetch word:", error);
-            toast({
-                variant: 'destructive',
-                title: 'Error Generating Word',
-                description: 'Could not generate a new word. Please try again later.',
-            });
-            setGameState('settings');
-        }
-    }, [getDifficulty, language, setupNewPuzzle, toast]);
+            const newPuzzles = [...currentPuzzles];
+            const nextPuzzle = newPuzzles.pop();
+            if (nextPuzzle) {
+                setupNewPuzzle(nextPuzzle);
+            }
+            return newPuzzles;
+        });
+    }, [setupNewPuzzle]);
 
     const startGame = useCallback(() => {
+        const difficulty = getDifficulty();
+        const puzzlesForLevel = wordHunterPuzzles.filter(p =>
+            p.language === language && p.difficulty === difficulty
+        );
+        const shuffledPuzzles = puzzlesForLevel.sort(() => 0.5 - Math.random());
+
+        if (shuffledPuzzles.length === 0) {
+            toast({
+                title: 'No Puzzles Available',
+                description: 'There are no words for your level in this language. Try resetting progress or changing the language.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        setAvailablePuzzles(shuffledPuzzles);
         setScore(0);
         setSolvedCount(0);
-        setPuzzle(null); // This will trigger the fetchPuzzle effect
+        setPuzzle(null); 
         setGameState('playing');
-    }, []);
+    }, [getDifficulty, language, toast]);
 
     useEffect(() => {
         if (gameState === 'playing' && !puzzle) {
@@ -128,24 +138,15 @@ export default function WordHunterPage() {
         }
     }, [gameState, puzzle, fetchPuzzle]);
 
-    const handleLetterSelect = useCallback((letter: Letter) => {
+    const handleLetterSelect = (letter: Letter) => {
         if (!puzzle || answerSlots.length >= puzzle.word.length) return;
         setAnswerSlots(prev => [...prev, letter]);
         setAvailableLetters(prev => prev.filter(l => l.id !== letter.id));
-    }, [puzzle, answerSlots.length]);
+    };
 
-    const handleLetterDeselect = useCallback((slot: AnswerSlot) => {
+    const handleLetterDeselect = (slot: AnswerSlot) => {
         setAnswerSlots(prev => prev.filter(s => s.id !== slot.id));
         setAvailableLetters(prev => [...prev, slot].sort((a,b) => a.id - b.id));
-    }, []);
-
-    const handleHint = () => {
-        if (showHint || score < HINT_COST) {
-            toast({ title: "Can't take hint", description: showHint ? "You've already used it for this word." : "Not enough points.", variant: 'destructive' });
-            return;
-        }
-        setShowHint(true);
-        setScore(prev => prev - HINT_COST);
     };
 
     const checkAnswer = useCallback(() => {
@@ -165,11 +166,7 @@ export default function WordHunterPage() {
                 points = 20;
                 awardedXp = 20;
             }
-            if (showHint) {
-                points = Math.floor(points / 2);
-                awardedXp = Math.floor(awardedXp / 2);
-            }
-
+            
             toast({ title: "Correct!", description: `+${points} points & +${awardedXp} XP`, className: 'bg-green-500' });
             setScore(prev => prev + points);
             setSolvedCount(prev => prev + 1);
@@ -194,7 +191,7 @@ export default function WordHunterPage() {
                 setIsWrong(false);
             }, 800);
         }
-    }, [answerSlots, puzzle, showHint, xp, xpToNextLevel, level, fetchPuzzle, toast, getDifficulty]);
+    }, [answerSlots, puzzle, xp, xpToNextLevel, level, fetchPuzzle, toast, getDifficulty]);
 
     useEffect(() => {
         if (puzzle && answerSlots.length === puzzle.word.length) {
@@ -223,7 +220,7 @@ export default function WordHunterPage() {
                         </CardTitle>
                         <CardDescription className="text-lg">
                            Your current level is <span className="font-bold text-primary">{level}</span>.
-                           Unscramble AI-generated words to earn XP and level up!
+                           Unscramble words to earn XP and level up!
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -355,10 +352,17 @@ export default function WordHunterPage() {
                     {isLoading || !puzzle ? (
                         <div className="text-center space-y-4 min-h-[300px] flex flex-col justify-center">
                             <Loader2 className="h-16 w-16 animate-spin mx-auto text-primary"/>
-                            <p className="text-xl text-muted-foreground">Generating new word...</p>
+                            <p className="text-xl text-muted-foreground">Loading new word...</p>
                         </div>
                     ) : (
                         <div className="space-y-6">
+                            <Card className="bg-secondary/50">
+                                <CardContent className="p-4 flex items-center justify-center gap-2 text-center">
+                                    <Lightbulb className="text-yellow-400 h-5 w-5 shrink-0" />
+                                    <p className="text-muted-foreground font-medium">{puzzle.hint}</p>
+                                </CardContent>
+                            </Card>
+                            
                             <div className="p-4 rounded-lg bg-secondary min-h-[100px] flex items-center justify-center">
                                 <AnswerDisplay />
                             </div>
@@ -366,22 +370,8 @@ export default function WordHunterPage() {
                              <div className="p-4 rounded-lg min-h-[140px] flex items-center justify-center">
                                 <LetterPool />
                             </div>
-
-                            {showHint && (
-                                <Card className="bg-secondary/50">
-                                    <CardContent className="p-4 flex items-center gap-2">
-                                        <Lightbulb className="text-yellow-400" />
-                                        <p className="text-muted-foreground">{puzzle.hint}</p>
-                                    </CardContent>
-                                </Card>
-                            )}
-
-                             <div className="flex justify-between items-center">
-                                <Button variant="outline" onClick={handleHint} disabled={showHint || isLoading || score < HINT_COST}>
-                                    <Lightbulb className="mr-2"/>
-                                    Hint (-{HINT_COST} pts)
-                                </Button>
-
+                            
+                            <div className="flex justify-center items-center">
                                 <Button variant="outline" onClick={fetchPuzzle} disabled={isLoading}>
                                     Skip Word
                                 </Button>
@@ -393,6 +383,3 @@ export default function WordHunterPage() {
         </div>
     );
 }
-
-
-    
