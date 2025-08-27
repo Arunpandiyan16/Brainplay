@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { X, Check, Newspaper, Loader2, Trophy, Zap, Sparkles, Lightbulb, RotateCcw } from 'lucide-react';
+import { X, Check, Newspaper, Loader2, Trophy, Zap, Sparkles, Lightbulb, RotateCcw, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useCountry } from '@/hooks/use-country';
@@ -16,8 +16,10 @@ import { getUserProfile, updateGameProgress, GameProgress, defaultGameProgress }
 
 const XP_PER_CORRECT = 15;
 const getXpToNextLevel = (level: number) => 75 + (level - 1) * 25;
+const MAX_LIVES = 3;
+const LIFE_REGEN_MINUTES = 5;
 
-type GameState = 'settings' | 'playing' | 'ended';
+type GameState = 'settings' | 'playing' | 'ended' | 'no-lives';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
 export default function SpotFakeNewsPage() {
@@ -35,6 +37,9 @@ export default function SpotFakeNewsPage() {
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
+    const [lives, setLives] = useState(MAX_LIVES);
+    const [nextLifeAt, setNextLifeAt] = useState<number | null>(null);
+    const [countdown, setCountdown] = useState('');
 
     const { toast } = useToast();
     const { country } = useCountry();
@@ -46,23 +51,28 @@ export default function SpotFakeNewsPage() {
             setXp(0);
             setXpToNextLevel(getXpToNextLevel(1));
             setScore(0);
+            setLives(MAX_LIVES);
             setIsLoading(false);
             return;
         }
         setIsLoading(true);
         const profile = await getUserProfile(user.uid);
         if (profile && profile.spotFakeNews) {
-            const { level, xp, xpToNextLevel, score } = profile.spotFakeNews;
+            const { level, xp, xpToNextLevel, score, lives, nextLifeAt } = profile.spotFakeNews;
             setLevel(level);
             setXp(xp);
             setXpToNextLevel(xpToNextLevel);
             setScore(score);
+            setLives(lives ?? MAX_LIVES);
+            setNextLifeAt(nextLifeAt ?? null);
         } else {
             const progress = defaultGameProgress();
             setLevel(progress.level);
             setXp(progress.xp);
             setXpToNextLevel(progress.xpToNextLevel);
             setScore(progress.score);
+            setLives(progress.lives);
+            setNextLifeAt(progress.nextLifeAt);
         }
         setIsLoading(false);
     }, [user]);
@@ -71,14 +81,35 @@ export default function SpotFakeNewsPage() {
         loadProgress();
     }, [loadProgress]);
 
+     useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (gameState === 'no-lives' && nextLifeAt) {
+            interval = setInterval(() => {
+                const now = Date.now();
+                const diff = nextLifeAt - now;
+                if (diff <= 0) {
+                    setLives(prev => prev + 1);
+                    setNextLifeAt(null);
+                    setGameState('settings');
+                    clearInterval(interval);
+                } else {
+                    const minutes = Math.floor((diff / 1000) / 60);
+                    const seconds = Math.floor((diff / 1000) % 60);
+                    setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+                }
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [gameState, nextLifeAt]);
+
     const saveProgress = useCallback(async () => {
         if (!user) return;
-        const progress: GameProgress = { score, level, xp, xpToNextLevel };
+        const progress: GameProgress = { score, level, xp, xpToNextLevel, lives, nextLifeAt };
         await updateGameProgress(user.uid, 'spotFakeNews', progress);
-    }, [user, score, level, xp, xpToNextLevel]);
+    }, [user, score, level, xp, xpToNextLevel, lives, nextLifeAt]);
 
     useEffect(() => {
-        if (gameState === 'ended') {
+        if (gameState === 'ended' || gameState === 'settings' || gameState === 'no-lives') {
             saveProgress();
         }
     }, [gameState, saveProgress]);
@@ -106,7 +137,11 @@ export default function SpotFakeNewsPage() {
     }, []);
 
     const startGame = useCallback(() => {
-        // Score is preserved
+        if (lives <= 0) {
+            setGameState('no-lives');
+            return;
+        }
+
         setAnsweredCount(0);
         setCorrectCount(0);
         setHeadline(null);
@@ -135,7 +170,7 @@ export default function SpotFakeNewsPage() {
         const shuffled = filtered.sort(() => 0.5 - Math.random());
         setAvailableHeadlines(shuffled);
         setGameState('playing');
-    }, [level, country, toast]);
+    }, [level, country, toast, lives]);
 
     useEffect(() => {
        if (gameState === 'playing' && availableHeadlines.length > 0 && !headline) {
@@ -168,8 +203,16 @@ export default function SpotFakeNewsPage() {
                 setXp(newXp);
             }
         } else {
-            toast({ title: "Incorrect!", description: "-10 points", variant: 'destructive' });
+            toast({ title: "Incorrect!", description: "-10 points, -1 life", variant: 'destructive' });
             setScore(prev => prev - 10);
+            const newLives = lives - 1;
+            setLives(newLives);
+            if (newLives < MAX_LIVES && !nextLifeAt) {
+                setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
+            }
+            if (newLives <= 0) {
+                setGameState('no-lives');
+            }
         }
     };
 
@@ -191,6 +234,8 @@ export default function SpotFakeNewsPage() {
         setXp(progress.xp);
         setXpToNextLevel(progress.xpToNextLevel);
         setScore(progress.score);
+        setLives(progress.lives);
+        setNextLifeAt(progress.nextLifeAt);
         if(user) {
             await updateGameProgress(user.uid, 'spotFakeNews', progress);
         }
@@ -203,6 +248,32 @@ export default function SpotFakeNewsPage() {
                 <Loader2 className="h-16 w-16 animate-spin text-primary"/>
             </div>
         );
+    }
+
+    if (gameState === 'no-lives') {
+        return (
+            <div className="flex justify-center items-center py-8">
+                <Card className="w-full max-w-md text-center p-8 border-destructive/50 glow-shadow">
+                    <CardHeader>
+                        <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
+                           <Heart className="w-10 h-10 text-destructive fill-destructive"/>
+                           Out of Lives!
+                        </CardTitle>
+                        <CardDescription className="text-lg">
+                           You've run out of lives. A new life will be ready in:
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-4">
+                        <div className="text-5xl font-bold font-mono text-primary">
+                            {countdown}
+                        </div>
+                        <Button size="lg" variant="outline" onClick={() => setGameState('settings')}>
+                           Back to Game Info
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        )
     }
 
     if (gameState === 'settings') {
@@ -221,7 +292,12 @@ export default function SpotFakeNewsPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-4">
-                        <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame}>
+                         <div className="flex justify-center items-center gap-2 text-2xl font-bold">
+                            {Array.from({ length: MAX_LIVES }).map((_, i) => (
+                                <Heart key={i} className={cn("w-8 h-8", i < lives ? "text-red-500 fill-red-500" : "text-muted-foreground")} />
+                            ))}
+                        </div>
+                        <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame} disabled={lives <= 0}>
                            <Zap className="mr-2"/> Start Game
                         </Button>
                          <Button size="sm" variant="outline" onClick={resetProgress}>
@@ -281,11 +357,18 @@ export default function SpotFakeNewsPage() {
                            <Newspaper className="text-primary"/>
                            Spot the Fake News
                         </div>
-                         <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
+                        <div className="flex items-center gap-2">
+                             {Array.from({ length: MAX_LIVES }).map((_, i) => (
+                                <Heart key={i} className={cn("w-6 h-6", i < lives ? "text-red-500 fill-red-500" : "text-muted-foreground")} />
+                            ))}
+                        </div>
                     </CardTitle>
-                    <CardDescription className="flex justify-between">
-                        <span>Score: <span className="font-bold text-primary">{score}</span></span>
-                        <span>Level: <span className="font-bold text-primary">{level}</span></span>
+                    <CardDescription className="flex justify-between items-center">
+                        <div>
+                            <span>Score: <span className="font-bold text-primary">{score}</span></span>
+                            <span className="ml-4">Level: <span className="font-bold text-primary">{level}</span></span>
+                        </div>
+                         <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -334,8 +417,8 @@ export default function SpotFakeNewsPage() {
                                             <Lightbulb className="w-5 h-5 mt-1 text-yellow-400 shrink-0"/>
                                             <p className="text-muted-foreground">{headline.explanation}</p>
                                         </div>
-                                        <Button onClick={nextHeadline} className="w-full">
-                                            Next Headline
+                                        <Button onClick={nextHeadline} className="w-full" disabled={lives <= 0 && !isCorrect}>
+                                            { lives > 0 || isCorrect ? 'Next Headline' : 'Out of Lives'}
                                         </Button>
                                     </CardContent>
                                 </Card>
@@ -347,3 +430,4 @@ export default function SpotFakeNewsPage() {
         </div>
     );
 }
+

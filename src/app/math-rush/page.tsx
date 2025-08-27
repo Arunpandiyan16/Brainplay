@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Sparkles, Zap, Calculator, Plus, Minus, X as MultiplyIcon, Divide, RotateCcw, Brain, Loader2, Check, X as WrongIcon } from 'lucide-react';
+import { Trophy, Sparkles, Zap, Calculator, Plus, Minus, X as MultiplyIcon, Divide, RotateCcw, Brain, Loader2, Check, X as WrongIcon, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { problemBank, MathProblem } from '@/lib/math-rush-data';
@@ -16,8 +16,10 @@ import { useAuth } from '@/hooks/use-auth';
 import { getUserProfile, updateGameProgress, GameProgress, defaultGameProgress } from '@/lib/firebase-service';
 
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 25;
+const MAX_LIVES = 3;
+const LIFE_REGEN_MINUTES = 5;
 
-type GameState = 'settings' | 'playing' | 'ended';
+type GameState = 'settings' | 'playing' | 'ended' | 'no-lives';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
 type Operation = 'Addition' | 'Subtraction' | 'Multiplication' | 'Division' | 'Mixed';
 
@@ -49,6 +51,9 @@ export default function MathRushPage() {
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
+    const [lives, setLives] = useState(MAX_LIVES);
+    const [nextLifeAt, setNextLifeAt] = useState<number | null>(null);
+    const [countdown, setCountdown] = useState('');
 
     const { toast } = useToast();
     const { user } = useAuth();
@@ -59,23 +64,28 @@ export default function MathRushPage() {
             setXp(0);
             setXpToNextLevel(getXpToNextLevel(1));
             setScore(0);
+            setLives(MAX_LIVES);
             setIsLoading(false);
             return;
         }
         setIsLoading(true);
         const profile = await getUserProfile(user.uid);
         if (profile && profile.mathRush) {
-            const { level, xp, xpToNextLevel, score } = profile.mathRush;
+            const { level, xp, xpToNextLevel, score, lives, nextLifeAt } = profile.mathRush;
             setLevel(level);
             setXp(xp);
             setXpToNextLevel(xpToNextLevel);
             setScore(score);
+            setLives(lives ?? MAX_LIVES);
+            setNextLifeAt(nextLifeAt ?? null);
         } else {
             const progress = defaultGameProgress();
             setLevel(progress.level);
             setXp(progress.xp);
             setXpToNextLevel(progress.xpToNextLevel);
             setScore(progress.score);
+            setLives(progress.lives);
+            setNextLifeAt(progress.nextLifeAt);
         }
         setIsLoading(false);
     }, [user]);
@@ -84,14 +94,35 @@ export default function MathRushPage() {
         loadProgress();
     }, [loadProgress]);
 
+     useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (gameState === 'no-lives' && nextLifeAt) {
+            interval = setInterval(() => {
+                const now = Date.now();
+                const diff = nextLifeAt - now;
+                if (diff <= 0) {
+                    setLives(prev => prev + 1);
+                    setNextLifeAt(null);
+                    setGameState('settings');
+                    clearInterval(interval);
+                } else {
+                    const minutes = Math.floor((diff / 1000) / 60);
+                    const seconds = Math.floor((diff / 1000) % 60);
+                    setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+                }
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [gameState, nextLifeAt]);
+
     const saveProgress = useCallback(async () => {
         if (!user) return;
-        const progress: GameProgress = { score, level, xp, xpToNextLevel };
+        const progress: GameProgress = { score, level, xp, xpToNextLevel, lives, nextLifeAt };
         await updateGameProgress(user.uid, 'mathRush', progress);
-    }, [user, score, level, xp, xpToNextLevel]);
+    }, [user, score, level, xp, xpToNextLevel, lives, nextLifeAt]);
     
     useEffect(() => {
-        if (gameState === 'ended') {
+        if (gameState === 'ended' || gameState === 'settings' || gameState === 'no-lives') {
             saveProgress();
         }
     }, [gameState, saveProgress]);
@@ -201,12 +232,15 @@ export default function MathRushPage() {
     }, [difficulty, operation, level]);
 
     const startGame = useCallback(() => {
-        // Score is preserved
+        if (lives <= 0) {
+            setGameState('no-lives');
+            return;
+        }
         setSolvedCount(0);
         setProblem(null);
         setGameState('playing');
         setIsLoading(true);
-    }, []);
+    }, [lives]);
     
     useEffect(() => {
         if(gameState === 'playing' && !problem) {
@@ -244,6 +278,14 @@ export default function MathRushPage() {
         } else {
             toast({ title: "Incorrect!", description: `-5 points. The correct answer was ${problem.choices[problem.answerIndex]}.`, variant: 'destructive' });
             setScore(prev => prev - 5);
+            const newLives = lives - 1;
+            setLives(newLives);
+            if (newLives < MAX_LIVES && !nextLifeAt) {
+                setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
+            }
+            if (newLives <= 0) {
+                setGameState('no-lives');
+            }
         }
     };
     
@@ -253,6 +295,8 @@ export default function MathRushPage() {
         setXp(progress.xp);
         setXpToNextLevel(progress.xpToNextLevel);
         setScore(progress.score);
+        setLives(progress.lives);
+        setNextLifeAt(progress.nextLifeAt);
         if (user) {
             await updateGameProgress(user.uid, 'mathRush', progress);
         }
@@ -291,6 +335,32 @@ export default function MathRushPage() {
             </div>
         );
     }
+    
+    if (gameState === 'no-lives') {
+        return (
+            <div className="flex justify-center items-center py-8">
+                <Card className="w-full max-w-md text-center p-8 border-destructive/50 glow-shadow">
+                    <CardHeader>
+                        <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
+                           <Heart className="w-10 h-10 text-destructive fill-destructive"/>
+                           Out of Lives!
+                        </CardTitle>
+                        <CardDescription className="text-lg">
+                           You've run out of lives. A new life will be ready in:
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-4">
+                        <div className="text-5xl font-bold font-mono text-primary">
+                            {countdown}
+                        </div>
+                        <Button size="lg" variant="outline" onClick={() => setGameState('settings')}>
+                           Back to Game Info
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
 
     if (gameState === 'settings') {
         return (
@@ -307,6 +377,11 @@ export default function MathRushPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                        <div className="flex justify-center items-center gap-2 text-2xl font-bold">
+                            {Array.from({ length: MAX_LIVES }).map((_, i) => (
+                                <Heart key={i} className={cn("w-8 h-8", i < lives ? "text-red-500 fill-red-500" : "text-muted-foreground")} />
+                            ))}
+                        </div>
                         <div className="space-y-2 text-left">
                             <label className="text-sm font-medium">Arithmetic Operation</label>
                             <Select onValueChange={(v: Operation) => setOperation(v)} defaultValue={operation}>
@@ -335,7 +410,7 @@ export default function MathRushPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame}>
+                        <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame} disabled={lives <= 0}>
                            <Zap className="mr-2"/> Start Game
                         </Button>
                         <Button size="sm" variant="outline" onClick={resetProgress}>
@@ -400,14 +475,18 @@ export default function MathRushPage() {
                            <div className="text-primary">{getIconForOperation()}</div>
                            Math Rush
                         </div>
-                        <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
+                         <div className="flex items-center gap-2">
+                             {Array.from({ length: MAX_LIVES }).map((_, i) => (
+                                <Heart key={i} className={cn("w-6 h-6", i < lives ? "text-red-500 fill-red-500" : "text-muted-foreground")} />
+                            ))}
+                        </div>
                     </CardTitle>
                      <CardDescription className="flex justify-between items-center">
                         <div>
                             <span>Score: <span className="font-bold text-primary">{score}</span></span>
                             <span className="ml-4">Level: <span className="font-bold text-primary">{level}</span></span>
                         </div>
-                        {problem?.type !== 'Arithmetic' && <Badge variant="secondary">{problem?.type}</Badge>}
+                         <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -461,8 +540,8 @@ export default function MathRushPage() {
                                    <p className="font-semibold text-lg">{isCorrect ? 'Correct!' : 'Incorrect!'}</p>
                                    </div>
                                    {!isCorrect && <p className="text-muted-foreground">The correct answer was: {problem.choices[problem.answerIndex]}</p>}
-                                   <Button onClick={generateProblem} className="w-full">
-                                       Next Problem
+                                   <Button onClick={generateProblem} className="w-full" disabled={lives <=0 && !isCorrect}>
+                                       { lives > 0 || isCorrect ? 'Next Problem' : 'Out of Lives'}
                                    </Button>
                                 </CardContent>
                             </Card>

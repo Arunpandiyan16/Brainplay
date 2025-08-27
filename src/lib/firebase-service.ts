@@ -8,8 +8,8 @@ export interface GameProgress {
     level: number;
     xp: number;
     xpToNextLevel: number;
-    lives: number;
-    nextLifeAt: number | null;
+    lives?: number;
+    nextLifeAt?: number | null;
 }
 
 export interface UserProfile {
@@ -28,7 +28,7 @@ export interface UserProfile {
     };
 }
 
-export const defaultGameProgress = (): GameProgress => ({
+export const defaultGameProgress = (): Required<GameProgress> => ({
     score: 0,
     level: 1,
     xp: 0,
@@ -106,14 +106,18 @@ export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfi
             
             const newTotalScore = (userProfile.totalScore || 0) + scoreDifference;
             
+            // Ensure lives and nextLifeAt are not undefined
+            const lives = progress.lives === undefined ? (currentGameProgress?.lives ?? 3) : progress.lives;
+            const nextLifeAt = progress.nextLifeAt === undefined ? (currentGameProgress?.nextLifeAt ?? null) : progress.nextLifeAt;
+            
             const updates: { [key: string]: any } = {
                 totalScore: newTotalScore,
                 [`${game}.score`]: progress.score,
                 [`${game}.level`]: progress.level,
                 [`${game}.xp`]: progress.xp,
                 [`${game}.xpToNextLevel`]: progress.xpToNextLevel,
-                [`${game}.lives`]: progress.lives,
-                [`${game}.nextLifeAt`]: progress.nextLifeAt,
+                [`${game}.lives`]: lives,
+                [`${game}.nextLifeAt`]: nextLifeAt,
             };
             
             transaction.update(userRef, updates);
@@ -134,3 +138,4 @@ export const getLeaderboard = async (limitCount = 10): Promise<UserProfile[]> =>
     });
     return leaderboard;
 };
+

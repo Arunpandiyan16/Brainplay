@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Zap, Brain, Lightbulb, Trophy, Sparkles, Loader2, Award, RotateCcw } from 'lucide-react';
+import { Zap, Brain, Lightbulb, Trophy, Sparkles, Loader2, Award, RotateCcw, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { wordHunterPuzzles, WordPuzzle } from '@/lib/word-hunter-data';
@@ -16,8 +16,10 @@ import { getUserProfile, updateGameProgress, GameProgress, defaultGameProgress }
 
 
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 25;
+const MAX_LIVES = 3;
+const LIFE_REGEN_MINUTES = 5;
 
-type GameState = 'settings' | 'playing' | 'ended';
+type GameState = 'settings' | 'playing' | 'ended' | 'no-lives';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
 type Language = 'English' | 'Tamil';
 
@@ -46,6 +48,9 @@ export default function WordHunterPage() {
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
+    const [lives, setLives] = useState(MAX_LIVES);
+    const [nextLifeAt, setNextLifeAt] = useState<number | null>(null);
+    const [countdown, setCountdown] = useState('');
     
     const [isWrong, setIsWrong] = useState(false);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -60,23 +65,28 @@ export default function WordHunterPage() {
             setXp(0);
             setXpToNextLevel(getXpToNextLevel(1));
             setScore(0);
+            setLives(MAX_LIVES);
             setIsLoading(false);
             return;
         }
         setIsLoading(true);
         const profile = await getUserProfile(user.uid);
         if (profile && profile.wordHunter) {
-            const { level, xp, xpToNextLevel, score } = profile.wordHunter;
+            const { level, xp, xpToNextLevel, score, lives, nextLifeAt } = profile.wordHunter;
             setLevel(level);
             setXp(xp);
             setXpToNextLevel(xpToNextLevel);
             setScore(score);
+            setLives(lives ?? MAX_LIVES);
+            setNextLifeAt(nextLifeAt ?? null);
         } else {
             const progress = defaultGameProgress();
             setLevel(progress.level);
             setXp(progress.xp);
             setXpToNextLevel(progress.xpToNextLevel);
             setScore(progress.score);
+            setLives(progress.lives);
+            setNextLifeAt(progress.nextLifeAt);
         }
         setIsLoading(false);
     }, [user]);
@@ -84,15 +94,36 @@ export default function WordHunterPage() {
     useEffect(() => {
         loadProgress();
     }, [loadProgress]);
+    
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (gameState === 'no-lives' && nextLifeAt) {
+            interval = setInterval(() => {
+                const now = Date.now();
+                const diff = nextLifeAt - now;
+                if (diff <= 0) {
+                    setLives(prev => prev + 1);
+                    setNextLifeAt(null);
+                    setGameState('settings');
+                    clearInterval(interval);
+                } else {
+                    const minutes = Math.floor((diff / 1000) / 60);
+                    const seconds = Math.floor((diff / 1000) % 60);
+                    setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+                }
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [gameState, nextLifeAt]);
 
     const saveProgress = useCallback(async () => {
         if (!user) return;
-        const progress: GameProgress = { score, level, xp, xpToNextLevel };
+        const progress: GameProgress = { score, level, xp, xpToNextLevel, lives, nextLifeAt };
         await updateGameProgress(user.uid, 'wordHunter', progress);
-    }, [user, score, level, xp, xpToNextLevel]);
+    }, [user, score, level, xp, xpToNextLevel, lives, nextLifeAt]);
     
     useEffect(() => {
-        if (gameState === 'ended') {
+        if (gameState === 'ended' || gameState === 'settings' || gameState === 'no-lives') {
             saveProgress();
         }
     }, [gameState, saveProgress]);
@@ -134,6 +165,11 @@ export default function WordHunterPage() {
     }, [setupNewPuzzle]);
 
     const startGame = useCallback(() => {
+        if (lives <= 0) {
+            setGameState('no-lives');
+            return;
+        }
+
         const difficulty = getDifficulty();
         const puzzlesForLevel = wordHunterPuzzles.filter(p =>
             p.language === language && p.difficulty === difficulty
@@ -154,7 +190,7 @@ export default function WordHunterPage() {
         setGameState('playing');
         setIsLoading(true);
         fetchPuzzle();
-    }, [language, getDifficulty, toast, fetchPuzzle]);
+    }, [language, getDifficulty, toast, fetchPuzzle, lives]);
 
     const handleLetterSelect = (letter: Letter) => {
         if (!puzzle || answerSlots.length >= puzzle.word.length || isCorrect !== null) return;
@@ -203,7 +239,17 @@ export default function WordHunterPage() {
             } else {
                 setIsCorrect(false);
                 setIsWrong(true);
-                toast({ title: "Not quite!", description: "Try again.", variant: 'destructive' });
+                toast({ title: "Not quite!", description: "Try again. -1 life.", variant: 'destructive' });
+                
+                const newLives = lives - 1;
+                setLives(newLives);
+                if (newLives < MAX_LIVES && !nextLifeAt) {
+                    setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
+                }
+                if (newLives <= 0) {
+                    setGameState('no-lives');
+                }
+
                 setTimeout(() => {
                     setAvailableLetters(prev => [...prev, ...answerSlots].sort((a, b) => a.id - b.id));
                     setAnswerSlots([]);
@@ -212,7 +258,7 @@ export default function WordHunterPage() {
                 }, 1000);
             }
         }
-    }, [puzzle, answerSlots, isCorrect, getDifficulty, toast, xp, xpToNextLevel, level]);
+    }, [puzzle, answerSlots, isCorrect, getDifficulty, toast, xp, xpToNextLevel, level, lives, nextLifeAt]);
     
     useEffect(() => {
         checkAnswer();
@@ -225,6 +271,8 @@ export default function WordHunterPage() {
         setXp(progress.xp);
         setXpToNextLevel(progress.xpToNextLevel);
         setScore(progress.score);
+        setLives(progress.lives);
+        setNextLifeAt(progress.nextLifeAt);
         if (user) {
             await updateGameProgress(user.uid, 'wordHunter', progress);
         }
@@ -237,6 +285,32 @@ export default function WordHunterPage() {
                 <Loader2 className="h-16 w-16 animate-spin text-primary"/>
             </div>
         );
+    }
+    
+    if (gameState === 'no-lives') {
+        return (
+            <div className="flex justify-center items-center py-8">
+                <Card className="w-full max-w-md text-center p-8 border-destructive/50 glow-shadow">
+                    <CardHeader>
+                        <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
+                           <Heart className="w-10 h-10 text-destructive fill-destructive"/>
+                           Out of Lives!
+                        </CardTitle>
+                        <CardDescription className="text-lg">
+                           You've run out of lives. A new life will be ready in:
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-4">
+                        <div className="text-5xl font-bold font-mono text-primary">
+                            {countdown}
+                        </div>
+                        <Button size="lg" variant="outline" onClick={() => setGameState('settings')}>
+                           Back to Game Info
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        )
     }
 
     if (gameState === 'settings') {
@@ -254,6 +328,11 @@ export default function WordHunterPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                         <div className="flex justify-center items-center gap-2 text-2xl font-bold">
+                            {Array.from({ length: MAX_LIVES }).map((_, i) => (
+                                <Heart key={i} className={cn("w-8 h-8", i < lives ? "text-red-500 fill-red-500" : "text-muted-foreground")} />
+                            ))}
+                        </div>
                         <div className="space-y-2 text-left">
                             <label className="text-sm font-medium">Language</label>
                             <Select onValueChange={(v: Language) => setLanguage(v)} defaultValue={language}>
@@ -266,7 +345,7 @@ export default function WordHunterPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame}>
+                        <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame} disabled={lives <= 0}>
                            <Zap className="mr-2"/> Start Game
                         </Button>
                          <Button size="sm" variant="outline" onClick={resetProgress}>
@@ -361,23 +440,21 @@ export default function WordHunterPage() {
                            <Brain className="text-primary"/>
                            Word Hunter
                         </div>
-                        <div className="flex items-center gap-4">
-                             <div className="flex items-center gap-2 text-xl font-mono px-3 py-1 rounded-md bg-secondary">
-                                <Award />
-                                <span>{score}</span>
-                            </div>
-                            <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
+                        <div className="flex items-center gap-2">
+                             {Array.from({ length: MAX_LIVES }).map((_, i) => (
+                                <Heart key={i} className={cn("w-6 h-6", i < lives ? "text-red-500 fill-red-500" : "text-muted-foreground")} />
+                            ))}
                         </div>
                     </CardTitle>
                      <CardDescription className="flex justify-between">
-                        <span>{language} - Words Solved: {solvedCount}</span>
+                        <span>Score: <span className="font-bold text-primary">{score}</span> | Level: <span className="font-bold text-primary">{level}</span></span>
                         <span className="font-semibold">{difficulty}</span>
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8">
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm font-medium text-muted-foreground">
-                            <span>Level {level}</span>
+                            <span>Level {level} XP</span>
                             <span>{xp} / {xpToNextLevel} XP</span>
                         </div>
                         <Progress value={(xp / xpToNextLevel) * 100} className="w-full h-2" />
@@ -419,3 +496,4 @@ export default function WordHunterPage() {
         </div>
     );
 }
+

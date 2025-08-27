@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward, RotateCcw, Award } from 'lucide-react';
+import { X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward, RotateCcw, Award, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { useCountry } from '@/hooks/use-country';
@@ -13,12 +13,15 @@ import { useAuth } from '@/hooks/use-auth';
 import { quizQuestions as staticQuestions, QuizQuestion } from '@/lib/quiz-data';
 import Link from 'next/link';
 import { getUserProfile, updateGameProgress, GameProgress, defaultGameProgress } from '@/lib/firebase-service';
+import { cn } from '@/lib/utils';
 
 const SKIP_LIMIT = 2;
 const XP_PER_CORRECT = 10;
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 20;
+const MAX_LIVES = 3;
+const LIFE_REGEN_MINUTES = 5;
 
-type GameState = 'start' | 'playing' | 'ended';
+type GameState = 'start' | 'playing' | 'ended' | 'no-lives';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
 
@@ -36,6 +39,9 @@ export default function QuizClashPage() {
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
+    const [lives, setLives] = useState(MAX_LIVES);
+    const [nextLifeAt, setNextLifeAt] = useState<number | null>(null);
+    const [countdown, setCountdown] = useState('');
 
     const [availableQuestions, setAvailableQuestions] = useState<QuizQuestion[]>([]);
 
@@ -49,23 +55,28 @@ export default function QuizClashPage() {
             setLevel(1);
             setXp(0);
             setXpToNextLevel(getXpToNextLevel(1));
+            setLives(MAX_LIVES);
             setIsLoading(false);
             return;
         };
         setIsLoading(true);
         const profile = await getUserProfile(user.uid);
         if (profile && profile.quizClash) {
-            const { level, xp, xpToNextLevel, score } = profile.quizClash;
+            const { level, xp, xpToNextLevel, score, lives, nextLifeAt } = profile.quizClash;
             setLevel(level);
             setXp(xp);
             setXpToNextLevel(xpToNextLevel);
             setScore(score);
+            setLives(lives ?? MAX_LIVES);
+            setNextLifeAt(nextLifeAt ?? null);
         } else {
             const progress = defaultGameProgress();
             setLevel(progress.level);
             setXp(progress.xp);
             setXpToNextLevel(progress.xpToNextLevel);
             setScore(progress.score);
+            setLives(progress.lives);
+            setNextLifeAt(progress.nextLifeAt);
         }
         setIsLoading(false);
     }, [user]);
@@ -74,14 +85,39 @@ export default function QuizClashPage() {
         loadProgress();
     }, [loadProgress]);
 
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (gameState === 'no-lives' && nextLifeAt) {
+            interval = setInterval(() => {
+                const now = Date.now();
+                const diff = nextLifeAt - now;
+                if (diff <= 0) {
+                    setLives(prev => Math.min(MAX_LIVES, prev + 1));
+                    const newNextLifeAt = Date.now() + LIFE_REGEN_MINUTES * 60 * 1000;
+                    setNextLifeAt(newNextLifeAt);
+                    if (lives + 1 >= MAX_LIVES) {
+                        setNextLifeAt(null);
+                        setGameState('start');
+                        clearInterval(interval);
+                    }
+                } else {
+                    const minutes = Math.floor((diff / 1000) / 60);
+                    const seconds = Math.floor((diff / 1000) % 60);
+                    setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+                }
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [gameState, nextLifeAt, lives]);
+
     const saveProgress = useCallback(async () => {
         if (!user) return;
-        const progress: GameProgress = { score, level, xp, xpToNextLevel };
+        const progress: GameProgress = { score, level, xp, xpToNextLevel, lives, nextLifeAt };
         await updateGameProgress(user.uid, 'quizClash', progress);
-    }, [user, score, level, xp, xpToNextLevel]);
+    }, [user, score, level, xp, xpToNextLevel, lives, nextLifeAt]);
     
     useEffect(() => {
-        if (gameState === 'ended') {
+        if (gameState === 'ended' || gameState === 'start') {
             saveProgress();
         }
     }, [gameState, saveProgress]);
@@ -107,8 +143,12 @@ export default function QuizClashPage() {
     }, []);
 
     const startGame = useCallback(() => {
+        if (lives <= 0) {
+            setGameState('no-lives');
+            return;
+        }
+
         setQuestion(null);
-        // Score is preserved from Firestore now
         setConsecutiveCorrect(0);
         setSkipsUsed(0);
         setSelectedAnswer(null);
@@ -140,7 +180,7 @@ export default function QuizClashPage() {
         
         setAvailableQuestions(shuffled);
         setGameState('playing');
-    }, [level, country, toast]);
+    }, [level, country, toast, lives]);
 
 
     useEffect(() => {
@@ -187,6 +227,14 @@ export default function QuizClashPage() {
         } else {
             setScore(prev => Math.max(0, prev - 5));
             setConsecutiveCorrect(0);
+            const newLives = lives - 1;
+            setLives(newLives);
+            if (newLives < MAX_LIVES && !nextLifeAt) {
+                setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
+            }
+            if (newLives <= 0) {
+                setGameState('no-lives');
+            }
         }
     };
 
@@ -216,6 +264,8 @@ export default function QuizClashPage() {
         setXp(progress.xp);
         setXpToNextLevel(progress.xpToNextLevel);
         setScore(progress.score);
+        setLives(progress.lives);
+        setNextLifeAt(progress.nextLifeAt);
         if (user) {
             await updateGameProgress(user.uid, 'quizClash', progress);
         }
@@ -259,6 +309,31 @@ export default function QuizClashPage() {
         );
     }
 
+    if (gameState === 'no-lives') {
+        return (
+            <div className="flex justify-center items-center py-8">
+                <Card className="w-full max-w-md text-center p-8 border-destructive/50 glow-shadow">
+                    <CardHeader>
+                        <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
+                           <Heart className="w-10 h-10 text-destructive fill-destructive"/>
+                           Out of Lives!
+                        </CardTitle>
+                        <CardDescription className="text-lg">
+                           You've run out of lives. A new life will be ready in:
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-4">
+                        <div className="text-5xl font-bold font-mono text-primary">
+                            {countdown}
+                        </div>
+                        <Button size="lg" variant="outline" onClick={() => setGameState('start')}>
+                           Back to Game Info
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
 
     if (gameState === 'start') {
         return (
@@ -275,7 +350,12 @@ export default function QuizClashPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-4">
-                        <Button size="lg" className="text-xl w-full glow-shadow" onClick={startGame}>
+                        <div className="flex justify-center items-center gap-2 text-2xl font-bold">
+                            {Array.from({ length: MAX_LIVES }).map((_, i) => (
+                                <Heart key={i} className={cn("w-8 h-8", i < lives ? "text-red-500 fill-red-500" : "text-muted-foreground")} />
+                            ))}
+                        </div>
+                        <Button size="lg" className="text-xl w-full glow-shadow" onClick={startGame} disabled={lives <= 0}>
                            <Zap className="mr-2"/> Start Game
                         </Button>
                         <Button size="sm" variant="outline" onClick={resetProgress}>
@@ -353,7 +433,11 @@ export default function QuizClashPage() {
                            <BrainCircuit className="text-primary"/>
                            Quiz Clash
                         </div>
-                         <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
+                        <div className="flex items-center gap-2">
+                             {Array.from({ length: MAX_LIVES }).map((_, i) => (
+                                <Heart key={i} className={cn("w-6 h-6", i < lives ? "text-red-500 fill-red-500" : "text-muted-foreground")} />
+                            ))}
+                        </div>
                     </CardTitle>
                     <CardDescription className="flex justify-between items-center">
                         <span>Question {questionNumber}</span>
@@ -398,14 +482,17 @@ export default function QuizClashPage() {
                     </div>
 
                      {selectedAnswer === null && (
-                       <Button
-                            variant="outline"
-                            onClick={handleSkip}
-                            disabled={skipsUsed >= SKIP_LIMIT || selectedAnswer !== null}
-                        >
-                            <SkipForward className="mr-2" />
-                            Skip ({SKIP_LIMIT - skipsUsed} left)
-                        </Button>
+                       <div className="flex items-center justify-between">
+                            <Button
+                                variant="outline"
+                                onClick={handleSkip}
+                                disabled={skipsUsed >= SKIP_LIMIT || selectedAnswer !== null}
+                            >
+                                <SkipForward className="mr-2" />
+                                Skip ({SKIP_LIMIT - skipsUsed} left)
+                            </Button>
+                             <Button variant="destructive" onClick={() => setGameState('ended')}>End Game</Button>
+                       </div>
                     )}
 
 
@@ -417,8 +504,8 @@ export default function QuizClashPage() {
                                <p className="font-semibold text-lg">{isCorrect ? 'Correct!' : 'Incorrect!'}</p>
                                </div>
                                <p className="text-muted-foreground mt-2">{question.explanation}</p>
-                               <Button onClick={fetchQuestion} className="w-full">
-                                   Next Question
+                               <Button onClick={fetchQuestion} className="w-full" disabled={lives <=0 && !isCorrect}>
+                                   { lives > 0 || isCorrect ? 'Next Question' : 'Out of Lives'}
                                </Button>
                             </CardContent>
                         </Card>
@@ -434,3 +521,4 @@ export default function QuizClashPage() {
         </div>
     );
 }
+
