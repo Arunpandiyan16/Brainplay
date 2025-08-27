@@ -44,15 +44,14 @@ const EMOJI_PAIRS: { [key: string]: string } = {
 };
 
 const getGridConfigForLevel = (level: number): { pairs: number; cols: number } => {
-    if (level < 3) return { pairs: 3, cols: 3 }; // 2x3 grid
-    if (level < 5) return { pairs: 4, cols: 4 }; // 2x4 grid
-    if (level < 8) return { pairs: 6, cols: 4 }; // 3x4 grid
-    if (level < 12) return { pairs: 8, cols: 4 }; // 4x4 grid
-    if (level < 16) return { pairs: 10, cols: 5 }; // 4x5 grid
-    if (level < 20) return { pairs: 12, cols: 6 }; // 4x6 grid
-    if (level < 25) return { pairs: 15, cols: 6 }; // 5x6 grid
-    if (level < 30) return { pairs: 18, cols: 6 }; // 6x6 grid
-    if (level < 40) return { pairs: 20, cols: 5 }; // 4x5 x 2 pages? no. let's do bigger grid. 8x5
+    if (level < 3) return { pairs: 3, cols: 3 }; // 2x3
+    if (level < 5) return { pairs: 4, cols: 4 }; // 2x4
+    if (level < 8) return { pairs: 6, cols: 4 }; // 3x4
+    if (level < 12) return { pairs: 8, cols: 4 }; // 4x4
+    if (level < 16) return { pairs: 10, cols: 5 }; // 4x5
+    if (level < 20) return { pairs: 12, cols: 6 }; // 4x6
+    if (level < 25) return { pairs: 15, cols: 6 }; // 5x6
+    if (level < 30) return { pairs: 18, cols: 6 }; // 6x6
     if (level < 40) return { pairs: 20, cols: 8 }; // 5x8
     return { pairs: 21, cols: 7 }; // 6x7, max
 };
@@ -131,21 +130,35 @@ export default function MemoryFlipPage() {
 
 
   const setupGame = useCallback(() => {
+    setIsLoading(true);
     const { pairs } = getGridConfigForLevel(level);
     const availableIcons = Object.keys(EMOJI_PAIRS);
     const selectedIcons = availableIcons.sort(() => 0.5 - Math.random()).slice(0, pairs);
+    
+    if (selectedIcons.length < pairs) {
+        toast({
+            title: "Error",
+            description: "Not enough unique icons to start the game.",
+            variant: "destructive"
+        });
+        setGameState("settings");
+        setIsLoading(false);
+        return;
+    }
+
     const gameCards = [...selectedIcons, ...selectedIcons]
       .sort(() => 0.5 - Math.random())
       .map((type, id) => ({ id, type, isFlipped: false, isMatched: false }));
     
+    setFlippedIndices([]);
     setCards(gameCards);
+    setIsLoading(false);
 
-  }, [level]);
+  }, [level, toast]);
 
   const startGame = useCallback(() => {
     setGameState('playing');
     setMoves(0);
-    setFlippedIndices([]);
     setTrivia(null);
     setupGame();
   }, [setupGame]);
@@ -164,9 +177,10 @@ export default function MemoryFlipPage() {
 
   useEffect(() => {
     if (cards.length > 0 && cards.every(c => c.isMatched)) {
-       setTimeout(() => setGameState('ended'), 1000);
+       toast({ title: "Grid Cleared!", description: "Setting up the next level...", className: "bg-primary text-primary-foreground" });
+       setTimeout(() => setupGame(), 1200);
     }
-  }, [cards]);
+  }, [cards, setupGame, toast]);
   
 
   const fetchTrivia = (topic: string) => {
@@ -205,7 +219,7 @@ export default function MemoryFlipPage() {
             setLevel(nextLevel);
             setXp(newXp - xpToNextLevel);
             setXpToNextLevel(getXpToNextLevel(nextLevel));
-            toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! The grid size has increased.`, className: 'bg-primary text-primary-foreground' });
+            toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! The next grid will be larger.`, className: 'bg-primary text-primary-foreground' });
         } else {
             setXp(newXp);
         }
@@ -301,7 +315,7 @@ export default function MemoryFlipPage() {
                         </div>
                          <div className="flex gap-4">
                             <Button size="lg" className="text-xl w-full" onClick={() => setGameState('settings')}>
-                               <Sparkles className="mr-2"/> Play Again
+                               <Sparkles className="mr-2"/> New Game
                             </Button>
                             <Button size="lg" className="text-xl w-full" variant="outline" asChild>
                                <Link href="/">Back to Home</Link>
@@ -314,6 +328,16 @@ export default function MemoryFlipPage() {
     }
   
   const { cols } = getGridConfigForLevel(level);
+
+  if (isLoading || cards.length === 0) {
+    return (
+        <div className="flex justify-center items-center py-8">
+            <Loader2 className="h-16 w-16 animate-spin text-primary"/>
+            <p className="ml-4 text-lg">Setting up the board...</p>
+        </div>
+    );
+  }
+
 
   return (
     <div className="flex flex-col items-center py-8 gap-8">
@@ -407,3 +431,5 @@ export default function MemoryFlipPage() {
   }
 }
 */
+
+    
