@@ -16,11 +16,11 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://brainplay-x7d62.web.app'),
   title: 'Brainvia - Play. Learn. Compete. | Fun Brain Games',
   description: 'A 5-in-1 hub for fun and knowledge games. Challenge yourself with quizzes, word puzzles, math problems, memory games, and more. Play, learn, and compete on the leaderboards!',
-  keywords: ['brain games', 'quiz', 'word game', 'math game', 'memory game', 'trivia', 'puzzle games', 'online games', 'educational games'],
+  keywords: ['brain games', 'quiz', 'word game', 'math game', 'memory game', 'trivia', 'puzzle games', 'online games', 'educational games', 'cognitive training', 'brain training', 'logic puzzles'],
   manifest: '/manifest.json',
   openGraph: {
     title: 'Brainvia - Play. Learn. Compete.',
-    description: 'The ultimate hub for fun and knowledge games.',
+    description: 'The ultimate hub for fun and knowledge games. Challenge your mind with fun games on Brainvia!',
     url: 'https://brainplay-x7d62.web.app',
     siteName: 'Brainvia',
     images: [
