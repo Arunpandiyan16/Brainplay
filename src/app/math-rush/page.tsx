@@ -12,9 +12,10 @@ import { problemBank, MathProblem } from '@/lib/math-rush-data';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/use-auth';
+import { getUserProfile, updateGameProgress, GameProgress, defaultGameProgress } from '@/lib/firebase-service';
 
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 25;
-const STORAGE_KEY = 'mathRushProgress';
 
 type GameState = 'settings' | 'playing' | 'ended';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
@@ -40,7 +41,7 @@ export default function MathRushPage() {
     const [problem, setProblem] = useState<Problem | null>(null);
     const [score, setScore] = useState(0);
     const [solvedCount, setSolvedCount] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
@@ -50,35 +51,50 @@ export default function MathRushPage() {
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
 
     const { toast } = useToast();
+    const { user } = useAuth();
 
-    // Load progress from localStorage
-    useEffect(() => {
-        try {
-            const savedProgress = localStorage.getItem(STORAGE_KEY);
-            if (savedProgress) {
-                const { savedLevel, savedXp, savedXpToNextLevel, savedScore } = JSON.parse(savedProgress);
-                if (savedLevel && typeof savedLevel === 'number') {
-                    setLevel(savedLevel);
-                    setXp(savedXp || 0);
-                    setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
-                    setScore(savedScore || 0);
-                }
-            }
-        } catch (error) {
-            console.error("Failed to load progress from localStorage", error);
+    const loadProgress = useCallback(async () => {
+        if (!user) {
+            setLevel(1);
+            setXp(0);
+            setXpToNextLevel(getXpToNextLevel(1));
+            setScore(0);
+            setIsLoading(false);
+            return;
         }
-    }, []);
+        setIsLoading(true);
+        const profile = await getUserProfile(user.uid);
+        if (profile && profile.mathRush) {
+            const { level, xp, xpToNextLevel, score } = profile.mathRush;
+            setLevel(level);
+            setXp(xp);
+            setXpToNextLevel(xpToNextLevel);
+            setScore(score);
+        } else {
+            const progress = defaultGameProgress();
+            setLevel(progress.level);
+            setXp(progress.xp);
+            setXpToNextLevel(progress.xpToNextLevel);
+            setScore(progress.score);
+        }
+        setIsLoading(false);
+    }, [user]);
 
-    // Save progress to localStorage
     useEffect(() => {
-        try {
-            const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel, savedScore: score });
-            localStorage.setItem(STORAGE_KEY, progress);
-        } catch (error)
-        {
-            console.error("Failed to save progress to localStorage", error);
+        loadProgress();
+    }, [loadProgress]);
+
+    const saveProgress = useCallback(async () => {
+        if (!user) return;
+        const progress: GameProgress = { score, level, xp, xpToNextLevel };
+        await updateGameProgress(user.uid, 'mathRush', progress);
+    }, [user, score, level, xp, xpToNextLevel]);
+    
+    useEffect(() => {
+        if (gameState === 'ended') {
+            saveProgress();
         }
-    }, [level, xp, xpToNextLevel, score]);
+    }, [gameState, saveProgress]);
     
     const generateChoices = (correctAnswer: number | string): { choices: (string|number)[], answerIndex: number} => {
         let choices: (string | number)[] = [correctAnswer];
@@ -185,7 +201,7 @@ export default function MathRushPage() {
     }, [difficulty, operation, level]);
 
     const startGame = useCallback(() => {
-        setScore(0);
+        // Score is preserved
         setSolvedCount(0);
         setProblem(null);
         setGameState('playing');
@@ -231,12 +247,15 @@ export default function MathRushPage() {
         }
     };
     
-    const resetProgress = () => {
-        setLevel(1);
-        setXp(0);
-        setScore(0);
-        setXpToNextLevel(getXpToNextLevel(1));
-        localStorage.removeItem(STORAGE_KEY);
+    const resetProgress = async () => {
+        const progress = defaultGameProgress();
+        setLevel(progress.level);
+        setXp(progress.xp);
+        setXpToNextLevel(progress.xpToNextLevel);
+        setScore(progress.score);
+        if (user) {
+            await updateGameProgress(user.uid, 'mathRush', progress);
+        }
         toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
     };
 
@@ -265,6 +284,13 @@ export default function MathRushPage() {
         return 'bg-secondary hover:bg-accent text-secondary-foreground';
     };
 
+    if (isLoading && gameState === 'settings') {
+         return (
+            <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-16 w-16 animate-spin text-primary"/>
+            </div>
+        );
+    }
 
     if (gameState === 'settings') {
         return (

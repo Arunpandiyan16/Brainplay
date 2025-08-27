@@ -11,22 +11,23 @@ import { cn } from '@/lib/utils';
 import { useCountry } from '@/hooks/use-country';
 import { fakeNewsData, NewsHeadline } from '@/lib/spot-fake-news-data';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/use-auth';
+import { getUserProfile, updateGameProgress, GameProgress, defaultGameProgress } from '@/lib/firebase-service';
 
 const XP_PER_CORRECT = 15;
 const getXpToNextLevel = (level: number) => 75 + (level - 1) * 25;
-const STORAGE_KEY = 'fakeNewsProgress';
 
 type GameState = 'settings' | 'playing' | 'ended';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
 export default function SpotFakeNewsPage() {
     const [gameState, setGameState] = useState<GameState>('settings');
+    const [isLoading, setIsLoading] = useState(true);
 
     const [headline, setHeadline] = useState<NewsHeadline | null>(null);
     const [selection, setSelection] = useState<'real' | 'fake' | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [score, setScore] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
     const [answeredCount, setAnsweredCount] = useState(0);
     const [correctCount, setCorrectCount] = useState(0);
     const [availableHeadlines, setAvailableHeadlines] = useState<NewsHeadline[]>([]);
@@ -37,41 +38,50 @@ export default function SpotFakeNewsPage() {
 
     const { toast } = useToast();
     const { country } = useCountry();
+    const { user } = useAuth();
+
+    const loadProgress = useCallback(async () => {
+        if (!user) {
+            setLevel(1);
+            setXp(0);
+            setXpToNextLevel(getXpToNextLevel(1));
+            setScore(0);
+            setIsLoading(false);
+            return;
+        }
+        setIsLoading(true);
+        const profile = await getUserProfile(user.uid);
+        if (profile && profile.spotFakeNews) {
+            const { level, xp, xpToNextLevel, score } = profile.spotFakeNews;
+            setLevel(level);
+            setXp(xp);
+            setXpToNextLevel(xpToNextLevel);
+            setScore(score);
+        } else {
+            const progress = defaultGameProgress();
+            setLevel(progress.level);
+            setXp(progress.xp);
+            setXpToNextLevel(progress.xpToNextLevel);
+            setScore(progress.score);
+        }
+        setIsLoading(false);
+    }, [user]);
 
     useEffect(() => {
-        try {
-            const savedProgress = localStorage.getItem(STORAGE_KEY);
-            if (savedProgress) {
-                const { savedLevel, savedXp, savedXpToNextLevel, savedScore, savedAnsweredCount, savedCorrectCount } = JSON.parse(savedProgress);
-                if (savedLevel && typeof savedLevel === 'number') {
-                    setLevel(savedLevel);
-                    setXp(savedXp || 0);
-                    setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
-                    setScore(savedScore || 0);
-                    setAnsweredCount(savedAnsweredCount || 0);
-                    setCorrectCount(savedCorrectCount || 0);
-                }
-            }
-        } catch (error) {
-            console.error("Failed to load progress from localStorage", error);
-        }
-    }, []);
+        loadProgress();
+    }, [loadProgress]);
+
+    const saveProgress = useCallback(async () => {
+        if (!user) return;
+        const progress: GameProgress = { score, level, xp, xpToNextLevel };
+        await updateGameProgress(user.uid, 'spotFakeNews', progress);
+    }, [user, score, level, xp, xpToNextLevel]);
 
     useEffect(() => {
-        try {
-            const progress = JSON.stringify({ 
-                savedLevel: level, 
-                savedXp: xp, 
-                savedXpToNextLevel: xpToNextLevel,
-                savedScore: score,
-                savedAnsweredCount: answeredCount,
-                savedCorrectCount: correctCount
-            });
-            localStorage.setItem(STORAGE_KEY, progress);
-        } catch (error) {
-            console.error("Failed to save progress to localStorage", error);
+        if (gameState === 'ended') {
+            saveProgress();
         }
-    }, [level, xp, xpToNextLevel, score, answeredCount, correctCount]);
+    }, [gameState, saveProgress]);
 
 
     const fetchHeadline = useCallback(() => {
@@ -96,7 +106,7 @@ export default function SpotFakeNewsPage() {
     }, []);
 
     const startGame = useCallback(() => {
-        setScore(0);
+        // Score is preserved
         setAnsweredCount(0);
         setCorrectCount(0);
         setHeadline(null);
@@ -175,16 +185,25 @@ export default function SpotFakeNewsPage() {
         }
     }
 
-    const resetProgress = () => {
-        setLevel(1);
-        setXp(0);
-        setScore(0);
-        setAnsweredCount(0);
-        setCorrectCount(0);
-        setXpToNextLevel(getXpToNextLevel(1));
-        localStorage.removeItem(STORAGE_KEY);
+    const resetProgress = async () => {
+        const progress = defaultGameProgress();
+        setLevel(progress.level);
+        setXp(progress.xp);
+        setXpToNextLevel(progress.xpToNextLevel);
+        setScore(progress.score);
+        if(user) {
+            await updateGameProgress(user.uid, 'spotFakeNews', progress);
+        }
         toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
     };
+
+     if (isLoading && gameState === 'settings') {
+         return (
+            <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-16 w-16 animate-spin text-primary"/>
+            </div>
+        );
+    }
 
     if (gameState === 'settings') {
         return (

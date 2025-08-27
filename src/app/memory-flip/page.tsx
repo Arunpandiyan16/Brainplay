@@ -19,6 +19,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { triviaData } from '@/lib/trivia-data';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/use-auth';
+import { getUserProfile, updateGameProgress, GameProgress, defaultGameProgress } from '@/lib/firebase-service';
 
 
 type GameState = 'settings' | 'playing' | 'ended';
@@ -49,8 +51,8 @@ const GRID_CONFIG = {
 };
 
 const XP_PER_MATCH = 5;
+const SCORE_PER_MATCH = 10;
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 20;
-const STORAGE_KEY = 'memoryFlipProgress';
 
 
 interface TriviaFact {
@@ -59,10 +61,12 @@ interface TriviaFact {
 
 export default function MemoryFlipPage() {
   const [gameState, setGameState] = useState<GameState>('settings');
+  const [isLoading, setIsLoading] = useState(true);
 
   const [cards, setCards] = useState<CardData[]>([]);
   const [flippedIndices, setFlippedIndices] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
+  const [score, setScore] = useState(0);
   const [isChecking, setIsChecking] = useState(false);
   const [trivia, setTrivia] = useState<TriviaFact | null>(null);
   const [isTriviaLoading, setIsTriviaLoading] = useState(false);
@@ -73,34 +77,50 @@ export default function MemoryFlipPage() {
   const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
 
   const { toast } = useToast();
+  const { user } = useAuth();
   
-  // Load progress from localStorage on initial render
-    useEffect(() => {
-        try {
-            const savedProgress = localStorage.getItem(STORAGE_KEY);
-            if (savedProgress) {
-                const { savedLevel, savedXp, savedXpToNextLevel, savedMoves } = JSON.parse(savedProgress);
-                if (savedLevel && typeof savedLevel === 'number') {
-                    setLevel(savedLevel);
-                    setXp(savedXp || 0);
-                    setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
-                    setMoves(savedMoves || 0);
-                }
-            }
-        } catch (error) {
-            console.error("Failed to load progress from localStorage", error);
+    const loadProgress = useCallback(async () => {
+        if (!user) {
+            setLevel(1);
+            setXp(0);
+            setXpToNextLevel(getXpToNextLevel(1));
+            setScore(0);
+            setIsLoading(false);
+            return;
         }
-    }, []);
+        setIsLoading(true);
+        const profile = await getUserProfile(user.uid);
+        if (profile && profile.memoryFlip) {
+            const { level, xp, xpToNextLevel, score } = profile.memoryFlip;
+            setLevel(level);
+            setXp(xp);
+            setXpToNextLevel(xpToNextLevel);
+            setScore(score);
+        } else {
+            const progress = defaultGameProgress();
+            setLevel(progress.level);
+            setXp(progress.xp);
+            setXpToNextLevel(progress.xpToNextLevel);
+            setScore(progress.score);
+        }
+        setIsLoading(false);
+    }, [user]);
 
-    // Save progress to localStorage whenever it changes
     useEffect(() => {
-        try {
-            const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel, savedMoves: moves });
-            localStorage.setItem(STORAGE_KEY, progress);
-        } catch (error) {
-            console.error("Failed to save progress to localStorage", error);
+        loadProgress();
+    }, [loadProgress]);
+
+    const saveProgress = useCallback(async () => {
+        if (!user) return;
+        const progress: GameProgress = { score, level, xp, xpToNextLevel };
+        await updateGameProgress(user.uid, 'memoryFlip', progress);
+    }, [user, score, level, xp, xpToNextLevel]);
+
+    useEffect(() => {
+        if (gameState === 'ended') {
+            saveProgress();
         }
-    }, [level, xp, xpToNextLevel, moves]);
+    }, [gameState, saveProgress]);
 
 
   const getDifficulty = useCallback((): Difficulty => {
@@ -130,12 +150,15 @@ export default function MemoryFlipPage() {
     setupGame();
   }, [setupGame]);
   
-    const resetProgress = () => {
-        setLevel(1);
-        setXp(0);
-        setMoves(0);
-        setXpToNextLevel(getXpToNextLevel(1));
-        localStorage.removeItem(STORAGE_KEY);
+    const resetProgress = async () => {
+        const progress = defaultGameProgress();
+        setLevel(progress.level);
+        setXp(progress.xp);
+        setXpToNextLevel(progress.xpToNextLevel);
+        setScore(progress.score);
+        if (user) {
+            await updateGameProgress(user.uid, 'memoryFlip', progress);
+        }
         toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
     };
 
@@ -168,6 +191,7 @@ export default function MemoryFlipPage() {
 
       if (firstCard.type === secondCard.type) {
         // Matched
+        setScore(prev => prev + SCORE_PER_MATCH);
         setCards(prevCards =>
           prevCards.map(card =>
             card.type === firstCard.type ? { ...card, isMatched: true } : card
@@ -215,6 +239,14 @@ export default function MemoryFlipPage() {
     setFlippedIndices(prev => [...prev, index]);
   };
   
+  if (isLoading && gameState === 'settings') {
+     return (
+        <div className="flex justify-center items-center py-8">
+            <Loader2 className="h-16 w-16 animate-spin text-primary"/>
+        </div>
+    );
+  }
+
   if (gameState === 'settings') {
     return (
         <div className="flex justify-center items-center py-8">
@@ -256,6 +288,7 @@ export default function MemoryFlipPage() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="text-2xl">{allMatched ? "You matched all the pairs!" : "You decided to end the game."}</div>
+                        <div className="text-xl">Your Final Score: <span className="font-bold text-primary">{score}</span></div>
                         <div className="flex justify-around text-lg w-full bg-secondary/50 p-4 rounded-lg">
                              <div>
                                 <p className="text-muted-foreground">Moves</p>
@@ -294,13 +327,14 @@ export default function MemoryFlipPage() {
                     </div>
                      <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2 text-lg font-mono px-3 py-1 rounded-md bg-secondary">
-                           Moves: <span className="font-bold">{moves}</span>
+                           Score: <span className="font-bold">{score}</span>
                         </div>
                         <Button variant="outline" onClick={() => setGameState('ended')}>End Game</Button>
                     </div>
                 </CardTitle>
                 <CardDescription className="flex justify-between">
                     <span>Level: <span className="font-bold text-primary">{level}</span> ({difficulty})</span>
+                    <span>Moves: <span className="font-bold text-primary">{moves}</span></span>
                 </CardDescription>
             </CardHeader>
              <CardContent className="space-y-4">
