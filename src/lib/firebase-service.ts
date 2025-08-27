@@ -82,30 +82,45 @@ export const updateUserProfile = async (uid: string, data: Partial<UserProfile>)
     await updateDoc(userRef, data);
 };
 
-export const updateGameProgress = async (uid: string, game: keyof UserProfile, progress: Partial<GameProgress | {score: number}>) => {
+export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfile, 'uid' | 'email' | 'displayName' | 'totalScore'>, progress: Partial<GameProgress>) => {
     const userRef = doc(db, 'users', uid);
-    const userProfile = await getUserProfile(uid);
 
-    if (userProfile) {
-        const updates: any = {};
-        let scoreDifference = 0;
-
-        if ('score' in progress && progress.score !== undefined) {
-            const currentGame = userProfile[game] as GameProgress | { score: number };
-            if (currentGame && 'score' in currentGame) {
-                scoreDifference = progress.score - currentGame.score;
+    try {
+        await runTransaction(db, async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+            if (!userDoc.exists()) {
+                // If for some reason the profile doesn't exist, we can't update it.
+                // The getUserProfile function should prevent this, but it's good practice.
+                console.error("User profile does not exist, cannot update progress.");
+                return;
             }
-        }
-        
-        Object.keys(progress).forEach(key => {
-            updates[`${game}.${key}`] = (progress as any)[key];
+
+            const userProfile = userDoc.data() as UserProfile;
+            const currentGameProgress = userProfile[game] as GameProgress;
+
+            // Calculate the difference in score to be added to the total score.
+            // This is crucial for keeping the total score in sync.
+            const oldScore = currentGameProgress.score || 0;
+            const newScore = progress.score !== undefined ? progress.score : oldScore;
+            const scoreDifference = newScore - oldScore;
+            
+            const newTotalScore = (userProfile.totalScore || 0) + scoreDifference;
+            
+            // Prepare the updates
+            const updates: { [key: string]: any } = {};
+            
+            // Update the specific game's progress
+            Object.keys(progress).forEach(key => {
+                updates[`${game}.${key}`] = (progress as any)[key];
+            });
+            
+            // Update the total score
+            updates.totalScore = newTotalScore;
+            
+            transaction.update(userRef, updates);
         });
-
-        if (scoreDifference !== 0) {
-            updates.totalScore = (userProfile.totalScore || 0) + scoreDifference;
-        }
-
-        await updateDoc(userRef, updates);
+    } catch (e) {
+        console.error("Transaction failed: ", e);
     }
 };
 
