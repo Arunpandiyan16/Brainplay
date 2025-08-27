@@ -1,5 +1,5 @@
 import { db, auth } from './firebase';
-import { doc, setDoc, getDoc, updateDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, collection, getDocs, query, orderBy, limit, runTransaction } from 'firebase/firestore';
 import type { User } from 'firebase/auth';
 
 export interface GameProgress {
@@ -52,17 +52,37 @@ export const createUserProfile = async (user: User) => {
 
 export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
     const userRef = doc(db, 'users', uid);
-    const docSnap = await getDoc(userRef);
+    
+    try {
+        // This transaction acts as a robust way to check for a connection.
+        // It will fail if offline, and we can handle it gracefully.
+        await runTransaction(db, async (transaction) => {
+            const docSnap = await transaction.get(userRef);
+            if (!docSnap.exists()) {
+                // If we're sure we're online and the doc doesn't exist, we can create it.
+            }
+        });
 
-    if (docSnap.exists()) {
-        return docSnap.data() as UserProfile;
-    } else {
-        // If user exists in auth but not in firestore, create them.
-        const currentUser = auth.currentUser;
-        if(currentUser && currentUser.uid === uid) {
-            await createUserProfile(currentUser);
-            const newDocSnap = await getDoc(userRef);
-            return newDocSnap.data() as UserProfile;
+        const docSnap = await getDoc(userRef);
+        if (docSnap.exists()) {
+            return docSnap.data() as UserProfile;
+        } else {
+            const currentUser = auth.currentUser;
+            if(currentUser && currentUser.uid === uid) {
+                await createUserProfile(currentUser);
+                const newDocSnap = await getDoc(userRef);
+                return newDocSnap.data() as UserProfile;
+            }
+            return null;
+        }
+    } catch (error) {
+         console.error("Firebase network error, trying to get user profile:", error);
+         // In case of a network error, we can try one more time after a short delay
+         // or return null/stale data. For now, we return null to prevent a crash.
+         // A more advanced implementation could use a local cache.
+        const docSnap = await getDoc(userRef);
+         if (docSnap.exists()) {
+            return docSnap.data() as UserProfile;
         }
         return null;
     }
