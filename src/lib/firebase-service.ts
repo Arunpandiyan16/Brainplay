@@ -8,6 +8,8 @@ export interface GameProgress {
     level: number;
     xp: number;
     xpToNextLevel: number;
+    lives: number;
+    nextLifeAt: number | null;
 }
 
 export interface UserProfile {
@@ -30,7 +32,9 @@ export const defaultGameProgress = (): GameProgress => ({
     score: 0,
     level: 1,
     xp: 0,
-    xpToNextLevel: 50,
+    xpToNextLevel: 50, // Default, will be overridden by each game's specific curve
+    lives: 3,
+    nextLifeAt: null,
 });
 
 export const createUserProfile = async (user: User) => {
@@ -82,7 +86,7 @@ export const updateUserProfile = async (uid: string, data: Partial<UserProfile>)
     await updateDoc(userRef, data);
 };
 
-export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfile, 'uid' | 'email' | 'displayName' | 'totalScore'>, progress: GameProgress) => {
+export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfile, 'uid' | 'email' | 'displayName' | 'totalScore' | 'dailyChallenge'>, progress: GameProgress) => {
     const userRef = doc(db, 'users', uid);
 
     try {
@@ -96,7 +100,7 @@ export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfi
             const userProfile = userDoc.data() as UserProfile;
             const currentGameProgress = userProfile[game] as GameProgress;
             
-            const oldScore = currentGameProgress.score || 0;
+            const oldScore = currentGameProgress ? currentGameProgress.score : 0;
             const newScore = progress.score;
             const scoreDifference = newScore - oldScore;
             
@@ -108,6 +112,8 @@ export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfi
                 [`${game}.level`]: progress.level,
                 [`${game}.xp`]: progress.xp,
                 [`${game}.xpToNextLevel`]: progress.xpToNextLevel,
+                [`${game}.lives`]: progress.lives,
+                [`${game}.nextLifeAt`]: progress.nextLifeAt,
             };
             
             transaction.update(userRef, updates);
