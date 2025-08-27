@@ -193,7 +193,7 @@ export default function WordHunterPage() {
         if (shuffledPuzzles.length === 0) {
             toast({
                 title: 'No Puzzles Available',
-                description: 'There are no words for your level in this language. Try resetting progress or changing the language.',
+                description: 'There are no words for your level in this language. Try another language.',
                 variant: 'destructive',
             });
             return;
@@ -277,21 +277,6 @@ export default function WordHunterPage() {
     useEffect(() => {
         checkAnswer();
     }, [checkAnswer]);
-
-
-    const resetProgress = useCallback(async () => {
-        const progress = defaultGameProgress();
-        setLevel(progress.level);
-        setXp(progress.xp);
-        setXpToNextLevel(getXpToNextLevel(progress.level));
-        setScore(progress.score);
-        setLives(progress.lives);
-        setNextLifeAt(progress.nextLifeAt);
-        if (user) {
-            await updateGameProgress(user.uid, 'wordHunter', progress);
-        }
-        toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
-    }, [user, toast]);
     
     if (isLoading && gameState === 'settings') {
          return (
@@ -361,9 +346,6 @@ export default function WordHunterPage() {
                         </div>
                         <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame} disabled={lives <= 0}>
                            <Zap className="mr-2"/> Start Game
-                        </Button>
-                         <Button size="sm" variant="outline" onClick={resetProgress}>
-                           <RotateCcw className="mr-2"/> Reset Progress
                         </Button>
                     </CardContent>
                 </Card>

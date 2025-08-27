@@ -44,15 +44,15 @@ const EMOJI_PAIRS: { [key: string]: string } = {
 };
 
 const getGridConfigForLevel = (level: number): { pairs: number; cols: number } => {
-    if (level < 3) return { pairs: 3, cols: 3 }; 
-    if (level < 5) return { pairs: 4, cols: 4 }; 
-    if (level < 8) return { pairs: 6, cols: 4 }; 
-    if (level < 12) return { pairs: 8, cols: 4 }; 
-    if (level < 16) return { pairs: 10, cols: 5 }; 
-    if (level < 20) return { pairs: 12, cols: 6 }; 
-    if (level < 25) return { pairs: 15, cols: 6 }; 
-    if (level < 30) return { pairs: 18, cols: 6 }; 
-    if (level < 40) return { pairs: 20, cols: 8 }; 
+    if (level < 2) return { pairs: 3, cols: 3 }; 
+    if (level < 3) return { pairs: 4, cols: 4 }; 
+    if (level < 5) return { pairs: 6, cols: 4 }; 
+    if (level < 8) return { pairs: 8, cols: 4 }; 
+    if (level < 12) return { pairs: 10, cols: 5 }; 
+    if (level < 16) return { pairs: 12, cols: 6 }; 
+    if (level < 20) return { pairs: 15, cols: 6 }; 
+    if (level < 25) return { pairs: 18, cols: 6 }; 
+    if (level < 30) return { pairs: 20, cols: 8 }; 
     return { pairs: 21, cols: 7 };
 };
 
@@ -163,24 +163,12 @@ export default function MemoryFlipPage() {
     setupGame();
   }, [setupGame]);
   
-    const resetProgress = async () => {
-        const progress = defaultGameProgress();
-        setLevel(progress.level);
-        setXp(progress.xp);
-        setXpToNextLevel(getXpToNextLevel(progress.level));
-        setScore(progress.score);
-        if (user) {
-            await updateGameProgress(user.uid, 'memoryFlip', progress);
-        }
-        toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
-    };
-
   useEffect(() => {
-    if (cards.length > 0 && cards.every(c => c.isMatched)) {
+    if (gameState === 'playing' && cards.length > 0 && cards.every(c => c.isMatched)) {
        toast({ title: "Grid Cleared!", description: "Setting up the next level...", className: "bg-primary text-primary-foreground" });
        setTimeout(() => setupGame(), 1200);
     }
-  }, [cards, setupGame, toast]);
+  }, [cards, setupGame, toast, gameState]);
   
 
   const fetchTrivia = (topic: string) => {
@@ -277,9 +265,6 @@ export default function MemoryFlipPage() {
                 <CardContent className="flex flex-col gap-4">
                     <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame}>
                        <Zap className="mr-2"/> Start Game
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={resetProgress}>
-                       <RotateCcw className="mr-2"/> Reset Progress
                     </Button>
                 </CardContent>
             </Card>

@@ -298,20 +298,6 @@ export default function MathRushPage() {
         }
     };
     
-    const resetProgress = async () => {
-        const progress = defaultGameProgress();
-        setLevel(progress.level);
-        setXp(progress.xp);
-        setXpToNextLevel(getXpToNextLevel(progress.level));
-        setScore(progress.score);
-        setLives(progress.lives);
-        setNextLifeAt(progress.nextLifeAt);
-        if (user) {
-            await updateGameProgress(user.uid, 'mathRush', progress);
-        }
-        toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
-    };
-
     const getIconForOperation = () => {
         if (problem?.type === 'Aptitude' || problem?.type === 'Logical Reasoning') {
             return <Brain />;
@@ -421,9 +407,6 @@ export default function MathRushPage() {
                         </div>
                         <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame} disabled={lives <= 0}>
                            <Zap className="mr-2"/> Start Game
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={resetProgress}>
-                           <RotateCcw className="mr-2"/> Reset Progress
                         </Button>
                     </CardContent>
                 </Card>

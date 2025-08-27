@@ -182,7 +182,7 @@ export default function QuizClashPage() {
             toast({
                 variant: 'destructive',
                 title: 'No Questions Available',
-                description: 'There are no questions for your level in this region. Please try another region or reset progress.',
+                description: 'There are no questions for your level in this region. Please try another region.',
             });
             setGameState('start');
             setIsLoading(false);
@@ -270,20 +270,6 @@ export default function QuizClashPage() {
         return 'bg-secondary hover:bg-accent text-secondary-foreground';
     };
 
-    const resetProgress = async () => {
-        const progress = defaultGameProgress();
-        setLevel(progress.level);
-        setXp(progress.xp);
-        setXpToNextLevel(getXpToNextLevel(progress.level));
-        setScore(progress.score);
-        setLives(progress.lives);
-        setNextLifeAt(progress.nextLifeAt);
-        if (user) {
-            await updateGameProgress(user.uid, 'quizClash', progress);
-        }
-        toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
-    };
-
     const renderCategoryBreakdown = () => {
         const breakdown: { [key: string]: { correct: number; total: number } } = {};
 
@@ -369,9 +355,6 @@ export default function QuizClashPage() {
                         </div>
                         <Button size="lg" className="text-xl w-full glow-shadow" onClick={startGame} disabled={lives <= 0}>
                            <Zap className="mr-2"/> Start Game
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={resetProgress}>
-                           <RotateCcw className="mr-2"/> Reset Progress
                         </Button>
                     </CardContent>
                 </Card>

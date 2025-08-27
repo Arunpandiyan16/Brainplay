@@ -230,20 +230,6 @@ export default function LogicLeapPage() {
         }
     };
     
-    const resetProgress = async () => {
-        const progress = defaultGameProgress();
-        setLevel(progress.level);
-        setXp(progress.xp);
-        setXpToNextLevel(getXpToNextLevel(progress.level));
-        setScore(progress.score);
-        setLives(progress.lives);
-        setNextLifeAt(progress.nextLifeAt);
-        if (user) {
-            await updateGameProgress(user.uid, 'logicLeap', progress);
-        }
-        toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
-    };
-
     const getButtonClass = (index: number) => {
         if (selectedAnswer !== null && puzzle) {
             if (index === puzzle.answerIndex) {
@@ -313,9 +299,6 @@ export default function LogicLeapPage() {
                         </div>
                         <Button size="lg" className="text-xl w-full glow-shadow mt-4" onClick={startGame} disabled={lives <= 0}>
                            <Zap className="mr-2"/> Start Game
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={resetProgress}>
-                           <RotateCcw className="mr-2"/> Reset Progress
                         </Button>
                     </CardContent>
                 </Card>
