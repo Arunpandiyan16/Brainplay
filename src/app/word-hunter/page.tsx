@@ -61,11 +61,13 @@ export default function WordHunterPage() {
 
      const loadProgress = useCallback(async () => {
         if (!user) {
-            setLevel(1);
-            setXp(0);
-            setXpToNextLevel(getXpToNextLevel(1));
-            setScore(0);
-            setLives(MAX_LIVES);
+            const progress = defaultGameProgress();
+            setLevel(progress.level);
+            setXp(progress.xp);
+            setXpToNextLevel(getXpToNextLevel(progress.level));
+            setScore(progress.score);
+            setLives(progress.lives);
+            setNextLifeAt(progress.nextLifeAt);
             setIsLoading(false);
             return;
         }
@@ -83,7 +85,7 @@ export default function WordHunterPage() {
             const progress = defaultGameProgress();
             setLevel(progress.level);
             setXp(progress.xp);
-            setXpToNextLevel(progress.xpToNextLevel);
+            setXpToNextLevel(getXpToNextLevel(progress.level));
             setScore(progress.score);
             setLives(progress.lives);
             setNextLifeAt(progress.nextLifeAt);
@@ -96,17 +98,26 @@ export default function WordHunterPage() {
     }, [loadProgress]);
     
     useEffect(() => {
+        if (lives >= MAX_LIVES) {
+            setNextLifeAt(null);
+            return;
+        }
+
         let interval: NodeJS.Timeout;
         if (gameState === 'no-lives' && nextLifeAt) {
             interval = setInterval(() => {
                 const now = Date.now();
-                const diff = nextLifeAt - now;
-                if (diff <= 0) {
-                    setLives(prev => prev + 1);
-                    setNextLifeAt(null);
-                    setGameState('settings');
-                    clearInterval(interval);
+                if (now >= nextLifeAt) {
+                    const newLives = Math.min(MAX_LIVES, lives + 1);
+                    setLives(newLives);
+                    if (newLives < MAX_LIVES) {
+                        setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
+                    } else {
+                        setNextLifeAt(null);
+                        setGameState('settings');
+                    }
                 } else {
+                    const diff = nextLifeAt - now;
                     const minutes = Math.floor((diff / 1000) / 60);
                     const seconds = Math.floor((diff / 1000) % 60);
                     setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
@@ -114,7 +125,7 @@ export default function WordHunterPage() {
             }, 1000);
         }
         return () => clearInterval(interval);
-    }, [gameState, nextLifeAt]);
+    }, [gameState, nextLifeAt, lives]);
 
     const saveProgress = useCallback(async () => {
         if (!user) return;
@@ -167,6 +178,9 @@ export default function WordHunterPage() {
     const startGame = useCallback(() => {
         if (lives <= 0) {
             setGameState('no-lives');
+             if (!nextLifeAt) {
+                 setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
+            }
             return;
         }
 
@@ -186,11 +200,11 @@ export default function WordHunterPage() {
         }
 
         setAvailablePuzzles(shuffledPuzzles);
-        setSolvedCount(0); // Reset session solved count
+        setSolvedCount(0);
         setGameState('playing');
         setIsLoading(true);
         fetchPuzzle();
-    }, [language, getDifficulty, toast, fetchPuzzle, lives]);
+    }, [language, getDifficulty, toast, fetchPuzzle, lives, nextLifeAt]);
 
     const handleLetterSelect = (letter: Letter) => {
         if (!puzzle || answerSlots.length >= puzzle.word.length || isCorrect !== null) return;
@@ -269,7 +283,7 @@ export default function WordHunterPage() {
         const progress = defaultGameProgress();
         setLevel(progress.level);
         setXp(progress.xp);
-        setXpToNextLevel(progress.xpToNextLevel);
+        setXpToNextLevel(getXpToNextLevel(progress.level));
         setScore(progress.score);
         setLives(progress.lives);
         setNextLifeAt(progress.nextLifeAt);
@@ -378,8 +392,8 @@ export default function WordHunterPage() {
                             <div className="text-2xl">Final Level: <span className="text-primary">{level}</span></div>
                         </div>
                         <div className="flex gap-4">
-                            <Button size="lg" className="text-xl w-full" onClick={startGame}>
-                               <Sparkles className="mr-2"/> Play Again
+                            <Button size="lg" className="text-xl w-full" onClick={startGame} disabled={lives <= 0}>
+                               <Sparkles className="mr-2"/> {lives > 0 ? 'Play Again' : 'Out of Lives'}
                             </Button>
                              <Button size="lg" className="text-xl w-full" variant="outline" asChild>
                                <Link href="/">Back to Home</Link>
@@ -448,7 +462,7 @@ export default function WordHunterPage() {
                     </CardTitle>
                      <CardDescription className="flex justify-between">
                         <span>Score: <span className="font-bold text-primary">{score}</span> | Level: <span className="font-bold text-primary">{level}</span></span>
-                        <span className="font-semibold">{difficulty}</span>
+                         <Button variant="destructive" size="sm" onClick={() => setGameState('ended')}>End Game</Button>
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-8">
@@ -484,8 +498,8 @@ export default function WordHunterPage() {
                             
                             {isCorrect === true && (
                                 <div className="text-center">
-                                <Button onClick={fetchPuzzle} className="glow-shadow">
-                                    Next Word
+                                <Button onClick={fetchPuzzle} className="glow-shadow" disabled={lives <= 0}>
+                                    {lives > 0 ? 'Next Word' : 'Out of Lives'}
                                 </Button>
                                 </div>
                             )}
@@ -496,4 +510,3 @@ export default function WordHunterPage() {
         </div>
     );
 }
-

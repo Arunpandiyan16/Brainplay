@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -47,7 +47,6 @@ export default function MathRushPage() {
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
-    // Leveling state
     const [level, setLevel] = useState(1);
     const [xp, setXp] = useState(0);
     const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
@@ -60,11 +59,13 @@ export default function MathRushPage() {
 
     const loadProgress = useCallback(async () => {
         if (!user) {
-            setLevel(1);
-            setXp(0);
-            setXpToNextLevel(getXpToNextLevel(1));
-            setScore(0);
-            setLives(MAX_LIVES);
+            const progress = defaultGameProgress();
+            setLevel(progress.level);
+            setXp(progress.xp);
+            setXpToNextLevel(getXpToNextLevel(progress.level));
+            setScore(progress.score);
+            setLives(progress.lives);
+            setNextLifeAt(progress.nextLifeAt);
             setIsLoading(false);
             return;
         }
@@ -82,7 +83,7 @@ export default function MathRushPage() {
             const progress = defaultGameProgress();
             setLevel(progress.level);
             setXp(progress.xp);
-            setXpToNextLevel(progress.xpToNextLevel);
+            setXpToNextLevel(getXpToNextLevel(progress.level));
             setScore(progress.score);
             setLives(progress.lives);
             setNextLifeAt(progress.nextLifeAt);
@@ -95,17 +96,26 @@ export default function MathRushPage() {
     }, [loadProgress]);
 
      useEffect(() => {
+        if (lives >= MAX_LIVES) {
+            setNextLifeAt(null);
+            return;
+        }
+
         let interval: NodeJS.Timeout;
         if (gameState === 'no-lives' && nextLifeAt) {
             interval = setInterval(() => {
                 const now = Date.now();
-                const diff = nextLifeAt - now;
-                if (diff <= 0) {
-                    setLives(prev => prev + 1);
-                    setNextLifeAt(null);
-                    setGameState('settings');
-                    clearInterval(interval);
+                if (now >= nextLifeAt) {
+                     const newLives = Math.min(MAX_LIVES, lives + 1);
+                    setLives(newLives);
+                    if (newLives < MAX_LIVES) {
+                        setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
+                    } else {
+                        setNextLifeAt(null);
+                        setGameState('settings');
+                    }
                 } else {
+                    const diff = nextLifeAt - now;
                     const minutes = Math.floor((diff / 1000) / 60);
                     const seconds = Math.floor((diff / 1000) % 60);
                     setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
@@ -113,7 +123,7 @@ export default function MathRushPage() {
             }, 1000);
         }
         return () => clearInterval(interval);
-    }, [gameState, nextLifeAt]);
+    }, [gameState, nextLifeAt, lives]);
 
     const saveProgress = useCallback(async () => {
         if (!user) return;
@@ -144,7 +154,6 @@ export default function MathRushPage() {
                 }
             }
         } else {
-             // For string answers (logical reasoning)
              const otherOptions = problemBank.filter(p => p.type === 'Logical Reasoning' && p.answer !== correctAnswer).map(p => p.answer);
              const shuffledOptions = otherOptions.sort(() => 0.5 - Math.random());
              choices = [...choices, ...shuffledOptions.slice(0, 3)];
@@ -161,12 +170,11 @@ export default function MathRushPage() {
         setSelectedAnswer(null);
         setIsCorrect(null);
 
-        // Advanced problems unlocked at higher levels
         let advancedChance = 0;
-        if (level >= 11) advancedChance = 0.60; // 60% chance
-        else if (level >= 8) advancedChance = 0.50; // 50% chance
-        else if (level >= 5) advancedChance = 0.35; // 35% chance
-        else if (level >= 2) advancedChance = 0.20; // 20% chance
+        if (level >= 11) advancedChance = 0.60;
+        else if (level >= 8) advancedChance = 0.50;
+        else if (level >= 5) advancedChance = 0.35;
+        else if (level >= 2) advancedChance = 0.20;
         
         const shouldShowAdvanced = Math.random() < advancedChance;
 
@@ -178,7 +186,6 @@ export default function MathRushPage() {
             return;
         }
 
-        // Otherwise, generate arithmetic problem
         let num1: number, num2: number, answer: number, op: string, xpPoints: number;
         
         const difficultyRanges = {
@@ -213,11 +220,11 @@ export default function MathRushPage() {
                 break;
             case '-':
                 num1 = Math.floor(Math.random() * (max - min + 1)) + min;
-                num2 = Math.floor(Math.random() * (num1 - min + 1)) + min; // ensure positive result
+                num2 = Math.floor(Math.random() * (num1 - min + 1)) + min;
                 answer = num1 - num2;
                 op = '-';
                 break;
-            default: // Addition
+            default:
                 num1 = Math.floor(Math.random() * (max - min + 1)) + min;
                 num2 = Math.floor(Math.random() * (max - min + 1)) + min;
                 answer = num1 + num2;
@@ -234,13 +241,16 @@ export default function MathRushPage() {
     const startGame = useCallback(() => {
         if (lives <= 0) {
             setGameState('no-lives');
+             if (!nextLifeAt) {
+                 setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
+            }
             return;
         }
         setSolvedCount(0);
         setProblem(null);
         setGameState('playing');
         setIsLoading(true);
-    }, [lives]);
+    }, [lives, nextLifeAt]);
     
     useEffect(() => {
         if(gameState === 'playing' && !problem) {
@@ -263,7 +273,6 @@ export default function MathRushPage() {
             setScore(prev => prev + points);
             setSolvedCount(prev => prev + 1);
 
-            // Handle XP and leveling up
             const newXp = xp + awardedXp;
             if (newXp >= xpToNextLevel) {
                 const nextLevel = level + 1;
@@ -276,8 +285,8 @@ export default function MathRushPage() {
             }
 
         } else {
-            toast({ title: "Incorrect!", description: `-5 points. The correct answer was ${problem.choices[problem.answerIndex]}.`, variant: 'destructive' });
-            setScore(prev => prev - 5);
+            toast({ title: "Incorrect!", description: `-5 points. -1 life. The correct answer was ${problem.choices[problem.answerIndex]}.`, variant: 'destructive' });
+            setScore(prev => Math.max(0, prev - 5));
             const newLives = lives - 1;
             setLives(newLives);
             if (newLives < MAX_LIVES && !nextLifeAt) {
@@ -293,7 +302,7 @@ export default function MathRushPage() {
         const progress = defaultGameProgress();
         setLevel(progress.level);
         setXp(progress.xp);
-        setXpToNextLevel(progress.xpToNextLevel);
+        setXpToNextLevel(getXpToNextLevel(progress.level));
         setScore(progress.score);
         setLives(progress.lives);
         setNextLifeAt(progress.nextLifeAt);

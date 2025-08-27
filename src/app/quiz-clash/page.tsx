@@ -52,10 +52,13 @@ export default function QuizClashPage() {
 
     const loadProgress = useCallback(async () => {
         if (!user) {
-            setLevel(1);
-            setXp(0);
-            setXpToNextLevel(getXpToNextLevel(1));
-            setLives(MAX_LIVES);
+            const progress = defaultGameProgress();
+            setLevel(progress.level);
+            setXp(progress.xp);
+            setXpToNextLevel(getXpToNextLevel(progress.level));
+            setScore(progress.score);
+            setLives(progress.lives);
+            setNextLifeAt(progress.nextLifeAt);
             setIsLoading(false);
             return;
         };
@@ -73,7 +76,7 @@ export default function QuizClashPage() {
             const progress = defaultGameProgress();
             setLevel(progress.level);
             setXp(progress.xp);
-            setXpToNextLevel(progress.xpToNextLevel);
+            setXpToNextLevel(getXpToNextLevel(progress.level));
             setScore(progress.score);
             setLives(progress.lives);
             setNextLifeAt(progress.nextLifeAt);
@@ -86,21 +89,26 @@ export default function QuizClashPage() {
     }, [loadProgress]);
 
     useEffect(() => {
+        if (lives >= MAX_LIVES) {
+            setNextLifeAt(null);
+            return;
+        }
+
         let interval: NodeJS.Timeout;
         if (gameState === 'no-lives' && nextLifeAt) {
             interval = setInterval(() => {
                 const now = Date.now();
-                const diff = nextLifeAt - now;
-                if (diff <= 0) {
-                    setLives(prev => Math.min(MAX_LIVES, prev + 1));
-                    const newNextLifeAt = Date.now() + LIFE_REGEN_MINUTES * 60 * 1000;
-                    setNextLifeAt(newNextLifeAt);
-                    if (lives + 1 >= MAX_LIVES) {
+                if (now >= nextLifeAt) {
+                    const newLives = Math.min(MAX_LIVES, lives + 1);
+                    setLives(newLives);
+                    if (newLives < MAX_LIVES) {
+                        setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
+                    } else {
                         setNextLifeAt(null);
                         setGameState('start');
-                        clearInterval(interval);
                     }
                 } else {
+                    const diff = nextLifeAt - now;
                     const minutes = Math.floor((diff / 1000) / 60);
                     const seconds = Math.floor((diff / 1000) % 60);
                     setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
@@ -117,7 +125,7 @@ export default function QuizClashPage() {
     }, [user, score, level, xp, xpToNextLevel, lives, nextLifeAt]);
     
     useEffect(() => {
-        if (gameState === 'ended' || gameState === 'start') {
+        if (gameState === 'ended' || gameState === 'start' || gameState === 'no-lives') {
             saveProgress();
         }
     }, [gameState, saveProgress]);
@@ -145,6 +153,9 @@ export default function QuizClashPage() {
     const startGame = useCallback(() => {
         if (lives <= 0) {
             setGameState('no-lives');
+             if (!nextLifeAt) {
+                 setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
+            }
             return;
         }
 
@@ -180,7 +191,7 @@ export default function QuizClashPage() {
         
         setAvailableQuestions(shuffled);
         setGameState('playing');
-    }, [level, country, toast, lives]);
+    }, [level, country, toast, lives, nextLifeAt]);
 
 
     useEffect(() => {
@@ -225,6 +236,7 @@ export default function QuizClashPage() {
             }
 
         } else {
+            toast({ title: "Incorrect!", description: "-1 life.", variant: 'destructive' });
             setScore(prev => Math.max(0, prev - 5));
             setConsecutiveCorrect(0);
             const newLives = lives - 1;
@@ -262,7 +274,7 @@ export default function QuizClashPage() {
         const progress = defaultGameProgress();
         setLevel(progress.level);
         setXp(progress.xp);
-        setXpToNextLevel(progress.xpToNextLevel);
+        setXpToNextLevel(getXpToNextLevel(progress.level));
         setScore(progress.score);
         setLives(progress.lives);
         setNextLifeAt(progress.nextLifeAt);
@@ -396,8 +408,8 @@ export default function QuizClashPage() {
                         </div>
                         {renderCategoryBreakdown()}
                          <div className="flex gap-4">
-                            <Button size="lg" className="text-xl w-full" onClick={startGame}>
-                               <Sparkles className="mr-2"/> Play Again
+                            <Button size="lg" className="text-xl w-full" onClick={startGame} disabled={lives <= 0}>
+                               <Sparkles className="mr-2"/> {lives > 0 ? 'Play Again' : 'Out of Lives'}
                             </Button>
                              <Button size="lg" className="text-xl w-full" variant="outline" asChild>
                                <Link href="/">Back to Home</Link>
@@ -521,4 +533,3 @@ export default function QuizClashPage() {
         </div>
     );
 }
-

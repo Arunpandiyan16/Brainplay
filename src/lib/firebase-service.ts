@@ -28,11 +28,11 @@ export interface UserProfile {
     };
 }
 
-export const defaultGameProgress = (): Required<GameProgress> => ({
+export const defaultGameProgress = (level = 1): Required<GameProgress> => ({
     score: 0,
-    level: 1,
+    level: level,
     xp: 0,
-    xpToNextLevel: 50, // Default, will be overridden by each game's specific curve
+    xpToNextLevel: 50, // This is a generic default, can be game-specific
     lives: 3,
     nextLifeAt: null,
 });
@@ -72,11 +72,10 @@ export const getUserProfile = async (uid: string): Promise<UserProfile | null> =
                     return newDocSnap.data() as UserProfile;
                 }
             }
-            return null; // Return null if user isn't found or something went wrong.
+            return null;
         }
     } catch (error) {
         console.error("Error getting user profile:", error);
-        // In case of a network error or other issues, returning null is safer.
         return null;
     }
 };
@@ -98,18 +97,18 @@ export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfi
             }
 
             const userProfile = userDoc.data() as UserProfile;
-            const currentGameProgress = userProfile[game] as GameProgress;
+            const currentGameProgress = userProfile[game] as GameProgress | undefined;
             
-            const oldScore = currentGameProgress ? currentGameProgress.score : 0;
+            const oldScore = currentGameProgress?.score ?? 0;
             const newScore = progress.score;
             const scoreDifference = newScore - oldScore;
             
             const newTotalScore = (userProfile.totalScore || 0) + scoreDifference;
-            
-            // Ensure lives and nextLifeAt are not undefined
+
+            // Provide default values if lives or nextLifeAt are undefined
             const lives = progress.lives === undefined ? (currentGameProgress?.lives ?? 3) : progress.lives;
             const nextLifeAt = progress.nextLifeAt === undefined ? (currentGameProgress?.nextLifeAt ?? null) : progress.nextLifeAt;
-            
+
             const updates: { [key: string]: any } = {
                 totalScore: newTotalScore,
                 [`${game}.score`]: progress.score,
@@ -138,4 +137,3 @@ export const getLeaderboard = async (limitCount = 10): Promise<UserProfile[]> =>
     });
     return leaderboard;
 };
-

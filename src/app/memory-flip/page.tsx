@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -44,16 +44,16 @@ const EMOJI_PAIRS: { [key: string]: string } = {
 };
 
 const getGridConfigForLevel = (level: number): { pairs: number; cols: number } => {
-    if (level < 3) return { pairs: 3, cols: 3 }; // 2x3
-    if (level < 5) return { pairs: 4, cols: 4 }; // 2x4
-    if (level < 8) return { pairs: 6, cols: 4 }; // 3x4
-    if (level < 12) return { pairs: 8, cols: 4 }; // 4x4
-    if (level < 16) return { pairs: 10, cols: 5 }; // 4x5
-    if (level < 20) return { pairs: 12, cols: 6 }; // 4x6
-    if (level < 25) return { pairs: 15, cols: 6 }; // 5x6
-    if (level < 30) return { pairs: 18, cols: 6 }; // 6x6
-    if (level < 40) return { pairs: 20, cols: 8 }; // 5x8
-    return { pairs: 21, cols: 7 }; // 6x7, max
+    if (level < 3) return { pairs: 3, cols: 3 }; 
+    if (level < 5) return { pairs: 4, cols: 4 }; 
+    if (level < 8) return { pairs: 6, cols: 4 }; 
+    if (level < 12) return { pairs: 8, cols: 4 }; 
+    if (level < 16) return { pairs: 10, cols: 5 }; 
+    if (level < 20) return { pairs: 12, cols: 6 }; 
+    if (level < 25) return { pairs: 15, cols: 6 }; 
+    if (level < 30) return { pairs: 18, cols: 6 }; 
+    if (level < 40) return { pairs: 20, cols: 8 }; 
+    return { pairs: 21, cols: 7 };
 };
 
 const XP_PER_MATCH = 5;
@@ -77,7 +77,6 @@ export default function MemoryFlipPage() {
   const [trivia, setTrivia] = useState<TriviaFact | null>(null);
   const [isTriviaLoading, setIsTriviaLoading] = useState(false);
   
-  // Leveling state
   const [level, setLevel] = useState(1);
   const [xp, setXp] = useState(0);
   const [xpToNextLevel, setXpToNextLevel] = useState(getXpToNextLevel(1));
@@ -87,10 +86,11 @@ export default function MemoryFlipPage() {
   
     const loadProgress = useCallback(async () => {
         if (!user) {
-            setLevel(1);
-            setXp(0);
-            setXpToNextLevel(getXpToNextLevel(1));
-            setScore(0);
+            const progress = defaultGameProgress();
+            setLevel(progress.level);
+            setXp(progress.xp);
+            setXpToNextLevel(getXpToNextLevel(progress.level));
+            setScore(progress.score);
             setIsLoading(false);
             return;
         }
@@ -106,7 +106,7 @@ export default function MemoryFlipPage() {
             const progress = defaultGameProgress();
             setLevel(progress.level);
             setXp(progress.xp);
-            setXpToNextLevel(progress.xpToNextLevel);
+            setXpToNextLevel(getXpToNextLevel(progress.level));
             setScore(progress.score);
         }
         setIsLoading(false);
@@ -123,7 +123,7 @@ export default function MemoryFlipPage() {
     }, [user, score, level, xp, xpToNextLevel]);
 
     useEffect(() => {
-        if (gameState === 'ended') {
+        if (gameState === 'ended' || gameState === 'settings') {
             saveProgress();
         }
     }, [gameState, saveProgress]);
@@ -167,7 +167,7 @@ export default function MemoryFlipPage() {
         const progress = defaultGameProgress();
         setLevel(progress.level);
         setXp(progress.xp);
-        setXpToNextLevel(progress.xpToNextLevel);
+        setXpToNextLevel(getXpToNextLevel(progress.level));
         setScore(progress.score);
         if (user) {
             await updateGameProgress(user.uid, 'memoryFlip', progress);
@@ -204,7 +204,6 @@ export default function MemoryFlipPage() {
       setMoves(prev => prev + 1);
 
       if (firstCard.type === secondCard.type) {
-        // Matched
         setScore(prev => prev + SCORE_PER_MATCH);
         setCards(prevCards =>
           prevCards.map(card =>
@@ -227,7 +226,6 @@ export default function MemoryFlipPage() {
         setFlippedIndices([]);
         setIsChecking(false);
       } else {
-        // Not a match
         setTimeout(() => {
           setCards(prevCards =>
             prevCards.map((card, index) =>
@@ -290,18 +288,16 @@ export default function MemoryFlipPage() {
   }
 
   if (gameState === 'ended') {
-        const allMatched = cards.every(c => c.isMatched);
         return (
             <div className="flex justify-center items-center py-8">
                 <Card className="w-full max-w-2xl text-center p-8 border-primary glow-shadow">
                     <CardHeader>
                         <CardTitle className="text-4xl font-bold flex items-center justify-center gap-3">
                            <Trophy className="w-10 h-10 text-yellow-400"/>
-                           {allMatched ? "Congratulations!" : "Game Over"}
+                           Game Over
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <div className="text-2xl">{allMatched ? "You matched all the pairs!" : "You decided to end the game."}</div>
                         <div className="text-xl">Your Final Score: <span className="font-bold text-primary">{score}</span></div>
                         <div className="flex justify-around text-lg w-full bg-secondary/50 p-4 rounded-lg">
                              <div>
@@ -391,7 +387,7 @@ export default function MemoryFlipPage() {
                 </div>
                  <div className="text-center">
                     <Button onClick={startGame} variant="outline">
-                        <Repeat className="mr-2" /> Restart Game
+                        <Repeat className="mr-2" /> Restart Level
                     </Button>
                 </div>
             </CardContent>
@@ -431,5 +427,3 @@ export default function MemoryFlipPage() {
   }
 }
 */
-
-    
