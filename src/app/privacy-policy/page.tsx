@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +19,7 @@ export default function PrivacyPolicyPage() {
           
           <h2 className="text-xl font-semibold">1. Introduction</h2>
           <p>
-            Welcome to BrainPlay. We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application.
+            Welcome to Brainvia. We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application.
           </p>
 
           <h2 className="text-xl font-semibold">2. Information We Collect</h2>
@@ -47,7 +48,7 @@ export default function PrivacyPolicyPage() {
           
           <h2 className="text-xl font-semibold">5. Contact Us</h2>
           <p>
-            If you have questions or comments about this Privacy Policy, please contact us at: support@brainplay.app
+            If you have questions or comments about this Privacy Policy, please contact us at: support@brainvia.app
           </p>
         </CardContent>
       </Card>

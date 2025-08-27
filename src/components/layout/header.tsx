@@ -78,7 +78,7 @@ export default function Header() {
                 <SheetClose asChild>
                     <Link href="/" className="flex items-center gap-2">
                       <Brain className="h-6 w-6 text-primary" />
-                      <span className="font-bold">BrainPlay</span>
+                      <span className="font-bold">Brainvia</span>
                     </Link>
                 </SheetClose>
              </SheetTitle>
@@ -119,7 +119,7 @@ export default function Header() {
            <MobileNav />
             <Link href="/" className="hidden md:flex items-center space-x-2">
                 <Brain className="h-6 w-6 text-primary" />
-                <span className="font-bold">BrainPlay</span>
+                <span className="font-bold">Brainvia</span>
             </Link>
         </div>
         

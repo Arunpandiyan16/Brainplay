@@ -60,7 +60,7 @@ export default function Home() {
           Play. Learn. Compete.
         </h1>
         <p className="max-w-2xl mx-auto mt-4 text-base sm:text-lg text-muted-foreground">
-          Welcome to BrainPlay, the ultimate hub for fun and knowledge games. Challenge yourself and climb the leaderboards!
+          Welcome to Brainvia, the ultimate hub for fun and knowledge games. Challenge yourself and climb the leaderboards!
         </p>
          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8">
             <Button size="lg" className="text-lg w-full sm:w-auto glow-shadow" asChild>

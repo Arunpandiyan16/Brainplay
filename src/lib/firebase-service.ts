@@ -1,3 +1,4 @@
+
 import { db, auth } from './firebase';
 import { doc, setDoc, getDoc, updateDoc, collection, getDocs, query, orderBy, limit, runTransaction } from 'firebase/firestore';
 import type { User } from 'firebase/auth';
@@ -37,7 +38,7 @@ export const createUserProfile = async (user: User) => {
     const userProfile: UserProfile = {
         uid: user.uid,
         email: user.email,
-        displayName: user.displayName || user.email?.split('@')[0] || 'BrainPlayer',
+        displayName: user.displayName || user.email?.split('@')[0] || 'BrainviaPlayer',
         totalScore: 0,
         quizClash: defaultGameProgress(),
         wordHunter: defaultGameProgress(),

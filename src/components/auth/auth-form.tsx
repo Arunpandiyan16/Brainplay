@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -107,7 +108,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </CardTitle>
         <CardDescription>
           {mode === 'login'
-            ? 'Sign in to continue to BrainPlay.'
+            ? 'Sign in to continue to Brainvia.'
             : 'Enter your details to get started.'}
         </CardDescription>
       </CardHeader>

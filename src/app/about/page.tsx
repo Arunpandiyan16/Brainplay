@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +13,7 @@ export default function AboutPage() {
              <Info className="w-16 h-16 text-primary" />
           </div>
           <CardTitle className="text-4xl font-bold">
-            About BrainPlay
+            About Brainvia
           </CardTitle>
            <p className="text-xl text-muted-foreground pt-2">Your Daily Dose of Cognitive Fun</p>
         </CardHeader>
@@ -20,13 +21,13 @@ export default function AboutPage() {
             <div className="space-y-4">
                 <h2 className="text-2xl font-semibold flex items-center justify-center gap-3"><Target className="w-8 h-8 text-primary"/> Our Mission</h2>
                 <p>
-                    BrainPlay is a 5-in-1 hub for fun and knowledge games designed to challenge your mind and provide endless entertainment. Our mission is to make learning and brain-training an exciting and engaging experience for everyone, transforming cognitive improvement from a chore into a daily delight.
+                    Brainvia is a 5-in-1 hub for fun and knowledge games designed to challenge your mind and provide endless entertainment. Our mission is to make learning and brain-training an exciting and engaging experience for everyone, transforming cognitive improvement from a chore into a daily delight.
                 </p>
             </div>
              <div className="space-y-4">
                  <h2 className="text-2xl font-semibold flex items-center justify-center gap-3"><Gamepad2 className="w-8 h-8 text-primary"/> Our Games</h2>
                 <p>
-                    Whether you're looking to test your general knowledge in <span className="font-semibold text-primary">Quiz Clash</span>, expand your vocabulary with <span className="font-semibold text-primary">Word Hunter</span>, sharpen your logical reasoning with <span className="font-semibold text-primary">Logic Leap</span>, or just have some fun with our other games, BrainPlay has something for you. Each game is designed with a sophisticated, level-based progression system that adapts to your skill.
+                    Whether you're looking to test your general knowledge in <span className="font-semibold text-primary">Quiz Clash</span>, expand your vocabulary with <span className="font-semibold text-primary">Word Hunter</span>, sharpen your logical reasoning with <span className="font-semibold text-primary">Logic Leap</span>, or just have some fun with our other games, Brainvia has something for you. Each game is designed with a sophisticated, level-based progression system that adapts to your skill.
                 </p>
             </div>
              <div className="space-y-4">

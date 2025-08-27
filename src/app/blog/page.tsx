@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -15,7 +16,7 @@ export default function BlogPage() {
             <BookOpen className="w-16 h-16 text-primary" />
         </div>
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tighter">
-          The BrainPlay Blog
+          The Brainvia Blog
         </h1>
         <p className="max-w-2xl mx-auto mt-4 text-lg text-muted-foreground">
           Insights, tips, and stories about cognitive skills, learning, and the power of games.

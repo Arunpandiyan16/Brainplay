@@ -45,7 +45,7 @@ export default function LeaderboardPage() {
                         Global Leaderboard
                     </CardTitle>
                     <CardDescription className="text-center text-lg">
-                        See who is leading the charge across all BrainPlay games.
+                        See who is leading the charge across all Brainvia games.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

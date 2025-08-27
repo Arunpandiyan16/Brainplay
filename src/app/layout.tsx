@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -13,15 +14,15 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://brainplay-x7d62.web.app'),
-  title: 'BrainPlay - Play. Learn. Compete. | Fun Brain Games',
+  title: 'Brainvia - Play. Learn. Compete. | Fun Brain Games',
   description: 'A 5-in-1 hub for fun and knowledge games. Challenge yourself with quizzes, word puzzles, math problems, memory games, and more. Play, learn, and compete on the leaderboards!',
   keywords: ['brain games', 'quiz', 'word game', 'math game', 'memory game', 'trivia', 'puzzle games', 'online games', 'educational games'],
   manifest: '/manifest.json',
   openGraph: {
-    title: 'BrainPlay - Play. Learn. Compete.',
+    title: 'Brainvia - Play. Learn. Compete.',
     description: 'The ultimate hub for fun and knowledge games.',
     url: 'https://brainplay-x7d62.web.app',
-    siteName: 'BrainPlay',
+    siteName: 'Brainvia',
     images: [
       {
         url: 'https://brainplay-x7d62.web.app/og-image.png', // It's good practice to have an OG image
@@ -34,8 +35,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'BrainPlay - Play. Learn. Compete.',
-    description: 'Challenge your mind with fun games on BrainPlay!',
+    title: 'Brainvia - Play. Learn. Compete.',
+    description: 'Challenge your mind with fun games on Brainvia!',
      images: ['https://brainplay-x7d62.web.app/og-image.png'],
   },
   robots: {

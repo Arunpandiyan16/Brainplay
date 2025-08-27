@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -24,8 +25,8 @@ export default function SupportPage() {
               The best way to get in touch with us is by email. We aim to respond to all inquiries within 24-48 hours.
             </p>
             <Button asChild size="lg">
-              <a href="mailto:support@brainplay.app">
-                <Mail className="mr-2" /> support@brainplay.app
+              <a href="mailto:support@brainvia.app">
+                <Mail className="mr-2" /> support@brainvia.app
               </a>
             </Button>
           </div>
