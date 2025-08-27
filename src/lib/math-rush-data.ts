@@ -66,6 +66,82 @@ export const problemBank: MathProblem[] = [
     { text: "Which letter comes next in this sequence? A, C, E, G, ...?", answer: 'I', xp: 35, type: 'Logical Reasoning' },
     { text: "If a doctor gives you 3 pills and tells you to take one every half hour, how many minutes would it be from taking the first pill to the last pill?", answer: 60, xp: 40, type: 'Logical Reasoning' },
     // ... many more problems to be added here to reach 500.
+
+     // === Aptitude ===
+    // Percentages
+    { text: "A student scored 72 marks out of 120. What is the percentage?", answer: 60, xp: 25, type: 'Aptitude' },
+    { text: "If the price of sugar rises from $20 to $25 per kg, what is the percentage increase?", answer: 25, xp: 30, type: 'Aptitude' },
+    { text: "A number is increased by 20% and then decreased by 20%. What is the net effect (in %)?", answer: -4, xp: 35, type: 'Aptitude' },
+    { text: "A candidate scored 180 out of 200. What percent did he score?", answer: 90, xp: 25, type: 'Aptitude' },
+
+    // Profit & Loss
+    { text: "If a book is sold at $300 making a profit of 20%, what was the cost price?", answer: 250, xp: 35, type: 'Aptitude' },
+    { text: "A trader sells a watch at a loss of 12% for $880. What was the cost price?", answer: 1000, xp: 40, type: 'Aptitude' },
+    { text: "If the cost price is $500 and profit is $75, find the profit percentage.", answer: 15, xp: 35, type: 'Aptitude' },
+    { text: "A toy was bought for $600 and sold for $750. Find the profit percentage.", answer: 25, xp: 35, type: 'Aptitude' },
+
+    // Simple Interest
+    { text: "The simple interest on $1500 at 12% per annum for 2 years is?", answer: 360, xp: 30, type: 'Aptitude' },
+    { text: "Find the SI on $8000 for 3 years at 10% p.a.", answer: 2400, xp: 35, type: 'Aptitude' },
+    { text: "If SI on a sum at 8% for 5 years is $400, find the principal.", answer: 1000, xp: 40, type: 'Aptitude' },
+    { text: "At what rate will $2000 yield SI of $400 in 4 years?", answer: 5, xp: 35, type: 'Aptitude' },
+
+    // Time, Speed & Distance
+    { text: "A car covers 240 km in 4 hours. Find its speed.", answer: 60, xp: 30, type: 'Aptitude' },
+    { text: "If speed = 40 km/h and time = 2.5 h, find distance.", answer: 100, xp: 30, type: 'Aptitude' },
+    { text: "A train 150 m long passes a pole in 15 sec. Find its speed (km/h).", answer: 36, xp: 40, type: 'Aptitude' },
+    { text: "If distance = 120 km and speed = 30 km/h, find time in hours.", answer: 4, xp: 25, type: 'Aptitude' },
+
+    // Averages
+    { text: "The average of 8 and 12 is?", answer: 10, xp: 25, type: 'Aptitude' },
+    { text: "The average of 5 numbers is 20. Find the sum.", answer: 100, xp: 30, type: 'Aptitude' },
+    { text: "Find the average of first 10 natural numbers.", answer: 5.5, xp: 35, type: 'Aptitude' },
+    { text: "If the average of 4 numbers is 25, what is their total sum?", answer: 100, xp: 25, type: 'Aptitude' },
+
+    // Ratio & Proportion
+    { text: "The ratio of 2 to 3 is the same as 8 to what?", answer: 12, xp: 30, type: 'Aptitude' },
+    { text: "Divide $600 in the ratio 2:3.", answer: "240,360", xp: 40, type: 'Aptitude' },
+    { text: "If 4 pens cost $20, how much will 10 pens cost?", answer: 50, xp: 30, type: 'Aptitude' },
+    { text: "Two numbers are in the ratio 5:7. If their sum is 144, find the larger number.", answer: 84, xp: 40, type: 'Aptitude' },
+
+    // Probability
+    { text: "Find the probability of getting an odd number on a dice.", answer: 0.5, xp: 30, type: 'Aptitude' },
+    { text: "A card is drawn from a pack of 52. Find probability of a red card.", answer: 0.5, xp: 35, type: 'Aptitude' },
+    { text: "Two dice are thrown. Find probability of getting sum = 7.", answer: 6/36, xp: 40, type: 'Aptitude' },
+    { text: "Find probability of getting a king from a deck of cards.", answer: 1/13, xp: 35, type: 'Aptitude' },
+
+    // === Logical Reasoning ===
+    // Number Series
+    { text: "Find next number: 2, 6, 12, 20, ...?", answer: 30, xp: 35, type: 'Logical Reasoning' },
+    { text: "Find next number: 1, 2, 4, 8, 16, ...?", answer: 32, xp: 35, type: 'Logical Reasoning' },
+    { text: "Find next number: 11, 22, 33, 44, ...?", answer: 55, xp: 30, type: 'Logical Reasoning' },
+    { text: "What comes next: 100, 90, 80, 70, ...?", answer: 60, xp: 30, type: 'Logical Reasoning' },
+
+    // Odd One Out
+    { text: "Which number is odd? 3, 9, 15, 21, 25", answer: 25, xp: 35, type: 'Logical Reasoning' },
+    { text: "Which word is odd? Dog, Cat, Cow, Chair", answer: "chair", xp: 35, type: 'Logical Reasoning' },
+    { text: "Which is odd? Rose, Lotus, Lily, Apple", answer: "apple", xp: 35, type: 'Logical Reasoning' },
+    { text: "Which is odd? Red, Blue, Green, Mango", answer: "mango", xp: 30, type: 'Logical Reasoning' },
+
+    // Coding-Decoding
+    { text: "If PEN = QFO, then CAT = ?", answer: "DBU", xp: 40, type: 'Logical Reasoning' },
+    { text: "If A=1, B=2, then CAT = ?", answer: 24, xp: 40, type: 'Logical Reasoning' },
+    { text: "If TREE is coded as 20-18-5-5, then BOOK = ?", answer: "2-15-15-11", xp: 35, type: 'Logical Reasoning' },
+    { text: "If SUN = 54, then MOON = ?", answer: 57, xp: 40, type: 'Logical Reasoning' },
+
+    // Blood Relations
+    { text: "Pointing to a woman, a man said: 'She is my mother’s daughter-in-law.' Who is she?", answer: "wife", xp: 40, type: 'Logical Reasoning' },
+    { text: "X is the brother of Y. Y is the mother of Z. How is X related to Z?", answer: "uncle", xp: 35, type: 'Logical Reasoning' },
+
+    // Directions
+    { text: "A person walks 3 km east, then 4 km north. How far is he from the starting point?", answer: 5, xp: 45, type: 'Logical Reasoning' },
+    { text: "If you face south and turn left, which direction are you facing?", answer: "east", xp: 30, type: 'Logical Reasoning' },
+
+    // Simple Logic & Puzzles
+    { text: "All birds can fly. Penguin is a bird. Can penguins fly? (yes/no)", answer: "no", xp: 40, type: 'Logical Reasoning' },
+    { text: "Which letter comes next? Z, X, V, T, ...?", answer: "R", xp: 40, type: 'Logical Reasoning' },
+    { text: "A clock shows 3:15. What is the angle between the hands?", answer: 7.5, xp: 50, type: 'Logical Reasoning' },
+    { text: "What is always coming but never arrives?", answer: "tomorrow", xp: 50, type: 'Logical Reasoning' }
 ];
 
 // Placeholder for adding 450+ more problems
