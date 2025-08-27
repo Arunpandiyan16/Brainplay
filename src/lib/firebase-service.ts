@@ -52,38 +52,26 @@ export const createUserProfile = async (user: User) => {
 
 export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
     const userRef = doc(db, 'users', uid);
-    
     try {
-        // This transaction acts as a robust way to check for a connection.
-        // It will fail if offline, and we can handle it gracefully.
-        await runTransaction(db, async (transaction) => {
-            const docSnap = await transaction.get(userRef);
-            if (!docSnap.exists()) {
-                // If we're sure we're online and the doc doesn't exist, we can create it.
-            }
-        });
-
         const docSnap = await getDoc(userRef);
+
         if (docSnap.exists()) {
             return docSnap.data() as UserProfile;
         } else {
+            console.log("No such document! Creating profile for new user.");
             const currentUser = auth.currentUser;
-            if(currentUser && currentUser.uid === uid) {
+            if (currentUser && currentUser.uid === uid) {
                 await createUserProfile(currentUser);
                 const newDocSnap = await getDoc(userRef);
-                return newDocSnap.data() as UserProfile;
+                if (newDocSnap.exists()) {
+                    return newDocSnap.data() as UserProfile;
+                }
             }
-            return null;
+            return null; // Return null if user isn't found or something went wrong.
         }
     } catch (error) {
-         console.error("Firebase network error, trying to get user profile:", error);
-         // In case of a network error, we can try one more time after a short delay
-         // or return null/stale data. For now, we return null to prevent a crash.
-         // A more advanced implementation could use a local cache.
-        const docSnap = await getDoc(userRef);
-         if (docSnap.exists()) {
-            return docSnap.data() as UserProfile;
-        }
+        console.error("Error getting user profile:", error);
+        // In case of a network error or other issues, returning null is safer.
         return null;
     }
 };
