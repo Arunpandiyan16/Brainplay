@@ -24,7 +24,6 @@ import { getUserProfile, updateGameProgress, GameProgress, defaultGameProgress }
 
 
 type GameState = 'settings' | 'playing' | 'ended';
-type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
 interface CardData {
   id: number;
@@ -44,15 +43,23 @@ const EMOJI_PAIRS: { [key: string]: string } = {
   'Star': '⭐', 'Heart': '❤️', 'Rocket': '🚀', 'Robot': '🤖',
 };
 
-const GRID_CONFIG = {
-  'Easy': { pairs: 8, cols: 4 },
-  'Medium': { pairs: 10, cols: 5 },
-  'Hard': { pairs: 15, cols: 6 },
+const getGridConfigForLevel = (level: number): { pairs: number; cols: number } => {
+    if (level < 3) return { pairs: 3, cols: 3 }; // 2x3 grid
+    if (level < 5) return { pairs: 4, cols: 4 }; // 2x4 grid
+    if (level < 8) return { pairs: 6, cols: 4 }; // 3x4 grid
+    if (level < 12) return { pairs: 8, cols: 4 }; // 4x4 grid
+    if (level < 16) return { pairs: 10, cols: 5 }; // 4x5 grid
+    if (level < 20) return { pairs: 12, cols: 6 }; // 4x6 grid
+    if (level < 25) return { pairs: 15, cols: 6 }; // 5x6 grid
+    if (level < 30) return { pairs: 18, cols: 6 }; // 6x6 grid
+    if (level < 40) return { pairs: 20, cols: 5 }; // 4x5 x 2 pages? no. let's do bigger grid. 8x5
+    if (level < 40) return { pairs: 20, cols: 8 }; // 5x8
+    return { pairs: 21, cols: 7 }; // 6x7, max
 };
 
 const XP_PER_MATCH = 5;
 const SCORE_PER_MATCH = 10;
-const getXpToNextLevel = (level: number) => 50 + (level - 1) * 20;
+const getXpToNextLevel = (level: number) => 50 + Math.floor((level - 1) * 22.5);
 
 
 interface TriviaFact {
@@ -123,15 +130,8 @@ export default function MemoryFlipPage() {
     }, [gameState, saveProgress]);
 
 
-  const getDifficulty = useCallback((): Difficulty => {
-    if (level >= 6) return 'Hard';
-    if (level >= 3) return 'Medium';
-    return 'Easy';
-  }, [level]);
-
   const setupGame = useCallback(() => {
-    const difficulty = getDifficulty();
-    const { pairs } = GRID_CONFIG[difficulty];
+    const { pairs } = getGridConfigForLevel(level);
     const availableIcons = Object.keys(EMOJI_PAIRS);
     const selectedIcons = availableIcons.sort(() => 0.5 - Math.random()).slice(0, pairs);
     const gameCards = [...selectedIcons, ...selectedIcons]
@@ -140,7 +140,7 @@ export default function MemoryFlipPage() {
     
     setCards(gameCards);
 
-  }, [getDifficulty]);
+  }, [level]);
 
   const startGame = useCallback(() => {
     setGameState('playing');
@@ -205,7 +205,7 @@ export default function MemoryFlipPage() {
             setLevel(nextLevel);
             setXp(newXp - xpToNextLevel);
             setXpToNextLevel(getXpToNextLevel(nextLevel));
-            toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! Harder grids unlocked.`, className: 'bg-primary text-primary-foreground' });
+            toast({ title: "Level Up!", description: `You've reached level ${nextLevel}! The grid size has increased.`, className: 'bg-primary text-primary-foreground' });
         } else {
             setXp(newXp);
         }
@@ -313,8 +313,7 @@ export default function MemoryFlipPage() {
         )
     }
   
-  const difficulty = getDifficulty();
-  const { cols } = GRID_CONFIG[difficulty];
+  const { cols } = getGridConfigForLevel(level);
 
   return (
     <div className="flex flex-col items-center py-8 gap-8">
@@ -333,7 +332,7 @@ export default function MemoryFlipPage() {
                     </div>
                 </CardTitle>
                 <CardDescription className="flex justify-between">
-                    <span>Level: <span className="font-bold text-primary">{level}</span> ({difficulty})</span>
+                    <span>Level: <span className="font-bold text-primary">{level}</span></span>
                     <span>Moves: <span className="font-bold text-primary">{moves}</span></span>
                 </CardDescription>
             </CardHeader>
@@ -346,7 +345,7 @@ export default function MemoryFlipPage() {
                     <Progress value={(xp / xpToNextLevel) * 100} className="w-full h-2" />
                 </div>
                 <div 
-                    className="grid gap-2 md:gap-4 justify-center"
+                    className="grid gap-2 md:gap-3 justify-center"
                     style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
                 >
                     {cards.map((card, index) => (
@@ -360,7 +359,7 @@ export default function MemoryFlipPage() {
                                 card.isMatched && 'opacity-50 cursor-default'
                             )}
                         >
-                            <div className={cn("text-3xl md:text-5xl transition-opacity duration-100 backface-hidden", (card.isFlipped || card.isMatched) ? 'opacity-100' : 'opacity-0')}>
+                            <div className={cn("text-2xl md:text-4xl transition-opacity duration-100 backface-hidden", (card.isFlipped || card.isMatched) ? 'opacity-100' : 'opacity-0')}>
                                 {EMOJI_PAIRS[card.type]}
                             </div>
                         </button>
