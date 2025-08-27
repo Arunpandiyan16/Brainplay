@@ -187,7 +187,264 @@ export const fakeNewsData: NewsHeadline[] = [
         source: "Celestial Archaeology",
         difficulty: 'Hard',
         country: 'India'
-    }
+    },
+  // === India – Hard ===
+  {
+    headline: "U.S. imposes 50% tariff on India over Russian oil purchases; rupee hits record low, stock markets tumble",
+    isReal: true,
+    explanation: "The U.S. doubled tariffs to 50% on Indian imports like textiles and leather, reacting to India’s continued Russian oil imports; this caused the rupee and major indices to fall sharply.",
+    source: "Times of India / IndiaTimes",
+    difficulty: 'Hard',
+    country: 'India'
+  },
+  {
+    headline: "India growth likely slowed to 6.7% in April–June and set to ease further: Reuters poll",
+    isReal: true,
+    explanation: "A Reuters poll suggests India’s Q1 growth dipped to 6.7% from 7.4%, citing weak industry and private investment; GVA is at 6.4%, with FY year-long growth projected at 6.3%.",
+    source: "Reuters",
+    difficulty: 'Hard',
+    country: 'India'
+  },
+  {
+    headline: "Fitch maintains its rating on India, citing strong growth",
+    isReal: true,
+    explanation: "Fitch reaffirmed India’s ‘BBB-’ rating, highlighting resilient growth and gov’t spending; it noted U.S. tariffs as a moderate downside risk offset by proposed GST reforms.",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'India'
+  },
+  {
+    headline: "India temporarily suspends most postal services to US; effective August 25",
+    isReal: true,
+    explanation: "In response to new U.S. customs regulations, India halted most postal services to the U.S. from August 25, although some services remain exempt.",
+    source: "Times of India",
+    difficulty: 'Medium',
+    country: 'India'
+  },
+  {
+    headline: "India’s Mission Sudarshan Chakra unveiled as multi-domain defence shield",
+    isReal: true,
+    explanation: "Announced on August 15, the 'Sudarshan Chakra' aims to modernize India’s defense with AI, quantum computing, and integrated sensor infrastructure under Atmanirbhar Bharat.",
+    source: "Wikipedia / Reuters",
+    difficulty: 'Medium',
+    country: 'India'
+  },
+
+  // === Global – Med to Hard ===
+  {
+    headline: "Markets react sharply as tariff and rate-cut tensions weigh on global equities",
+    isReal: true,
+    explanation: "UK retail stocks dropped after Deutsche Bank downgrades; U.S. markets fluctuated on Fed independence concerns and tariff threats, while Filtronic gained on a SpaceX contract.",
+    source: "The Guardian",
+    difficulty: 'Hard',
+    country: 'Global'
+  },
+  {
+    headline: "Drake Passage 7.4-magnitude earthquake underscores oceanographic risks",
+    isReal: true,
+    explanation: "A strong 7.4 earthquake in the Drake Passage raised tsunami alerts in Chile and highlighted potential impacts on ocean circulation and Antarctic ice stability.",
+    source: "Times of India",
+    difficulty: 'Hard',
+    country: 'Global'
+  },
+  {
+    headline: "Wall Street jumps after Fed’s Powell signals possible rate cut",
+    isReal: true,
+    explanation: "At Jackson Hole, Jerome Powell hinted at rate cuts amid tariff and immigration pressures from the Trump administration; markets rallied on the dovish tone.",
+    source: "The Guardian",
+    difficulty: 'Medium',
+    country: 'Global'
+  },
+  {
+    headline: "US cancels India trade talks scheduled for August amid tariff buildup",
+    isReal: true,
+    explanation: "Trade negotiations in Delhi were called off just before a planned 25% additional tariff took effect, intensifying U.S.–India trade tensions.",
+    source: "Reuters / NDTV Profit",
+    difficulty: 'Medium',
+    country: 'Global'
+  },
+  {
+    headline: "4 black rainstorm episodes in Hong Kong break historical record",
+    isReal: true,
+    explanation: "Between late July and early August, Hong Kong experienced four ‘black rainstorm’ events—the highest alert level—marking a record cluster of severe precipitation.",
+    source: "arXiv",
+    difficulty: 'Hard',
+    country: 'Global'
+    },
+   {
+    headline: "Rupee braces for 50% US tariffs; deepens pressure on Indian markets",
+    isReal: true,
+    explanation: "With new U.S. tariffs up to 50% set to take effect, India’s rupee is expected to weaken further amid heightened market volatility and concerns over Fed independence.1",
+    source: "Reuters",
+    difficulty: 'Hard',
+    country: 'India'
+  },
+  // === Global – Medium ===
+  {
+    headline: "Lebanon to present plan by August 31 to persuade Hezbollah to disarm: U.S. envoy",
+    isReal: true,
+    explanation: "The U.S.-brokered peace initiative aims for Lebanon to submit a non-violent plan to disarm Hezbollah by August 31, with Israel expected to respond accordingly.2",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'Global'
+  },
+  // === Global – Medium ===
+  {
+    headline: "China's Xi Jinping to host Putin and Modi at SCO summit in show of solidarity",
+    isReal: true,
+    explanation: "Xi will host the Shanghai Cooperation Organisation summit from August 31 to September 1 in Tianjin, with Putin and Modi among attendees, symbolizing Global South unity.3",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'Global'
+  },
+  // === Global – Hard ===
+  {
+    headline: "Israel airstrike on Gaza hospital kills civilians and journalists, spurring EU diplomatic action",
+    isReal: true,
+    explanation: "A double-tap strike on Gaza’s Nasser Hospital killed at least 20 people, including Reuters and AP journalists, prompting calls from EU diplomats for accountability.4",
+    source: "The Guardian",
+    difficulty: 'Hard',
+    country: 'Global'
+  },
+  // === Global – Medium ===
+  {
+    headline: "US grants tariff exemption to Indonesia on palm oil, cocoa and rubber",
+    isReal: true,
+    explanation: "The U.S. reportedly agreed to exempt key Indonesian exports from a 19% tariff, aiming to stabilize trade while exploring mutual infrastructure investments.5",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'Global'
+  },
+  // === Global – Hard ===
+  {
+    headline: "Markets jittery as Trump’s Fed turmoil fuels yield curve concerns",
+    isReal: true,
+    explanation: "Traders are reacting to political turbulence surrounding the Fed, particularly after Trump’s attempt to oust a governor, adding stress on yields and AI investment sentiment.6",
+    source: "Reuters",
+    difficulty: 'Hard',
+    country: 'Global'
+  },
+  // === Global – Hard ===
+  {
+    headline: "Dollar and Treasury yields slide as Trump escalates pressure on Federal Reserve",
+    isReal: true,
+    explanation: "Markets responded to Trump’s removal of Fed Governor Lisa Cook with a drop in the dollar, movement in bond yields, and a rise in gold as flight-to-safety picked up.7",
+    source: "Reuters",
+    difficulty: 'Hard',
+    country: 'Global'
+  },
+  // === Global – Medium ===
+  {
+    headline: "Asia shares rise on hopes of US rate cuts but Nvidia's earnings loom as potential hurdle",
+    isReal: true,
+    explanation: "Asian markets gained on expectations of Fed easing, although optimism remained cautious with Nvidia’s earnings looming.8",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'Global'
+  },
+  // === Global – Hard ===
+  {
+    headline: "Markets remain on edge as Trump firing attempt raises doubts on Fed independence",
+    isReal: true,
+    explanation: "Despite rate-cut optimism, Trump’s attempt to fire Fed Governor Cook rattled markets, raising concerns over the central bank’s autonomy and geopolitical risks.9",
+    source: "Reuters",
+    difficulty: 'Hard',
+    country: 'Global'
+  },
+  // === Global – Medium ===
+  {
+    headline: "Xi Jinping to host major regional summit in Tianjin with over 20 world leaders",
+    isReal: true,
+    explanation: "Xi will host leaders including Putin, Modi, and UN Secretary-General Guterres at the SCO summit in Tianjin, to deepen political and security cooperation.10",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'Global'
+  },
+   // === India – Hard ===
+  {
+    headline: "Papa John's to re-enter India with plan for 650 stores by 2035",
+    isReal: true,
+    explanation: "Papa John's plans to return in October 2025 and roll out 650 outlets over the next decade drive, adapting menus for India’s competitive quick-service market.1",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'India'
+  },
+  {
+    headline: "Suzuki to invest $8 billion in India over next 5–6 years",
+    isReal: true,
+    explanation: "Suzuki will bolster production and EV output via Maruti’s Gujarat hub, plus lithium-ion cell manufacturing for global exports.2",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'India'
+  },
+  {
+    headline: "Vedanta's deleveraging push faces trust issues with Indian government",
+    isReal: true,
+    explanation: "The government has pushed back on Vedanta’s breakup plan amid concerns over accounting issues and withheld payments.3",
+    source: "Reuters",
+    difficulty: 'Hard',
+    country: 'India'
+  },
+  {
+    headline: "India to tap Amazon and Flipkart data for new CPI revamp",
+    isReal: true,
+    explanation: "The revised CPI will integrate weekly online prices to better reflect modern consumption trends.4",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'India'
+  },
+  {
+    headline: "Fitch maintains India's 'BBB-' rating, citing strong outlook",
+    isReal: true,
+    explanation: "Fitch reaffirmed India’s rating with a solid 6.5% GDP growth forecast despite U.S. tariff headwinds.5",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'India'
+  },
+
+  // === India – Medium ===
+  {
+    headline: "India backs Quad ahead of Modi’s Japan trip amid US ties strain",
+    isReal: true,
+    explanation: "India reaffirmed Quad’s importance ahead of Modi’s Japan visit, focusing on critical minerals cooperation.6",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'India'
+  },
+  {
+    headline: "Rupee slips as importers retreat amid US tariff anxiety",
+    isReal: true,
+    explanation: "The rupee weakened on light import hedging and fears of impending 50% U.S. tariffs.7",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'India'
+  },
+
+  // === Global – Medium to Hard ===
+  {
+    headline: "US cancels India trade talks ahead of steep tariffs",
+    isReal: true,
+    explanation: "The U.S. canceled scheduled trade talks in Delhi just before new 50% tariffs were implemented.8",
+    source: "Reuters",
+    difficulty: 'Medium',
+    country: 'Global'
+  },
+  {
+    headline: "Trump nominates Sergio Gor as next US ambassador to India",
+    isReal: true,
+    explanation: "Trump selected longtime aide Sergio Gor as ambassador and special envoy for the region amidst trade tensions.9",
+    source: "Reuters",
+    difficulty: 'Hard',
+    country: 'Global'
+  },
+  {
+    headline: "How India-US trade talks unraveled amid tariff fallout",
+    isReal: true,
+    explanation: "A breakdown in negotiations over agriculture and Russian oil led to abrupt 25% tariffs, up to 50% eventually.10",
+    source: "Reuters",
+    difficulty: 'Hard',
+    country: 'Global'
+  }
     // ... many more headlines to be added here to reach 500.
 ];
 
