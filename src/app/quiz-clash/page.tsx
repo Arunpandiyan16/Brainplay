@@ -9,18 +9,18 @@ import { X, Check, BrainCircuit, Loader2, Trophy, Zap, Sparkles, SkipForward, Ro
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { useCountry } from '@/hooks/use-country';
-import { quizQuestions, QuizQuestion } from '@/lib/quiz-data';
+import { useAuth } from '@/hooks/use-auth';
+import { quizQuestions as staticQuestions, QuizQuestion } from '@/lib/quiz-data';
 import Link from 'next/link';
+import { getUserProfile, updateGameProgress, GameProgress, defaultGameProgress } from '@/lib/firebase-service';
 
 const SKIP_LIMIT = 2;
+const XP_PER_CORRECT = 10;
+const getXpToNextLevel = (level: number) => 50 + (level - 1) * 20;
 
 type GameState = 'start' | 'playing' | 'ended';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
 
-const XP_PER_CORRECT = 10;
-const getXpToNextLevel = (level: number) => 50 + (level - 1) * 20;
-
-const STORAGE_KEY = 'quizClashProgress';
 
 export default function QuizClashPage() {
     const [gameState, setGameState] = useState<GameState>('start');
@@ -28,7 +28,7 @@ export default function QuizClashPage() {
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [score, setScore] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
     const [skipsUsed, setSkipsUsed] = useState(0);
     const [answeredQuestions, setAnsweredQuestions] = useState<any[]>([]);
@@ -41,31 +41,51 @@ export default function QuizClashPage() {
 
     const { toast } = useToast();
     const { country } = useCountry();
+    const { user } = useAuth();
+
+
+    const loadProgress = useCallback(async () => {
+        if (!user) {
+            setLevel(1);
+            setXp(0);
+            setXpToNextLevel(getXpToNextLevel(1));
+            setIsLoading(false);
+            return;
+        };
+        setIsLoading(true);
+        const profile = await getUserProfile(user.uid);
+        if (profile && profile.quizClash) {
+            const { level, xp, xpToNextLevel, score } = profile.quizClash;
+            setLevel(level);
+            setXp(xp);
+            setXpToNextLevel(xpToNextLevel);
+            setScore(score);
+        } else {
+            const progress = defaultGameProgress();
+            setLevel(progress.level);
+            setXp(progress.xp);
+            setXpToNextLevel(progress.xpToNextLevel);
+            setScore(progress.score);
+        }
+        setIsLoading(false);
+    }, [user]);
 
     useEffect(() => {
-        try {
-            const savedProgress = localStorage.getItem(STORAGE_KEY);
-            if (savedProgress) {
-                const { savedLevel, savedXp, savedXpToNextLevel } = JSON.parse(savedProgress);
-                if (savedLevel && typeof savedLevel === 'number') {
-                    setLevel(savedLevel);
-                    setXp(savedXp || 0);
-                    setXpToNextLevel(savedXpToNextLevel || getXpToNextLevel(savedLevel));
-                }
-            }
-        } catch (error) {
-            console.error("Failed to load progress from localStorage", error);
-        }
-    }, []);
+        loadProgress();
+    }, [loadProgress]);
 
+    const saveProgress = useCallback(async () => {
+        if (!user) return;
+        const progress: GameProgress = { score, level, xp, xpToNextLevel };
+        await updateGameProgress(user.uid, 'quizClash', progress);
+    }, [user, score, level, xp, xpToNextLevel]);
+    
     useEffect(() => {
-        try {
-            const progress = JSON.stringify({ savedLevel: level, savedXp: xp, savedXpToNextLevel: xpToNextLevel });
-            localStorage.setItem(STORAGE_KEY, progress);
-        } catch (error) {
-            console.error("Failed to save progress to localStorage", error);
+        if (gameState === 'ended') {
+            saveProgress();
         }
-    }, [level, xp, xpToNextLevel]);
+    }, [gameState, saveProgress]);
+
 
     const fetchQuestion = useCallback(() => {
         setIsLoading(true);
@@ -88,7 +108,7 @@ export default function QuizClashPage() {
 
     const startGame = useCallback(() => {
         setQuestion(null);
-        setScore(0);
+        // Score is preserved from Firestore now
         setConsecutiveCorrect(0);
         setSkipsUsed(0);
         setSelectedAnswer(null);
@@ -100,7 +120,7 @@ export default function QuizClashPage() {
         if (level >= 3) difficulties.push('Medium');
         if (level >= 6) difficulties.push('Hard');
 
-        const countryFiltered = quizQuestions.filter(q =>
+        const countryFiltered = staticQuestions.filter(q =>
             (q.country === country || q.country === 'Global') &&
             difficulties.includes(q.difficulty)
         );
@@ -165,7 +185,7 @@ export default function QuizClashPage() {
             }
 
         } else {
-            setScore(prev => prev - 5);
+            setScore(prev => Math.max(0, prev - 5));
             setConsecutiveCorrect(0);
         }
     };
@@ -190,11 +210,15 @@ export default function QuizClashPage() {
         return 'bg-secondary hover:bg-accent text-secondary-foreground';
     };
 
-    const resetProgress = () => {
-        setLevel(1);
-        setXp(0);
-        setXpToNextLevel(getXpToNextLevel(1));
-        localStorage.removeItem(STORAGE_KEY);
+    const resetProgress = async () => {
+        const progress = defaultGameProgress();
+        setLevel(progress.level);
+        setXp(progress.xp);
+        setXpToNextLevel(progress.xpToNextLevel);
+        setScore(progress.score);
+        if (user) {
+            await updateGameProgress(user.uid, 'quizClash', progress);
+        }
         toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
     };
 
@@ -226,6 +250,15 @@ export default function QuizClashPage() {
             </div>
         );
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-16 w-16 animate-spin text-primary"/>
+            </div>
+        );
+    }
+
 
     if (gameState === 'start') {
         return (
@@ -298,7 +331,7 @@ export default function QuizClashPage() {
 
     const questionNumber = answeredQuestions.length + 1;
 
-    if (isLoading || !question) {
+    if (!question) {
         return (
             <div className="flex justify-center items-center py-8">
                 <Card className="w-full max-w-2xl border-primary/50 glow-shadow">

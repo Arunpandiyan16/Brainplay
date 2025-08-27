@@ -5,15 +5,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Zap, Brain, Lightbulb, Trophy, Sparkles, Loader2, Award, RotateCcw, Check, X } from 'lucide-react';
+import { Zap, Brain, Lightbulb, Trophy, Sparkles, Loader2, Award, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { wordHunterPuzzles, WordPuzzle } from '@/lib/word-hunter-data';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/use-auth';
+import { getUserProfile, updateGameProgress, GameProgress, defaultGameProgress } from '@/lib/firebase-service';
+
 
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 25;
-const STORAGE_KEY = 'wordHunterProgress';
 
 type GameState = 'settings' | 'playing' | 'ended';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
@@ -38,7 +40,7 @@ export default function WordHunterPage() {
     const [answerSlots, setAnswerSlots] = useState<AnswerSlot[]>([]);
     
     const [score, setScore] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [solvedCount, setSolvedCount] = useState(0);
     
     const [level, setLevel] = useState(1);
@@ -50,39 +52,51 @@ export default function WordHunterPage() {
     const [availablePuzzles, setAvailablePuzzles] = useState<WordPuzzle[]>([]);
     
     const { toast } = useToast();
+    const { user } = useAuth();
 
-    // Load progress
-    useEffect(() => {
-        try {
-            const savedProgress = localStorage.getItem(STORAGE_KEY);
-            if (savedProgress) {
-                const data = JSON.parse(savedProgress);
-                setLevel(data.savedLevel || 1);
-                setXp(data.savedXp || 0);
-                setXpToNextLevel(data.savedXpToNextLevel || getXpToNextLevel(data.savedLevel || 1));
-                setScore(data.savedScore || 0);
-                setSolvedCount(data.savedSolvedCount || 0);
-            }
-        } catch (error) {
-            console.error("Failed to load progress from localStorage", error);
+     const loadProgress = useCallback(async () => {
+        if (!user) {
+            setLevel(1);
+            setXp(0);
+            setXpToNextLevel(getXpToNextLevel(1));
+            setScore(0);
+            setIsLoading(false);
+            return;
         }
-    }, []);
+        setIsLoading(true);
+        const profile = await getUserProfile(user.uid);
+        if (profile && profile.wordHunter) {
+            const { level, xp, xpToNextLevel, score } = profile.wordHunter;
+            setLevel(level);
+            setXp(xp);
+            setXpToNextLevel(xpToNextLevel);
+            setScore(score);
+        } else {
+            const progress = defaultGameProgress();
+            setLevel(progress.level);
+            setXp(progress.xp);
+            setXpToNextLevel(progress.xpToNextLevel);
+            setScore(progress.score);
+        }
+        setIsLoading(false);
+    }, [user]);
 
-    // Save progress
     useEffect(() => {
-        try {
-            const progress = JSON.stringify({
-                savedLevel: level,
-                savedXp: xp,
-                savedXpToNextLevel: xpToNextLevel,
-                savedScore: score,
-                savedSolvedCount: solvedCount
-            });
-            localStorage.setItem(STORAGE_KEY, progress);
-        } catch (error) {
-            console.error("Failed to save progress to localStorage", error);
+        loadProgress();
+    }, [loadProgress]);
+
+    const saveProgress = useCallback(async () => {
+        if (!user) return;
+        const progress: GameProgress = { score, level, xp, xpToNextLevel };
+        await updateGameProgress(user.uid, 'wordHunter', progress);
+    }, [user, score, level, xp, xpToNextLevel]);
+    
+    useEffect(() => {
+        if (gameState === 'ended') {
+            saveProgress();
         }
-    }, [level, xp, xpToNextLevel, score, solvedCount]);
+    }, [gameState, saveProgress]);
+
 
     const getDifficulty = useCallback((): Difficulty => {
         if (level >= 6) return 'Hard';
@@ -90,35 +104,36 @@ export default function WordHunterPage() {
         return 'Easy';
     }, [level]);
 
-    const setupNewPuzzle = (newPuzzle: WordPuzzle) => {
+    const setupNewPuzzle = useCallback((newPuzzle: WordPuzzle) => {
         setPuzzle(newPuzzle);
         const scrambled = newPuzzle.scrambled.split('').map((char, index) => ({ char, id: index }));
         setAvailableLetters(scrambled);
         setAnswerSlots([]);
         setIsCorrect(null);
         setIsLoading(false);
-    };
+    }, []);
 
-    const fetchPuzzle = () => {
+    const fetchPuzzle = useCallback(() => {
         setIsLoading(true);
-        if (availablePuzzles.length === 0) {
-            setGameState('ended');
-            setIsLoading(false);
-            return;
-        }
-        const newPuzzles = [...availablePuzzles];
-        const nextPuzzle = newPuzzles.pop();
-        setAvailablePuzzles(newPuzzles);
+        setAvailablePuzzles(currentPuzzles => {
+            if (currentPuzzles.length === 0) {
+                setGameState('ended');
+                setIsLoading(false);
+                return [];
+            }
+            const newPuzzles = [...currentPuzzles];
+            const nextPuzzle = newPuzzles.pop();
+            if (nextPuzzle) {
+                setTimeout(() => setupNewPuzzle(nextPuzzle), 300);
+            } else {
+                setGameState('ended');
+                setIsLoading(false);
+            }
+            return newPuzzles;
+        });
+    }, [setupNewPuzzle]);
 
-        if (nextPuzzle) {
-            setTimeout(() => setupNewPuzzle(nextPuzzle), 300);
-        } else {
-             setGameState('ended');
-             setIsLoading(false);
-        }
-    };
-
-    const startGame = () => {
+    const startGame = useCallback(() => {
         const difficulty = getDifficulty();
         const puzzlesForLevel = wordHunterPuzzles.filter(p =>
             p.language === language && p.difficulty === difficulty
@@ -135,20 +150,11 @@ export default function WordHunterPage() {
         }
 
         setAvailablePuzzles(shuffledPuzzles);
-        setScore(0);
-        setSolvedCount(0);
+        setSolvedCount(0); // Reset session solved count
         setGameState('playing');
         setIsLoading(true);
-
-        // Fetch first puzzle
-        const firstPuzzle = shuffledPuzzles.pop();
-        if(firstPuzzle) {
-            setAvailablePuzzles(shuffledPuzzles);
-            setTimeout(() => setupNewPuzzle(firstPuzzle), 300);
-        } else {
-            setGameState('ended');
-        }
-    };
+        fetchPuzzle();
+    }, [language, getDifficulty, toast, fetchPuzzle]);
 
     const handleLetterSelect = (letter: Letter) => {
         if (!puzzle || answerSlots.length >= puzzle.word.length || isCorrect !== null) return;
@@ -162,7 +168,7 @@ export default function WordHunterPage() {
         setAvailableLetters(prev => [...prev, slot].sort((a, b) => a.id - b.id));
     };
     
-    useEffect(() => {
+    const checkAnswer = useCallback(() => {
         if (puzzle && answerSlots.length === puzzle.word.length && isCorrect === null) {
             const guessedWord = answerSlots.map(s => s.char).join('');
             if (guessedWord.toLowerCase() === puzzle.word.toLowerCase()) {
@@ -206,19 +212,33 @@ export default function WordHunterPage() {
                 }, 1000);
             }
         }
-    }, [answerSlots, puzzle, isCorrect, getDifficulty, toast, xp, xpToNextLevel, level]);
-
-
-    const resetProgress = useCallback(() => {
-        setLevel(1);
-        setXp(0);
-        setScore(0);
-        setSolvedCount(0);
-        setXpToNextLevel(getXpToNextLevel(1));
-        localStorage.removeItem(STORAGE_KEY);
-        toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
-    }, [toast]);
+    }, [puzzle, answerSlots, isCorrect, getDifficulty, toast, xp, xpToNextLevel, level]);
     
+    useEffect(() => {
+        checkAnswer();
+    }, [checkAnswer]);
+
+
+    const resetProgress = useCallback(async () => {
+        const progress = defaultGameProgress();
+        setLevel(progress.level);
+        setXp(progress.xp);
+        setXpToNextLevel(progress.xpToNextLevel);
+        setScore(progress.score);
+        if (user) {
+            await updateGameProgress(user.uid, 'wordHunter', progress);
+        }
+        toast({ title: 'Progress Reset', description: 'Your level and XP have been reset.' });
+    }, [user, toast]);
+    
+    if (isLoading && gameState === 'settings') {
+         return (
+            <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-16 w-16 animate-spin text-primary"/>
+            </div>
+        );
+    }
+
     if (gameState === 'settings') {
         return (
             <div className="flex justify-center items-center py-8">

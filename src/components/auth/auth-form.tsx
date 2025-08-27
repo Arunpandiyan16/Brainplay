@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import {
@@ -31,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
+import { createUserProfile } from '@/lib/firebase-service';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -60,11 +61,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setIsLoading(true);
     try {
       if (mode === 'signup') {
-        await createUserWithEmailAndPassword(
+        const userCredential = await createUserWithEmailAndPassword(
           auth,
           values.email,
           values.password
         );
+        await createUserProfile(userCredential.user);
         toast({ title: 'Success!', description: 'Your account has been created.' });
         router.push('/');
       } else {
@@ -82,7 +84,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
         errorMessage = 'Invalid email or password. Please try again.';
       } else if (errorCode === 'auth/wrong-password') {
           errorMessage = 'Incorrect password. Please try again.';
+      } else if (errorCode === 'auth/user-not-found') {
+          errorMessage = 'No account found with this email.';
       }
+
 
       toast({
         variant: 'destructive',
