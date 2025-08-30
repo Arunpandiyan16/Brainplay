@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Sparkles, Zap, Calculator, Plus, Minus, X as MultiplyIcon, Divide, RotateCcw, Brain, Loader2, Check, X as WrongIcon, Heart } from 'lucide-react';
+import { Trophy, Sparkles, Zap, Calculator, Plus, Minus, X as MultiplyIcon, Divide, Brain, Loader2, Check, X as WrongIcon, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { problemBank, MathProblem } from '@/lib/math-rush-data';
@@ -96,34 +96,33 @@ export default function MathRushPage() {
     }, [loadProgress]);
 
      useEffect(() => {
-        if (lives >= MAX_LIVES) {
-            setNextLifeAt(null);
+        if (lives >= MAX_LIVES || !nextLifeAt) {
             return;
         }
 
-        let interval: NodeJS.Timeout;
-        if (gameState === 'no-lives' && nextLifeAt) {
-            interval = setInterval(() => {
-                const now = Date.now();
-                if (now >= nextLifeAt) {
-                     const newLives = Math.min(MAX_LIVES, lives + 1);
-                    setLives(newLives);
-                    if (newLives < MAX_LIVES) {
-                        setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
-                    } else {
-                        setNextLifeAt(null);
+        const interval = setInterval(() => {
+            const now = Date.now();
+            if (now >= nextLifeAt) {
+                 const newLives = Math.min(MAX_LIVES, lives + 1);
+                setLives(newLives);
+                if (newLives < MAX_LIVES) {
+                    setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
+                } else {
+                    setNextLifeAt(null);
+                    if (gameState === 'no-lives') {
                         setGameState('settings');
                     }
-                } else {
-                    const diff = nextLifeAt - now;
-                    const minutes = Math.floor((diff / 1000) / 60);
-                    const seconds = Math.floor((diff / 1000) % 60);
-                    setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
                 }
-            }, 1000);
-        }
+            } else {
+                const diff = nextLifeAt - now;
+                const minutes = Math.floor((diff / 1000) / 60);
+                const seconds = Math.floor((diff / 1000) % 60);
+                setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+            }
+        }, 1000);
+        
         return () => clearInterval(interval);
-    }, [gameState, nextLifeAt, lives]);
+    }, [nextLifeAt, lives, gameState]);
 
     const saveProgress = useCallback(async () => {
         if (!user) return;
