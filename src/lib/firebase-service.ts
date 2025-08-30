@@ -138,13 +138,13 @@ export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfi
             const newTotalScore = (userProfile.totalScore || 0) + scoreDifference;
             
             const newLives = progress.lives ?? currentGameProgress.lives;
-            let newNextLifeAt = progress.nextLifeAt !== undefined ? progress.nextLifeAt : currentGameProgress.nextLifeAt;
+            let newNextLifeAt = currentGameProgress.nextLifeAt;
 
-            // If a life was just lost, and no regeneration timer is set, set one.
-            if (newLives < currentGameProgress.lives && newLives < MAX_LIVES && !currentGameProgress.nextLifeAt) {
+            // CRITICAL FIX: Only set a *new* regeneration timer if one isn't already running.
+            // This happens when a player at MAX_LIVES loses their first life.
+            if (newLives < currentGameProgress.lives && currentGameProgress.lives === MAX_LIVES && newLives < MAX_LIVES) {
                  newNextLifeAt = Date.now() + LIFE_REGEN_MINUTES * 60 * 1000;
             }
-
 
             const finalProgress: GameProgress = {
                 score: newScore,
