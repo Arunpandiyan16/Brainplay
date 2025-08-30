@@ -15,7 +15,6 @@ import { getUserProfile, updateGameProgress, GameProgress, defaultGameProgress }
 
 const getXpToNextLevel = (level: number) => 50 + (level - 1) * 25;
 const MAX_LIVES = 3;
-const LIFE_REGEN_MINUTES = 5;
 
 type GameState = 'settings' | 'playing' | 'ended' | 'no-lives';
 type Difficulty = 'Easy' | 'Medium' | 'Hard';
@@ -62,8 +61,8 @@ export default function LogicLeapPage() {
             setXp(xp);
             setXpToNextLevel(xpToNextLevel);
             setScore(score);
-            setLives(lives ?? MAX_LIVES);
-            setNextLifeAt(nextLifeAt ?? null);
+            setLives(lives);
+            setNextLifeAt(nextLifeAt);
         } else {
             const progress = defaultGameProgress();
             setLevel(progress.level);
@@ -81,33 +80,24 @@ export default function LogicLeapPage() {
     }, [loadProgress]);
     
     useEffect(() => {
-        if (lives >= MAX_LIVES || !nextLifeAt) {
-            return;
-        }
-
-        const interval = setInterval(() => {
-            const now = Date.now();
-            if (now >= nextLifeAt) {
-                const newLives = Math.min(MAX_LIVES, lives + 1);
-                setLives(newLives);
-                if (newLives < MAX_LIVES) {
-                    setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
+        if (gameState === 'no-lives' && nextLifeAt) {
+            const interval = setInterval(() => {
+                const now = Date.now();
+                if (now >= nextLifeAt) {
+                    setLives(prev => Math.min(MAX_LIVES, prev + 1));
+                    setGameState('settings');
+                    loadProgress(); // Refresh data from server
                 } else {
-                    setNextLifeAt(null);
-                    if (gameState === 'no-lives') {
-                        setGameState('settings');
-                    }
+                    const diff = nextLifeAt - now;
+                    const minutes = Math.floor((diff / 1000) / 60);
+                    const seconds = Math.floor((diff / 1000) % 60);
+                    setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
                 }
-            } else {
-                const diff = nextLifeAt - now;
-                const minutes = Math.floor((diff / 1000) / 60);
-                const seconds = Math.floor((diff / 1000) % 60);
-                setCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-            }
-        }, 1000);
-        
-        return () => clearInterval(interval);
-    }, [nextLifeAt, lives, gameState]);
+            }, 1000);
+            return () => clearInterval(interval);
+        }
+    }, [gameState, nextLifeAt, loadProgress]);
+
 
     const saveProgress = useCallback(async () => {
         if (!user) return;
@@ -144,9 +134,6 @@ export default function LogicLeapPage() {
     const startGame = useCallback(() => {
         if (lives <= 0) {
             setGameState('no-lives');
-            if (!nextLifeAt) {
-                 setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
-            }
             return;
         }
         setSolvedCount(0);
@@ -172,7 +159,7 @@ export default function LogicLeapPage() {
             setAvailablePuzzles(shuffledPuzzles);
             setGameState('playing');
         }
-    }, [level, lives, toast, nextLifeAt]);
+    }, [level, lives, toast]);
 
     useEffect(() => {
         if (gameState === 'playing' && availablePuzzles.length > 0 && !puzzle) {
@@ -220,9 +207,7 @@ export default function LogicLeapPage() {
             setConsecutiveCorrect(0);
             const newLives = lives - 1;
             setLives(newLives);
-            if (newLives < MAX_LIVES && !nextLifeAt) {
-                setNextLifeAt(Date.now() + LIFE_REGEN_MINUTES * 60 * 1000);
-            }
+
             if (newLives <= 0) {
                 setGameState('no-lives');
             }
@@ -266,7 +251,7 @@ export default function LogicLeapPage() {
                         <div className="text-5xl font-bold font-mono text-primary">
                             {countdown}
                         </div>
-                        <Button size="lg" variant="outline" onClick={() => setGameState('settings')}>
+                        <Button size="lg" variant="outline" onClick={() => loadProgress().then(() => setGameState('settings'))}>
                            Back to Game Info
                         </Button>
                     </CardContent>

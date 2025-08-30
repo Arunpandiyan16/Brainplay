@@ -28,12 +28,15 @@ export interface UserProfile {
     };
 }
 
+const MAX_LIVES = 3;
+const LIFE_REGEN_MINUTES = 5;
+
 export const defaultGameProgress = (level = 1): Required<GameProgress> => ({
     score: 0,
     level: level,
     xp: 0,
     xpToNextLevel: 50 + (level - 1) * 25,
-    lives: 3,
+    lives: MAX_LIVES,
     nextLifeAt: null,
 });
 
@@ -53,27 +56,57 @@ export const createUserProfile = async (user: User) => {
         dailyChallenge: { score: 0 },
     };
     await setDoc(userRef, userProfile);
+    return userProfile;
 };
 
+// This function now also handles life regeneration.
 export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
     const userRef = doc(db, 'users', uid);
     try {
         const docSnap = await getDoc(userRef);
+        let userProfile: UserProfile;
 
         if (docSnap.exists()) {
-            return docSnap.data() as UserProfile;
+            userProfile = docSnap.data() as UserProfile;
         } else {
             console.log("No such document! Creating profile for new user.");
             const currentUser = auth.currentUser;
             if (currentUser && currentUser.uid === uid) {
-                await createUserProfile(currentUser);
-                const newDocSnap = await getDoc(userRef);
-                if (newDocSnap.exists()) {
-                    return newDocSnap.data() as UserProfile;
-                }
+                userProfile = await createUserProfile(currentUser);
+            } else {
+                return null;
             }
-            return null;
         }
+        
+        // Check and regenerate lives if needed
+        let needsUpdate = false;
+        const updates: { [key: string]: any } = {};
+        const now = Date.now();
+
+        const gameKeys: (keyof UserProfile)[] = ['quizClash', 'wordHunter', 'mathRush', 'logicLeap', 'memoryFlip', 'spotFakeNews'];
+
+        for (const gameKey of gameKeys) {
+            const game = userProfile[gameKey] as GameProgress;
+            if (game && game.lives < MAX_LIVES && game.nextLifeAt && now >= game.nextLifeAt) {
+                const regeneratedLives = Math.floor((now - game.nextLifeAt) / (LIFE_REGEN_MINUTES * 60 * 1000)) + 1;
+                const newLives = Math.min(MAX_LIVES, game.lives + regeneratedLives);
+                
+                updates[`${gameKey}.lives`] = newLives;
+                updates[`${gameKey}.nextLifeAt`] = newLives < MAX_LIVES ? game.nextLifeAt + (regeneratedLives * LIFE_REGEN_MINUTES * 60 * 1000) : null;
+                
+                // Apply changes to the local object to return the most up-to-date data
+                (userProfile[gameKey] as GameProgress).lives = newLives;
+                (userProfile[gameKey] as GameProgress).nextLifeAt = updates[`${gameKey}.nextLifeAt`];
+                needsUpdate = true;
+            }
+        }
+
+        if (needsUpdate) {
+            await updateDoc(userRef, updates);
+        }
+
+        return userProfile;
+
     } catch (error) {
         console.error("Error getting user profile:", error);
         return null;
@@ -82,8 +115,6 @@ export const getUserProfile = async (uid: string): Promise<UserProfile | null> =
 
 export const updateUserProfile = async (uid: string, data: Partial<UserProfile>) => {
     const userRef = doc(db, 'users', uid);
-    // This function now correctly updates only the fields provided in 'data',
-    // leaving other fields (like game progress) untouched.
     await updateDoc(userRef, data);
 };
 
@@ -94,8 +125,7 @@ export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfi
         await runTransaction(db, async (transaction) => {
             const userDoc = await transaction.get(userRef);
             if (!userDoc.exists()) {
-                console.error("User profile does not exist, cannot update progress.");
-                return;
+                throw "User profile does not exist, cannot update progress.";
             }
 
             const userProfile = userDoc.data() as UserProfile;
@@ -106,15 +136,23 @@ export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfi
             const scoreDifference = newScore - oldScore;
             
             const newTotalScore = (userProfile.totalScore || 0) + scoreDifference;
+            
+            const newLives = progress.lives ?? currentGameProgress.lives;
+            let newNextLifeAt = progress.nextLifeAt !== undefined ? progress.nextLifeAt : currentGameProgress.nextLifeAt;
 
-            // Ensure we have a complete progress object with no undefined fields
+            // If a life was just lost, and no regeneration timer is set, set one.
+            if (newLives < currentGameProgress.lives && newLives < MAX_LIVES && !currentGameProgress.nextLifeAt) {
+                 newNextLifeAt = Date.now() + LIFE_REGEN_MINUTES * 60 * 1000;
+            }
+
+
             const finalProgress: GameProgress = {
                 score: newScore,
                 level: progress.level ?? currentGameProgress.level,
                 xp: progress.xp ?? currentGameProgress.xp,
                 xpToNextLevel: progress.xpToNextLevel ?? currentGameProgress.xpToNextLevel,
-                lives: progress.lives ?? currentGameProgress.lives,
-                nextLifeAt: progress.nextLifeAt !== undefined ? progress.nextLifeAt : currentGameProgress.nextLifeAt,
+                lives: newLives,
+                nextLifeAt: newNextLifeAt,
             };
 
             const updates = {
