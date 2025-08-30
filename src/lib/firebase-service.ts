@@ -32,7 +32,7 @@ export const defaultGameProgress = (level = 1): Required<GameProgress> => ({
     score: 0,
     level: level,
     xp: 0,
-    xpToNextLevel: 50, // This is a generic default, can be game-specific
+    xpToNextLevel: 50 + (level - 1) * 25,
     lives: 3,
     nextLifeAt: null,
 });
@@ -82,6 +82,8 @@ export const getUserProfile = async (uid: string): Promise<UserProfile | null> =
 
 export const updateUserProfile = async (uid: string, data: Partial<UserProfile>) => {
     const userRef = doc(db, 'users', uid);
+    // This function now correctly updates only the fields provided in 'data',
+    // leaving other fields (like game progress) untouched.
     await updateDoc(userRef, data);
 };
 
@@ -105,13 +107,14 @@ export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfi
             
             const newTotalScore = (userProfile.totalScore || 0) + scoreDifference;
 
+            // Ensure we have a complete progress object with no undefined fields
             const finalProgress: GameProgress = {
                 score: newScore,
                 level: progress.level ?? currentGameProgress.level,
                 xp: progress.xp ?? currentGameProgress.xp,
                 xpToNextLevel: progress.xpToNextLevel ?? currentGameProgress.xpToNextLevel,
                 lives: progress.lives ?? currentGameProgress.lives,
-                nextLifeAt: progress.nextLifeAt === undefined ? currentGameProgress.nextLifeAt : progress.nextLifeAt,
+                nextLifeAt: progress.nextLifeAt !== undefined ? progress.nextLifeAt : currentGameProgress.nextLifeAt,
             };
 
             const updates = {
