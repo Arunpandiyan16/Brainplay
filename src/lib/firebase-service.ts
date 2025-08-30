@@ -8,8 +8,8 @@ export interface GameProgress {
     level: number;
     xp: number;
     xpToNextLevel: number;
-    lives?: number;
-    nextLifeAt?: number | null;
+    lives: number;
+    nextLifeAt: number | null;
 }
 
 export interface UserProfile {
@@ -85,7 +85,7 @@ export const updateUserProfile = async (uid: string, data: Partial<UserProfile>)
     await updateDoc(userRef, data);
 };
 
-export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfile, 'uid' | 'email' | 'displayName' | 'totalScore' | 'dailyChallenge'>, progress: GameProgress) => {
+export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfile, 'uid' | 'email' | 'displayName' | 'totalScore' | 'dailyChallenge'>, progress: Partial<GameProgress>) => {
     const userRef = doc(db, 'users', uid);
 
     try {
@@ -97,26 +97,26 @@ export const updateGameProgress = async (uid: string, game: keyof Omit<UserProfi
             }
 
             const userProfile = userDoc.data() as UserProfile;
-            const currentGameProgress = userProfile[game] as GameProgress | undefined;
+            const currentGameProgress = userProfile[game] || defaultGameProgress();
             
-            const oldScore = currentGameProgress?.score ?? 0;
-            const newScore = progress.score;
+            const oldScore = currentGameProgress.score;
+            const newScore = progress.score ?? oldScore;
             const scoreDifference = newScore - oldScore;
             
             const newTotalScore = (userProfile.totalScore || 0) + scoreDifference;
 
-            // Provide default values if lives or nextLifeAt are undefined
-            const lives = progress.lives === undefined ? (currentGameProgress?.lives ?? 3) : progress.lives;
-            const nextLifeAt = progress.nextLifeAt === undefined ? (currentGameProgress?.nextLifeAt ?? null) : progress.nextLifeAt;
+            const finalProgress: GameProgress = {
+                score: newScore,
+                level: progress.level ?? currentGameProgress.level,
+                xp: progress.xp ?? currentGameProgress.xp,
+                xpToNextLevel: progress.xpToNextLevel ?? currentGameProgress.xpToNextLevel,
+                lives: progress.lives ?? currentGameProgress.lives,
+                nextLifeAt: progress.nextLifeAt === undefined ? currentGameProgress.nextLifeAt : progress.nextLifeAt,
+            };
 
-            const updates: { [key: string]: any } = {
+            const updates = {
                 totalScore: newTotalScore,
-                [`${game}.score`]: progress.score,
-                [`${game}.level`]: progress.level,
-                [`${game}.xp`]: progress.xp,
-                [`${game}.xpToNextLevel`]: progress.xpToNextLevel,
-                [`${game}.lives`]: lives,
-                [`${game}.nextLifeAt`]: nextLifeAt,
+                [game]: finalProgress,
             };
             
             transaction.update(userRef, updates);
