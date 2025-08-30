@@ -16,7 +16,7 @@ export const wordHunterPuzzles: WordPuzzle[] = [
   { word: "dream", scrambled: "mader", hint: "Stories in your mind while sleeping", language: "English", difficulty: "Easy" },
   { word: "smile", scrambled: "miles", hint: "A happy facial expression", language: "English", difficulty: "Easy" },
   { word: "earth", scrambled: "herta", hint: "The planet we live on", language: "English", difficulty: "Easy" },
-  { word: "bread", scrambled: "bard", hint: "A baked food made from flour", language: "English", difficulty: "Easy" },
+  { word: "bread", scrambled: "drabe", hint: "A baked food made from flour", language: "English", difficulty: "Easy" },
   { word: "light", scrambled: "gilht", hint: "Makes things visible", language: "English", difficulty: "Easy" },
   { word: "beach", scrambled: "cheab", hint: "A sandy shore by the ocean", language: "English", difficulty: "Easy" },
 
@@ -26,7 +26,7 @@ export const wordHunterPuzzles: WordPuzzle[] = [
   { word: "friend", scrambled: "frined", hint: "A person you know well and like", language: "English", difficulty: "Medium" },
   { word: "purple", scrambled: "lupper", hint: "A color that is a mix of red and blue", language: "English", difficulty: "Medium" },
   { word: "journey", scrambled: "yournej", hint: "A long trip", language: "English", difficulty: "Medium" },
-  { word: "believe", scrambled: "vebile", hint: "Accept something as true", language: "English", difficulty: "Medium" },
+  { word: "believe", scrambled: "elevib", hint: "Accept something as true", language: "English", difficulty: "Medium" },
   { word: "country", scrambled: "nycotur", hint: "A nation with its own government", language: "English", difficulty: "Medium" },
   { word: "morning", scrambled: "ninmorg", hint: "The early part of the day", language: "English", difficulty: "Medium" },
 
@@ -43,7 +43,7 @@ export const wordHunterPuzzles: WordPuzzle[] = [
   // === Tamil - Easy (2-3 characters) ===
   { word: "நாய்", scrambled: "ய்நா", hint: "வீட்டு விலங்கு", language: "Tamil", difficulty: "Easy" },
   { word: "பூனை", scrambled: "னைபூ", hint: "இதுவும் வீட்டு விலங்கு", language: "Tamil", difficulty: "Easy" },
-  { word: "மரம்", scrambled: "ரம்ம", hint: "மரக்கன்றுகளை நடுங்கள்", language: "Tamil", difficulty: "Easy" },
+  { word: "மரம்", scrambled: "ரமஅ", hint: "மரக்கன்றுகளை நடுங்கள்", language: "Tamil", difficulty: "Easy" },
   { word: "வீடு", scrambled: "டுவீ", hint: "நாம் வசிக்கும் இடம்", language: "Tamil", difficulty: "Easy" },
   { word: "பழம்", scrambled: "ழம்ப", hint: "மாம்பழம் ஒரு...", language: "Tamil", difficulty: "Easy" },
   { word: "நிலா", scrambled: "லாநி", hint: "இரவில் தெரியும்", language: "Tamil", difficulty: "Easy" },
@@ -59,6 +59,6 @@ export const wordHunterPuzzles: WordPuzzle[] = [
   { word: "கணினி", scrambled: "னிகணி", hint: "ஒரு மின்னணு சாதனம்", language: "Tamil", difficulty: "Hard" },
   { word: "நூலகம்", scrambled: "கம்நூல", hint: "புத்தகங்கள் இருக்கும் இடம்", language: "Tamil", difficulty: "Hard" },
   { word: "விண்வெளி", scrambled: "ளிண்வெவி", hint: "பூமிக்கு அப்பால் உள்ள இடம்", language: "Tamil", difficulty: "Hard" },
-  { word: "கலாச்சாரம்", scrambled: "ரம்சாலாக்க", hint: "பண்பாடு", language: "Tamil", difficulty: "Hard" },
-  { word: "சுற்றுச்சூழல்", scrambled: "ழல்சுற்றுச்சூழ", hint: "நம்மைச் சுற்றியுள்ள உலகம்", language: "Tamil", difficulty: "Hard" },
+  { word: "கலாச்சாரம்", scrambled: "சம்காரளா", hint: "பண்பாடு", language: "Tamil", difficulty: "Hard" },
+  { word: "சுற்றுச்சூழல்", scrambled: "ழச்சூள்றல்சு", hint: "நம்மைச் சுற்றியுள்ள உலகம்", language: "Tamil", difficulty: "Hard" },
 ];
