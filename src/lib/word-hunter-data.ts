@@ -132,4 +132,397 @@ export const wordHunterPuzzles: WordPuzzle[] = [
 { word: "கலைஞர்", scrambled: "ஞரகலை", hint: "படைப்பாளர்", language: "Tamil", difficulty: "Hard" },
 { word: "ஆன்மீகம்", scrambled: "மஆன்மீக", hint: "Spirituality", language: "Tamil", difficulty: "Hard" },
 { word: "வளர்ச்சி", scrambled: "ர்ச்சிவள", hint: "Development", language: "Tamil", difficulty: "Hard" },
+  
+    {
+    "word": "cake",
+    "scrambled": "ekac",
+    "hint": "Sweet dessert baked in oven",
+    "language": "English",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "lamp",
+    "scrambled": "ampl",
+    "hint": "Provides light at night",
+    "language": "English",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "game",
+    "scrambled": "emag",
+    "hint": "Fun activity to play",
+    "language": "English",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "hill",
+    "scrambled": "llhi",
+    "hint": "Small elevated landform",
+    "language": "English",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "nest",
+    "scrambled": "tsen",
+    "hint": "Bird's home",
+    "language": "English",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "teacher",
+    "scrambled": "chearet",
+    "hint": "Person who teaches students",
+    "language": "English",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "airport",
+    "scrambled": "irparto",
+    "hint": "Place for airplanes to take off",
+    "language": "English",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "battery",
+    "scrambled": "terybta",
+    "hint": "Stores electricity for devices",
+    "language": "English",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "picture",
+    "scrambled": "cturepi",
+    "hint": "A visual image or photo",
+    "language": "English",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "writing",
+    "scrambled": "itgrwin",
+    "hint": "The act of forming letters",
+    "language": "English",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "happiness",
+    "scrambled": "nesshappi",
+    "hint": "State of being happy",
+    "language": "English",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "generation",
+    "scrambled": "rationgene",
+    "hint": "All people born at same time",
+    "language": "English",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "knowledge",
+    "scrambled": "owkledgen",
+    "hint": "What you know",
+    "language": "English",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "reflection",
+    "scrambled": "ctionrelef",
+    "hint": "Image seen in a mirror",
+    "language": "English",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "resolution",
+    "scrambled": "olutionres",
+    "hint": "Firm decision or solving problem",
+    "language": "English",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "மண்",
+    "scrambled": "ண்ம",
+    "hint": "நமது நிலம்",
+    "language": "Tamil",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "நீர்",
+    "scrambled": "ீரந",
+    "hint": "தண்ணீர்",
+    "language": "Tamil",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "மூடு",
+    "scrambled": "டுமோ",
+    "hint": "மூடும் செயல்பாடு",
+    "language": "Tamil",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "வீழ்ச்சி",
+    "scrambled": "்ச்சிவீழ",
+    "hint": "தாழ்வு அல்லது பொழிவு",
+    "language": "Tamil",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "மின்னல்",
+    "scrambled": "ல்மின்ன",
+    "hint": "வெஜ்ஜல் ஒளியுடன் வரும்",
+    "language": "Tamil",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "முயற்சி",
+    "scrambled": "ற்சி முய",
+    "hint": "செய்யும் முயற்சி",
+    "language": "Tamil",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "அறிவியல்",
+    "scrambled": "யியல்அறிவ",
+    "hint": "Science",
+    "language": "Tamil",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "அருள்ச்சி",
+    "scrambled": "்ச்சி அருள்",
+    "hint": "Grace, Blessing",
+    "language": "Tamil",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "மாணவர்",
+    "scrambled": "வரமாண",
+    "hint": "Student",
+    "language": "Tamil",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "முன்னேற்றம்",
+    "scrambled": "ற்றமுன்னே",
+    "hint": "Progress, Development",
+    "language": "Tamil",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "பொதுமக்கள்",
+    "scrambled": "க்கள்பொது",
+    "hint": "Public people",
+    "language": "Tamil",
+    "difficulty": "Hard"
+  },
+   {
+    "word": "coin",
+    "scrambled": "oinc",
+    "hint": "Metal currency",
+    "language": "English",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "cake",
+    "scrambled": "keca",
+    "hint": "Sweet baked dessert",
+    "language": "English",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "leaf",
+    "scrambled": "feal",
+    "hint": "Part of a plant",
+    "language": "English",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "bell",
+    "scrambled": "lleb",
+    "hint": "Makes ringing sound",
+    "language": "English",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "fish",
+    "scrambled": "hsfi",
+    "hint": "Aquatic animal",
+    "language": "English",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "airport",
+    "scrambled": "poritra",
+    "hint": "Place for planes",
+    "language": "English",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "library",
+    "scrambled": "rryliba",
+    "hint": "Place with books",
+    "language": "English",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "gallery",
+    "scrambled": "yallerg",
+    "hint": "Art display space",
+    "language": "English",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "journey",
+    "scrambled": "ejnruoy",
+    "hint": "Travel from one place to another",
+    "language": "English",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "balance",
+    "scrambled": "eblanca",
+    "hint": "Even distribution",
+    "language": "English",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "extraordinary",
+    "scrambled": "rdinaryextrao",
+    "hint": "Very unusual",
+    "language": "English",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "philosophy",
+    "scrambled": "ophyphiloso",
+    "hint": "Study of fundamental nature",
+    "language": "English",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "dictionary",
+    "scrambled": "arydictino",
+    "hint": "Word meanings collection",
+    "language": "English",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "journalist",
+    "scrambled": "nalistjour",
+    "hint": "Reports news",
+    "language": "English",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "microphone",
+    "scrambled": "phonemicro",
+    "hint": "Amplifies sound",
+    "language": "English",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "மரம்",
+    "scrambled": "மரம",
+    "hint": "மிகப் பெரிய செடி",
+    "language": "Tamil",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "கல்",
+    "scrambled": "லக",
+    "hint": "தோல் மிகக் கடினம்",
+    "language": "Tamil",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "நீர்",
+    "scrambled": "ரநீ",
+    "hint": "தண்ணீர்",
+    "language": "Tamil",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "பால்",
+    "scrambled": "லபா",
+    "hint": "கன்றுக்குட்டி குடிக்கும்",
+    "language": "Tamil",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "கடல்",
+    "scrambled": "லடக",
+    "hint": "நீர்கடல்",
+    "language": "Tamil",
+    "difficulty": "Easy"
+  },
+  {
+    "word": "புத்தகம்",
+    "scrambled": "கம்புத்த",
+    "hint": "அறிவு தரும் நூல்",
+    "language": "Tamil",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "ஆரோக்கியம்",
+    "scrambled": "மஆரோக்கிய",
+    "hint": "நலமுள்ள நிலை",
+    "language": "Tamil",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "முன்னேற்றம்",
+    "scrambled": "்றமுன்னே",
+    "hint": "வளர்ச்சி",
+    "language": "Tamil",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "கடிகாரம்",
+    "scrambled": "ரமகடிகா",
+    "hint": "நேரம் காட்டும் சாதனம்",
+    "language": "Tamil",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "விமானம்",
+    "scrambled": "மவினா",
+    "hint": "வானில் பறக்கும் வாகனம்",
+    "language": "Tamil",
+    "difficulty": "Medium"
+  },
+  {
+    "word": "அறிவியல்",
+    "scrambled": "யியல்அறிவ",
+    "hint": "அறிவு பகிர்வது",
+    "language": "Tamil",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "மாணவர்",
+    "scrambled": "வரமாண",
+    "hint": "படிக்கின்றவர்",
+    "language": "Tamil",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "இயற்கை",
+    "scrambled": "கையஇற",
+    "hint": "நாட்டு இயல்புகள்",
+    "language": "Tamil",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "சமூகம்",
+    "scrambled": "கம்சமூ",
+    "hint": "மக்கள் குழு",
+    "language": "Tamil",
+    "difficulty": "Hard"
+  },
+  {
+    "word": "பொறியியல்",
+    "scrambled": "றியில்பொ",
+    "hint": "தொழில்நுட்பம்",
+    "language": "Tamil",
+    "difficulty": "Hard"
+  }
 ];
