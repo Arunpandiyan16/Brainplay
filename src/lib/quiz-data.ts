@@ -1782,7 +1782,7 @@ export const quizQuestions: QuizQuestion[] = [
     category: "Tamil Nadu GK",
     country: "India",
     difficulty: "Hard"
-  }
+  },
 ];
 // Add more questions to reach 500+
 const moreQuestions: QuizQuestion[] = [
