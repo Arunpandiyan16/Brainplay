@@ -1565,26 +1565,7 @@ export const fakeNewsData: NewsHeadline[] = [
         "source": "Lancet Planetary Health",
         "difficulty": "Hard",
         "country": "Global"
-    }
-]
-👉 Shall I continue generating the next batch of 50 headlines next?
-
-
-
-
-
-
-
-You said:
-next
-
-
-ChatGPT said:
-Here is batch #8 of handcrafted news headlines in JSON format:
-
-json
-Copy code
-[
+    },
     {
         "headline": "India Successfully Tests Anti-Satellite Weapon Capability",
         "isReal": true,
