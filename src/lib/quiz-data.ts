@@ -1062,7 +1062,6 @@ export const quizQuestions: QuizQuestion[] = [
     country: "India",
     difficulty: "Easy"
   },
-  quizQuestions.push(
   {
     question: "Which planet in our solar system has the most moons?",
     choices: ["Earth", "Saturn", "Jupiter", "Mars"],
