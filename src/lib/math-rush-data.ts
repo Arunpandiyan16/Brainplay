@@ -141,7 +141,263 @@ export const problemBank: MathProblem[] = [
     { text: "All birds can fly. Penguin is a bird. Can penguins fly? (yes/no)", answer: "no", xp: 40, type: 'Logical Reasoning' },
     { text: "Which letter comes next? Z, X, V, T, ...?", answer: "R", xp: 40, type: 'Logical Reasoning' },
     { text: "A clock shows 3:15. What is the angle between the hands?", answer: 7.5, xp: 50, type: 'Logical Reasoning' },
-    { text: "What is always coming but never arrives?", answer: "tomorrow", xp: 50, type: 'Logical Reasoning' }
+    { text: "What is always coming but never arrives?", answer: "tomorrow", xp: 50, type: 'Logical Reasoning' },
+    { text: "A shop gives a 15% discount on a dress priced at $200. What is the sale price?", answer: 170, xp: 30, type: 'Aptitude' },
+    { text: "A student's marks increased from 40 to 50. Find the percentage increase.", answer: 25, xp: 30, type: 'Aptitude' },
+    { text: "If a number is increased by 50%, the result is 75. Find the original number.", answer: 50, xp: 35, type: 'Aptitude' },
+
+    // Profit & Loss
+    { text: "A bicycle is bought for $500 and sold for $600. Find the profit percentage.", answer: 20, xp: 35, type: 'Aptitude' },
+    { text: "An article bought for $400 is sold at $320. Find the loss percentage.", answer: 20, xp: 35, type: 'Aptitude' },
+    
+    // Simple Interest
+    { text: "Find SI on $1200 at 5% per annum for 3 years.", answer: 180, xp: 30, type: 'Aptitude' },
+    { text: "If SI = $250 on a sum of $2000 for 5 years, find the rate of interest.", answer: 2.5, xp: 35, type: 'Aptitude' },
+    
+    // Time, Speed & Distance
+    { text: "A man runs at 10 km/h. How long will he take to cover 25 km?", answer: 2.5, xp: 30, type: 'Aptitude' },
+    { text: "A train travels 300 km in 5 hours. Find its speed.", answer: 60, xp: 30, type: 'Aptitude' },
+    
+    // Ratio & Proportion
+    { text: "Divide $500 in the ratio 3:2.", answer: "300,200", xp: 35, type: 'Aptitude' },
+    { text: "Two numbers are in the ratio 7:8. If the smaller is 21, find the larger.", answer: 24, xp: 30, type: 'Aptitude' },
+
+    // Averages
+    { text: "The average of 6 numbers is 15. Find their sum.", answer: 90, xp: 25, type: 'Aptitude' },
+    { text: "Average of 5, 10, 15, 20, 25 is?", answer: 15, xp: 25, type: 'Aptitude' },
+
+    // === Logical Reasoning ===
+    // Number Series
+    { text: "Find the next number: 5, 10, 20, 40, ...?", answer: 80, xp: 35, type: 'Logical Reasoning' },
+    { text: "Find next number: 1, 2, 4, 7, 11, ...?", answer: 16, xp: 40, type: 'Logical Reasoning' },
+    { text: "Find next number: 2, 6, 12, 20, 30, ...?", answer: 42, xp: 40, type: 'Logical Reasoning' },
+
+    // Analogies
+    { text: "Hand is to Glove as Foot is to ...?", answer: "sock", xp: 30, type: 'Logical Reasoning' },
+    { text: "Bird is to Nest as Bee is to ...?", answer: "hive", xp: 35, type: 'Logical Reasoning' },
+    
+    // Odd One Out
+    { text: "Odd one out: 14, 28, 35, 42", answer: 35, xp: 35, type: 'Logical Reasoning' },
+    { text: "Odd one out: Lion, Tiger, Elephant, Leopard", answer: "Elephant", xp: 35, type: 'Logical Reasoning' },
+
+    // Coding-Decoding
+    { text: "If DOG = 4157, then CAT = ?", answer: 3120, xp: 40, type: 'Logical Reasoning' },
+    { text: "If ABC = 123, then DEF = ?", answer: 456, xp: 40, type: 'Logical Reasoning' },
+
+    // Blood Relations
+    { text: "Pointing to a boy, a woman says, 'He is my grandfather’s son’s son.' Who is he?", answer: "grandson", xp: 40, type: 'Logical Reasoning' },
+    { text: "X is the father of Y. Y is the sister of Z. How is Z related to X?", answer: "child", xp: 35, type: 'Logical Reasoning' },
+
+    // Directions
+    { text: "A person walks 5 km north and then 12 km east. Find the distance from starting point.", answer: 13, xp: 45, type: 'Logical Reasoning' },
+    { text: "If you face west and turn right, which direction are you facing?", answer: "north", xp: 30, type: 'Logical Reasoning' },
+
+    // Puzzles & Logic
+    { text: "I am a three-digit number. My tens digit is 5 more than my hundreds digit. My units digit is 8 less than my tens digit. Who am I?", answer: 193, xp: 50, type: 'Logical Reasoning' },
+    { text: "Which number is missing in the series: 2, 6, 12, 20, ?, 42", answer: 30, xp: 45, type: 'Logical Reasoning' },
+
+    // Mixed Aptitude
+    { text: "If a shopkeeper gives 2 kg sugar free on purchase of 10 kg, what is the effective discount %?", answer: 16.67, xp: 35, type: 'Aptitude' },
+    { text: "A sum of $1000 amounts to $1210 in 2 years at simple interest. Find rate of interest.", answer: 10.5, xp: 35, type: 'Aptitude' },
+    { text: "The difference between compound and simple interest on $5000 for 2 years at 10% p.a. is?", answer: 50, xp: 40, type: 'Aptitude' },
+    { text: "A boat goes 10 km downstream in 1 hour and returns upstream in 1.25 hours. Find speed of stream.", answer: 2, xp: 40, type: 'Aptitude' },
+
+    // Logical Puzzle
+    { text: "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?", answer: "echo", xp: 50, type: 'Logical Reasoning' },
+    { text: "You see me once in June, twice in November, and not at all in May. What am I?", answer: "E", xp: 45, type: 'Logical Reasoning' },
+
+    // More Number Series
+    { text: "Next in series: 0, 1, 1, 2, 3, 5, ...?", answer: 8, xp: 40, type: 'Logical Reasoning' },
+    { text: "Next number: 7, 14, 28, 56, ...?", answer: 112, xp: 35, type: 'Logical Reasoning' },
+
+    // Word Puzzles
+    { text: "Unscramble: 'TCA' to form an animal.", answer: "cat", xp: 30, type: 'Logical Reasoning' },
+    { text: "Unscramble: 'ODG' to form an animal.", answer: "dog", xp: 30, type: 'Logical Reasoning' },
+
+    // Simple Algebra
+    { text: "If 5x - 10 = 20, find x.", answer: 6, xp: 35, type: 'Aptitude' },
+    { text: "If 3x + 7 = 25, find x.", answer: 6, xp: 35, type: 'Aptitude' },
+
+    // Time & Work
+    { text: "If 5 men can do a job in 10 days, how long will 10 men take?", answer: 5, xp: 35, type: 'Aptitude' },
+    { text: "If A can do a work in 12 days and B in 18 days, in how many days will they do it together?", answer: 7.2, xp: 40, type: 'Aptitude' },
+
+    // Probability
+    { text: "A bag has 4 red, 3 blue, 2 green balls. Probability of picking red?", answer: 4/9, xp: 35, type: 'Aptitude' },
+    { text: "Probability of getting even number on dice?", answer: 0.5, xp: 30, type: 'Aptitude' },
+     // Percentages
+    { text: "A laptop costs $800 and is sold at 10% discount. Find the selling price.", answer: 720, xp: 30, type: 'Aptitude' },
+    { text: "A price rises from $60 to $75. Find the percentage increase.", answer: 25, xp: 30, type: 'Aptitude' },
+    { text: "A number decreased by 20% becomes 160. Find the original number.", answer: 200, xp: 35, type: 'Aptitude' },
+
+    // Profit & Loss
+    { text: "A shopkeeper buys an article for $250 and sells it for $300. Find profit %.", answer: 20, xp: 35, type: 'Aptitude' },
+    { text: "An article bought for $400 is sold at $360. Find loss %.", answer: 10, xp: 35, type: 'Aptitude' },
+
+    // Simple Interest
+    { text: "SI on $1500 at 6% per annum for 2 years?", answer: 180, xp: 30, type: 'Aptitude' },
+    { text: "Find rate if SI = $120 on $800 for 3 years.", answer: 5, xp: 35, type: 'Aptitude' },
+
+    // Time, Speed & Distance
+    { text: "A man runs 12 km in 3 hours. Find his speed.", answer: 4, xp: 30, type: 'Aptitude' },
+    { text: "A train covers 150 km in 2.5 hours. Find speed.", answer: 60, xp: 30, type: 'Aptitude' },
+
+    // Ratio & Proportion
+    { text: "Divide $900 in the ratio 5:4.", answer: "500,400", xp: 35, type: 'Aptitude' },
+    { text: "Two numbers are in ratio 6:7. If sum = 91, find larger number.", answer: 49, xp: 30, type: 'Aptitude' },
+
+    // Averages
+    { text: "Average of 12, 15, 18, 21 is?", answer: 16.5, xp: 25, type: 'Aptitude' },
+    { text: "Average of 7 numbers is 14. Find their sum.", answer: 98, xp: 25, type: 'Aptitude' },
+
+    // === Logical Reasoning ===
+    // Number Series
+    { text: "Next in series: 3, 9, 27, 81, ...?", answer: 243, xp: 35, type: 'Logical Reasoning' },
+    { text: "Next number: 2, 5, 10, 17, ...?", answer: 26, xp: 40, type: 'Logical Reasoning' },
+    { text: "Next number: 1, 4, 10, 19, ...?", answer: 31, xp: 40, type: 'Logical Reasoning' },
+
+    // Analogies
+    { text: "Fish is to Water as Bird is to ...?", answer: "air", xp: 30, type: 'Logical Reasoning' },
+    { text: "Pen is to Write as Knife is to ...?", answer: "cut", xp: 35, type: 'Logical Reasoning' },
+
+    // Odd One Out
+    { text: "Odd one out: 9, 16, 25, 36, 40", answer: 40, xp: 35, type: 'Logical Reasoning' },
+    { text: "Odd one out: Rose, Lily, Tulip, Car", answer: "Car", xp: 35, type: 'Logical Reasoning' },
+
+    // Coding-Decoding
+    { text: "If SUN = 21, then STAR = ?", answer: 61, xp: 40, type: 'Logical Reasoning' },
+    { text: "If CAT = 24, then DOG = ?", answer: 26, xp: 40, type: 'Logical Reasoning' },
+
+    // Blood Relations
+    { text: "Pointing to a girl, a man says 'She is my son’s sister.' Who is she?", answer: "daughter", xp: 40, type: 'Logical Reasoning' },
+    { text: "A is the father of B. B is the mother of C. How is C related to A?", answer: "grandchild", xp: 35, type: 'Logical Reasoning' },
+
+    // Directions
+    { text: "A man walks 8 km east and then 6 km south. Distance from starting point?", answer: 10, xp: 45, type: 'Logical Reasoning' },
+    { text: "If you face north and turn left, which direction are you facing?", answer: "west", xp: 30, type: 'Logical Reasoning' },
+
+    // Puzzles & Logic
+    { text: "I have keys but no locks. I have space but no rooms. What am I?", answer: "keyboard", xp: 50, type: 'Logical Reasoning' },
+    { text: "What comes once in a minute, twice in a moment, but never in a thousand years?", answer: "M", xp: 45, type: 'Logical Reasoning' },
+
+    // Algebra
+    { text: "Solve for x: 4x + 7 = 31.", answer: 6, xp: 35, type: 'Aptitude' },
+    { text: "Solve: 7x - 5 = 16.", answer: 3, xp: 35, type: 'Aptitude' },
+
+    // Time & Work
+    { text: "If 6 men complete a work in 12 days, how long will 4 men take?", answer: 18, xp: 35, type: 'Aptitude' },
+    { text: "A can do a job in 10 days, B in 15 days. Days together?", answer: 6, xp: 40, type: 'Aptitude' },
+
+    // Probability
+    { text: "Probability of getting a red ball from bag with 5 red, 3 blue?", answer: 5/8, xp: 35, type: 'Aptitude' },
+    { text: "Probability of getting a head when a coin is tossed?", answer: 0.5, xp: 30, type: 'Aptitude' },
+
+    // Mixed Logic
+    { text: "I am tall when I am young, and short when I am old. What am I?", answer: "candle", xp: 50, type: 'Logical Reasoning' },
+    { text: "What has hands but cannot clap?", answer: "clock", xp: 45, type: 'Logical Reasoning' },
+
+    // Number Series
+    { text: "Next number: 2, 3, 5, 7, 11, ...?", answer: 13, xp: 35, type: 'Logical Reasoning' },
+    { text: "Next number: 1, 1, 2, 6, 24, ...?", answer: 120, xp: 40, type: 'Logical Reasoning' },
+
+    // Simple Algebra
+    { text: "If x - 7 = 15, find x.", answer: 22, xp: 35, type: 'Aptitude' },
+    { text: "If 2x + 9 = 25, find x.", answer: 8, xp: 35, type: 'Aptitude' },
+
+    // Percentages
+    { text: "A sum of $500 is increased by 10%. Find the final amount.", answer: 550, xp: 30, type: 'Aptitude' },
+    { text: "A price decreases from $200 to $160. Find % decrease.", answer: 20, xp: 30, type: 'Aptitude' },
+
+    // Profit & Loss
+    { text: "Cost price $250, sold for $275. Profit %?", answer: 10, xp: 35, type: 'Aptitude' },
+    { text: "CP $400, SP $360. Loss %?", answer: 10, xp: 35, type: 'Aptitude' },
+      // Percentages
+    { text: "A jacket costs $120. A 25% discount is given. Find the sale price.", answer: 90, xp: 30, type: 'Aptitude' },
+    { text: "The price of a product rises from $80 to $100. Find the percentage increase.", answer: 25, xp: 30, type: 'Aptitude' },
+    { text: "A number is decreased by 15% and becomes 85. Find the original number.", answer: 100, xp: 35, type: 'Aptitude' },
+
+    // Profit & Loss
+    { text: "A watch is bought for $450 and sold for $540. Find profit %.", answer: 20, xp: 35, type: 'Aptitude' },
+    { text: "An item bought for $300 is sold for $270. Find loss %.", answer: 10, xp: 35, type: 'Aptitude' },
+
+    // Simple Interest
+    { text: "SI on $1000 at 8% p.a. for 3 years?", answer: 240, xp: 30, type: 'Aptitude' },
+    { text: "If SI = $150 on $1000 for 5 years, find rate of interest.", answer: 3, xp: 35, type: 'Aptitude' },
+
+    // Time, Speed & Distance
+    { text: "A person walks 20 km in 4 hours. Find speed.", answer: 5, xp: 30, type: 'Aptitude' },
+    { text: "A train travels 180 km in 3 hours. Find speed.", answer: 60, xp: 30, type: 'Aptitude' },
+
+    // Ratio & Proportion
+    { text: "Divide $700 in the ratio 3:4.", answer: "300,400", xp: 35, type: 'Aptitude' },
+    { text: "Two numbers in ratio 9:11. Smaller number is 27. Find larger.", answer: 33, xp: 30, type: 'Aptitude' },
+
+    // Averages
+    { text: "Average of 20, 25, 30, 35?", answer: 27.5, xp: 25, type: 'Aptitude' },
+    { text: "Average of 6 numbers is 18. Find sum.", answer: 108, xp: 25, type: 'Aptitude' },
+
+    // === Logical Reasoning ===
+    // Number Series
+    { text: "Next in series: 1, 3, 6, 10, 15, ...?", answer: 21, xp: 35, type: 'Logical Reasoning' },
+    { text: "Next number: 5, 11, 17, 23, ...?", answer: 29, xp: 40, type: 'Logical Reasoning' },
+    { text: "Next number: 2, 6, 12, 20, 30, ...?", answer: 42, xp: 40, type: 'Logical Reasoning' },
+
+    // Analogies
+    { text: "Knife is to Cut as Pen is to ...?", answer: "Write", xp: 30, type: 'Logical Reasoning' },
+    { text: "Bird is to Fly as Fish is to ...?", answer: "Swim", xp: 35, type: 'Logical Reasoning' },
+
+    // Odd One Out
+    { text: "Odd one out: 5, 10, 15, 21", answer: 21, xp: 35, type: 'Logical Reasoning' },
+    { text: "Odd one out: Apple, Mango, Banana, Carrot", answer: "Carrot", xp: 35, type: 'Logical Reasoning' },
+
+    // Coding-Decoding
+    { text: "If CAT = 312, then DOG = ?", answer: 415, xp: 40, type: 'Logical Reasoning' },
+    { text: "If ABC = 123, then XYZ = ?", answer: 242526, xp: 40, type: 'Logical Reasoning' },
+
+    // Blood Relations
+    { text: "Pointing to a boy, a woman says 'He is my brother’s son.' Who is he?", answer: "nephew", xp: 40, type: 'Logical Reasoning' },
+    { text: "X is the father of Y. Y is the daughter of Z. How is Z related to X?", answer: "spouse", xp: 35, type: 'Logical Reasoning' },
+
+    // Directions
+    { text: "A person walks 7 km west, then 24 km north. Distance from start?", answer: 25, xp: 45, type: 'Logical Reasoning' },
+    { text: "If you face east and turn left, which direction?", answer: "north", xp: 30, type: 'Logical Reasoning' },
+
+    // Puzzles & Logic
+    { text: "I am not alive, but I grow. I don’t have lungs, but I need air. What am I?", answer: "fire", xp: 50, type: 'Logical Reasoning' },
+    { text: "The more you take away from me, the bigger I get. What am I?", answer: "hole", xp: 45, type: 'Logical Reasoning' },
+
+    // Algebra
+    { text: "Solve: 3x - 7 = 14.", answer: 7, xp: 35, type: 'Aptitude' },
+    { text: "Solve: 5x + 8 = 33.", answer: 5, xp: 35, type: 'Aptitude' },
+
+    // Time & Work
+    { text: "If 8 men can do a work in 10 days, 4 men can do it in?", answer: 20, xp: 35, type: 'Aptitude' },
+    { text: "A can do a job in 6 days, B in 9 days. Days together?", answer: 3.43, xp: 40, type: 'Aptitude' },
+
+    // Probability
+    { text: "Probability of picking a king from deck of 52 cards?", answer: 1/13, xp: 35, type: 'Aptitude' },
+    { text: "Probability of getting a tail when a coin is tossed?", answer: 0.5, xp: 30, type: 'Aptitude' },
+
+    // Mixed Logic
+    { text: "What has a neck but no head?", answer: "bottle", xp: 50, type: 'Logical Reasoning' },
+    { text: "What can travel around the world while staying in a corner?", answer: "stamp", xp: 45, type: 'Logical Reasoning' },
+
+    // Number Series
+    { text: "Next number: 2, 3, 5, 7, 11, ...?", answer: 13, xp: 35, type: 'Logical Reasoning' },
+    { text: "Next number: 1, 2, 6, 24, 120, ...?", answer: 720, xp: 40, type: 'Logical Reasoning' },
+
+    // Simple Algebra
+    { text: "If x + 15 = 40, find x.", answer: 25, xp: 35, type: 'Aptitude' },
+    { text: "If 6x - 9 = 21, find x.", answer: 5, xp: 35, type: 'Aptitude' },
+
+    // Percentages
+    { text: "Price $500 increased by 12%. Find final price.", answer: 560, xp: 30, type: 'Aptitude' },
+    { text: "Price $600 decreased by 20%. Find final price.", answer: 480, xp: 30, type: 'Aptitude' },
+
+    // Profit & Loss
+    { text: "CP $350, SP $420. Profit %?", answer: 20, xp: 35, type: 'Aptitude' },
+    { text: "CP $500, SP $450. Loss %?", answer: 10, xp: 35, type: 'Aptitude' }
+
 ];
 
 // Placeholder for adding 450+ more problems
